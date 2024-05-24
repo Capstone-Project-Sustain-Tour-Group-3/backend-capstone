@@ -18,6 +18,8 @@ func HandleError(c echo.Context, err error) error {
 		statusCode = http.StatusNotFound
 	case *UnAuthorizedError:
 		statusCode = http.StatusUnauthorized
+	case *ConflictError:
+		statusCode = http.StatusUnauthorized
 	case *ForbiddenError:
 		statusCode = http.StatusForbidden
 	default:
