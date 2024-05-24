@@ -7,3 +7,7 @@ type RegisterRequest struct {
 	NoTelepon   string `json:"no_telepon"`
 	Password    string `json:"password"`
 }
+
+type RegisterResponse struct {
+	ReferenceId string `json:"reference_id"`
+}

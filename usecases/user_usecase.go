@@ -10,19 +10,20 @@ import (
 )
 
 type UserUsecase interface {
-	Register(request *dto.RegisterRequest) (*entities.User, error)
+	Register(request *dto.RegisterRequest) (*dto.RegisterResponse, error)
 }
 
 type userUsecase struct {
-	repository repositories.UserRepository
+	userRepo  repositories.UserRepository
+	cacheRepo repositories.CacheRepository
 }
 
-func NewUserUsecase(repository repositories.UserRepository) *userUsecase {
-	return &userUsecase{repository}
+func NewUserUsecase(userRepo repositories.UserRepository, cacheRepo repositories.CacheRepository) *userUsecase {
+	return &userUsecase{userRepo, cacheRepo}
 }
 
-func (uc *userUsecase) Register(request *dto.RegisterRequest) (*entities.User, error) {
-	isExist, _ := uc.repository.FindByEmail(request.Email)
+func (uc *userUsecase) Register(request *dto.RegisterRequest) (*dto.RegisterResponse, error) {
+	isExist, _ := uc.userRepo.FindByEmail(request.Email)
 	if isExist != nil {
 		return nil, &errorHandlers.ConflictError{Message: "username/email sudah terdaftar"}
 	}
@@ -31,7 +32,7 @@ func (uc *userUsecase) Register(request *dto.RegisterRequest) (*entities.User, e
 	if err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
 	}
-	user := entities.User{
+	user := &entities.User{
 		Id:          uuid.New(),
 		Email:       request.Email,
 		Password:    password,
@@ -39,4 +40,15 @@ func (uc *userUsecase) Register(request *dto.RegisterRequest) (*entities.User, e
 		Fullname:    request.NamaLengkap,
 		PhoneNumber: request.NoTelepon,
 	}
+	ref := helpers.GenerateReferenceId()
+	otp := helpers.GenerateOTP()
+
+	uc.cacheRepo.Set(ref, otp)
+	err = uc.userRepo.Create(user)
+	if err != nil {
+		return nil, &errorHandlers.InternalServerError{err.Error()}
+	}
+
+	response := dto.RegisterResponse{ReferenceId: ref}
+	return &response, nil
 }
