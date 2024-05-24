@@ -1,6 +1,7 @@
 package config
 
 import (
+	mysql2 "capstone/drivers/mysql"
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -20,7 +21,7 @@ func LoadDb() {
 		log.Fatal(err)
 	}
 
-	db.AutoMigrate()
+	db.AutoMigrate(mysql2.User{})
 
 	DB = db
 }
