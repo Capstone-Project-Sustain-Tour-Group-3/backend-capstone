@@ -11,3 +11,8 @@ type RegisterRequest struct {
 type RegisterResponse struct {
 	ReferenceId string `json:"reference_id"`
 }
+
+type VerifyEmailRequest struct {
+	RefId string `json:"ref_id"`
+	OTP   string `json:"otp"`
+}

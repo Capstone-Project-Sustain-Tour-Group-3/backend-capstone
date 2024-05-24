@@ -27,11 +27,11 @@ func (r *userRepository) FindByEmail(email string) (*entities.User, error) {
 	return user, nil
 }
 
-func (r *userRepository) Create(user *entities.User) (*entities.User, error) {
+func (r *userRepository) Create(user *entities.User) error {
 	if err := r.db.Create(&user).Error; err != nil {
-		return nil, err
+		return err
 	}
-	return user, nil
+	return nil
 }
 
 func (r *userRepository) Update(user *entities.User) (*entities.User, error) {

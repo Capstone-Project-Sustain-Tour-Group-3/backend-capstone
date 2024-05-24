@@ -1,6 +1,8 @@
 package helpers
 
 import (
+	"gopkg.in/gomail.v2"
+	"log"
 	"math/rand"
 	"time"
 )
@@ -25,4 +27,20 @@ func GenerateOTP() string {
 		otp[i] = otpChars[rand.Intn(len(otpChars))]
 	}
 	return string(otp)
+}
+
+func SendOTP(to, otpCode string) error {
+	m := gomail.NewMessage()
+	m.SetHeader("From", "leafthe78@gmail.com")
+	m.SetHeader("To", to)
+	m.SetHeader("Subject", "Your OTP Code")
+	m.SetBody("text/plain", "Your OTP code is: "+otpCode)
+
+	d := gomail.NewDialer("smtp.gmail.com", 587, "leafthe78@gmail.com", "cvuznzxfmnsgjmwa")
+
+	if err := d.DialAndSend(m); err != nil {
+		log.Println("Failed to send email:", err)
+		return err
+	}
+	return nil
 }

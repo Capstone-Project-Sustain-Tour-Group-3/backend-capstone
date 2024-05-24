@@ -13,15 +13,15 @@ func NewCacheRepository() *CacheRepository {
 	}
 }
 
-func (c *CacheRepository) Set(referenceId string, otp string) {
+func (c *CacheRepository) Set(name string, val string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.data[referenceId] = otp
+	c.data[name] = val
 }
 
-func (c *CacheRepository) Get(referenceId string) (string, bool) {
+func (c *CacheRepository) Get(name string) (string, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
-	otp, exists := c.data[referenceId]
+	otp, exists := c.data[name]
 	return otp, exists
 }

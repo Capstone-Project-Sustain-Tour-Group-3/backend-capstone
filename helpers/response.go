@@ -81,13 +81,13 @@ func Response(param dto.ResponseParams) any {
 	}
 
 	if param.Data != nil {
-		if param.IsPaginate {
+		if param.IsPaginate == true {
 			paginate := Paginate{
 				TotalData:   param.TotalData,
 				TotalPages:  param.TotalPages,
 				CurrentPage: param.CurrentPage,
 			}
-			if param.IsSort {
+			if param.IsSort == true {
 				sort := Sort{Sort: param.Sort}
 				return generateResponseWithSort(status, param.Message, param.Data, paginate, sort)
 			}
