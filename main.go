@@ -17,6 +17,7 @@ func main() {
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(10)))
 	middlewares.LogMiddleware(e)
 
+	e.Use(middleware.CORS())
 	e.Static("static", "static")
 	e.File("/docs", "./static/index.html")
 	e.GET("/docs/swagger.yaml", func(c echo.Context) error {
