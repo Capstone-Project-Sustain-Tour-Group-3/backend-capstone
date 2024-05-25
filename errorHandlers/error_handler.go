@@ -19,7 +19,7 @@ func HandleError(c echo.Context, err error) error {
 	case *UnAuthorizedError:
 		statusCode = http.StatusUnauthorized
 	case *ConflictError:
-		statusCode = http.StatusUnauthorized
+		statusCode = http.StatusConflict
 	case *ForbiddenError:
 		statusCode = http.StatusForbidden
 	default:

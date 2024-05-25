@@ -1,14 +1,22 @@
 package helpers
 
 import (
+	"bytes"
 	"gopkg.in/gomail.v2"
 	"log"
 	"math/rand"
+	"path/filepath"
+	"text/template"
 	"time"
 )
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
+}
+
+type EmailData struct {
+	Name    string
+	OTPCode []string
 }
 
 func GenerateReferenceId() string {
@@ -29,14 +37,37 @@ func GenerateOTP() string {
 	return string(otp)
 }
 
-func SendOTP(to, otpCode string) error {
-	m := gomail.NewMessage()
-	m.SetHeader("From", "leafthe78@gmail.com")
-	m.SetHeader("To", to)
-	m.SetHeader("Subject", "Your OTP Code")
-	m.SetBody("text/plain", "Your OTP code is: "+otpCode)
+func SendOTP(to, name, otpCode string) error {
+	templatePath := filepath.Join("helpers", "email_template.html")
+	tmpl, err := template.ParseFiles(templatePath)
+	if err != nil {
+		log.Println("Failed to parse template:", err)
+		return err
+	}
 
-	d := gomail.NewDialer("smtp.gmail.com", 587, "leafthe78@gmail.com", "cvuznzxfmnsgjmwa")
+	otpDigits := make([]string, len(otpCode))
+	for i, char := range otpCode {
+		otpDigits[i] = string(char)
+	}
+
+	data := EmailData{
+		Name:    name,
+		OTPCode: otpDigits,
+	}
+
+	var body bytes.Buffer
+	if err := tmpl.Execute(&body, data); err != nil {
+		log.Println("Failed to execute template:", err)
+		return err
+	}
+
+	m := gomail.NewMessage()
+	m.SetHeader("From", "Tourease <tourease03@gmail.com>")
+	m.SetHeader("To", to)
+	m.SetHeader("Subject", "Kode Verifikasi (OTP)")
+	m.SetBody("text/html", body.String())
+
+	d := gomail.NewDialer("smtp.gmail.com", 587, "tourease03@gmail.com", "psjyhtudsaxrptvd")
 
 	if err := d.DialAndSend(m); err != nil {
 		log.Println("Failed to send email:", err)

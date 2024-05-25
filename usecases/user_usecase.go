@@ -55,7 +55,7 @@ func (uc *userUsecase) Register(request *dto.RegisterRequest) (*dto.RegisterResp
 		return nil, &errorHandlers.InternalServerError{"Gagal untuk mendaftar"}
 	}
 
-	if err := helpers.SendOTP(user.Email, otp); err != nil {
+	if err := helpers.SendOTP(user.Email, user.Fullname, otp); err != nil {
 		return nil, &errorHandlers.InternalServerError{"Gagal mengirimkan email"}
 	}
 	response := dto.RegisterResponse{ReferenceId: ref}
@@ -72,7 +72,7 @@ func (uc *userUsecase) ResendOTP() (*dto.RegisterResponse, error) {
 	referenceId := helpers.GenerateReferenceId()
 	uc.cacheRepo.Set(referenceId, otp)
 
-	if err := helpers.SendOTP(user.Email, otp); err != nil {
+	if err := helpers.SendOTP(user.Email, user.Fullname, otp); err != nil {
 		return nil, &errorHandlers.InternalServerError{"Gagal mengirimkan email"}
 	}
 	response := dto.RegisterResponse{ReferenceId: referenceId}
