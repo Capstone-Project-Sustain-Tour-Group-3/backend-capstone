@@ -1,9 +1,4 @@
 #!/bin/sh
-golangci-lint run --fix
-if [ $? -ne 0 ]; then
-  echo "Linting errors found. Commit aborted."
-  exit 1
-fi
 
 # Jalankan gofumpt
 gofumpt -w .
@@ -15,5 +10,11 @@ fi
 goimports -w .
 if [ $? -ne 0 ]; then
   echo "Goimports formatting errors found. Commit aborted."
+  exit 1
+fi
+
+golangci-lint run --fix
+if [ $? -ne 0 ]; then
+  echo "Linting errors found. Commit aborted."
   exit 1
 fi
