@@ -2,12 +2,13 @@ package helpers
 
 import (
 	"bytes"
-	"gopkg.in/gomail.v2"
 	"log"
 	"math/rand"
 	"path/filepath"
 	"text/template"
 	"time"
+
+	"gopkg.in/gomail.v2"
 )
 
 func init() {

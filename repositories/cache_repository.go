@@ -13,7 +13,7 @@ func NewCacheRepository() *CacheRepository {
 	}
 }
 
-func (c *CacheRepository) Set(name string, val string) {
+func (c *CacheRepository) Set(name, val string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	c.data[name] = val
