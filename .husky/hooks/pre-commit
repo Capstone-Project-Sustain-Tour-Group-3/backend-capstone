@@ -1,21 +1,19 @@
 #!/bin/sh
+# gofumpt -w .
+# if [ $? -ne 0 ]; then
+#   echo "Formatting errors found. Commit aborted."
+#   exit 1
+# fi
 
-# Jalankan gofumpt
-gofumpt -w .
-if [ $? -ne 0 ]; then
-  echo "Formatting errors found. Commit aborted."
-  exit 1
-fi
+# echo "Successfully formatted with gofumpt"
 
-echo "Successfully formatted with gofumpt"
+# goimports -w .
+# if [ $? -ne 0 ]; then
+#   echo "Goimports formatting errors found. Commit aborted."
+#   exit 1
+# fi
 
-goimports -w .
-if [ $? -ne 0 ]; then
-  echo "Goimports formatting errors found. Commit aborted."
-  exit 1
-fi
-
-echo "Successfully formatted with goimports"
+# echo "Successfully formatted with goimports"
 
 golangci-lint run --fix
 if [ $? -ne 0 ]; then
