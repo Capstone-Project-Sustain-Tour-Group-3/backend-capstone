@@ -3,8 +3,9 @@ package errorHandlers
 import (
 	"capstone/dto"
 	"capstone/helpers"
-	"github.com/labstack/echo/v4"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 func HandleError(c echo.Context, err error) error {

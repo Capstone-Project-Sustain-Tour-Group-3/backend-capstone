@@ -2,12 +2,13 @@ package helpers
 
 import (
 	"bytes"
-	"gopkg.in/gomail.v2"
 	"log"
 	"math/rand"
 	"path/filepath"
 	"text/template"
 	"time"
+
+	"gopkg.in/gomail.v2"
 )
 
 func init() {
@@ -74,4 +75,12 @@ func SendOTP(to, name, otpCode string) error {
 		return err
 	}
 	return nil
+}
+
+func TestOnly() {
+	a := true
+
+	if a == true {
+		log.Println("Test Only")
+	}
 }

@@ -4,10 +4,11 @@ import (
 	"capstone/entities"
 	"errors"
 	"fmt"
+	"time"
+
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/spf13/viper"
-	"time"
 )
 
 type JWTClaims struct {

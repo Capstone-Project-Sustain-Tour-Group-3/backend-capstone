@@ -2,9 +2,10 @@ package middlewares
 
 import (
 	"capstone/helpers"
-	"github.com/labstack/echo/v4"
 	"net/http"
 	"strings"
+
+	"github.com/labstack/echo/v4"
 )
 
 func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
