@@ -5,24 +5,209 @@ info:
 servers:
   - url: https://api.tourease.my.id/v1
     description: Production Server
-  - url: http://localhost:1323
+  - url: http://localhost:1323/v1
     description: Development Server
+tags:
+  - name: Auth
 paths:
-  /ping:
-    get:
-      summary: Ping
-      description: Ping
+  /auth/register:
+    post:
+      tags:
+        - Auth
+      summary: Registrasi Pengguna
+      description: API untuk registrasi pengguna baru.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "johndoe"
+                nama_lengkap:
+                  type: string
+                  example: "John Doe"
+                email:
+                  type: string
+                  example: "johndoe@example.com"
+                no_telepon:
+                  type: string
+                  example: "081234567891"
+                password:
+                  type: string
+                  example: "password123"
       responses:
-        '200':
-          description: OK
+        '201':
+          description: Registrasi Berhasil
           content:
             application/json:
               schema:
                 type: object
                 properties:
+                  status:
+                    type: string
+                    example: "Success"
                   message:
                     type: string
-                    example: Hello World
+                    example: "Registrasi berhasil!"
+                  data:
+                    type: object
+                    properties:
+                      reference_id:
+                        type: string
+                        example: "fAwCnf3TSOkSqB9M"
+        '409':
+          description: Konflik
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Failed"
+                  message:
+                    type: string
+                    example: "username sudah ada, silahkan gunakan username lain"
+  /auth/resend-otp:
+    post:
+      tags:
+        - Auth
+      summary: Kirim Ulang OTP
+      description: API untuk mengirim ulang OTP.
+      responses:
+        '200':
+          description: OTP Berhasil Dikirimkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Success"
+                  message:
+                    type: string
+                    example: "OTP berhasil dikirimkan"
+                  data:
+                    type: object
+                    properties:
+                      reference_id:
+                        type: string
+                        example: "WCTp17O4Uu2CZ88O"
+  /auth/verify:
+      post:
+        tags:
+          - Auth
+        summary: Verifikasi OTP
+        description: API untuk verifikasi OTP.
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ref_id:
+                    type: string
+                    example: "WCTp17O4Uu2CZ88O"
+                  otp:
+                    type: string
+                    example: "7523"
+        responses:
+          '200':
+            description: OTP Valid
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                      example: "Success"
+                    message:
+                      type: string
+                      example: "OTP Valid"
+          '400':
+            description: OTP Tidak Cocok
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                      example: "Failed"
+                    message:
+                      type: string
+                      example: "Kode OTP tidak cocok. Mohon periksa kembali dan masukkan dengan benar."
+  /auth/login:
+      post:
+        tags:
+          - Auth
+        summary: Login Pengguna
+        description: API untuk login pengguna.
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  email:
+                    type: string
+                    example: "johndoe@example.com"
+                  password:
+                    type: string
+                    example: "password123"
+        responses:
+          '200':
+            description: Login Berhasil
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                      example: "Success"
+                    message:
+                      type: string
+                      example: "Login berhasil!"
+                    data:
+                      type: object
+                      properties:
+                        token:
+                          type: string
+                          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjFjMmYwNzNmLTExYjQtNDdkMi1hYjQ2LThmNGY3YTQyOGNmMyIsIlVzZXJuYW1lIjoiam9obmRvZSIsImV4cCI6MTcxNjYyNDUxMSwiaWF0IjoxNzE2NjIwOTExLCJuYmYiOjE3MTY2MjA5MTF9.8fs4oFCGo2eRxiw4hnm0emajeG1rpZKGvAi_O-vfW5o"
+          '409':
+            description: Akun Tidak Ditemukan
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                      example: "Failed"
+                    message:
+                      type: string
+                      example: "Akun tidak ditemukan"
+          '401':
+            description: Email Belum Terverifikasi
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    status:
+                      type: string
+                      example: "Failed"
+                    message:
+                      type: string
+                      example: "Email belum terverifikasi"
 components:
   securitySchemes:
     BearerAuth:
