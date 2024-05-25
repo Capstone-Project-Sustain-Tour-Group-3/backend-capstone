@@ -1,9 +1,10 @@
 package errorHandlers
 
 import (
+	"net/http"
+
 	"capstone/dto"
 	"capstone/helpers"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 )

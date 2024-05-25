@@ -6,7 +6,6 @@ linters:
     - errcheck
     - gosimple
     - staticcheck
-    # Enable other linters as needed
 
 linters-settings:
   gofumpt:

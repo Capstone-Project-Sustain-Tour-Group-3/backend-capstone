@@ -11,3 +11,9 @@ if [ $? -ne 0 ]; then
   echo "Formatting errors found. Commit aborted."
   exit 1
 fi
+
+goimports -w .
+if [ $? -ne 0 ]; then
+  echo "Goimports formatting errors found. Commit aborted."
+  exit 1
+fi
