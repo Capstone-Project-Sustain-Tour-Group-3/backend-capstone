@@ -1,4 +1,11 @@
 #!/bin/sh
+gofumpt -w .
+if [ $? -ne 0 ]; then
+  echo "Formatting errors found. Commit aborted."
+  exit 1
+fi
+
+echo "[+] Successfully formatted with gofumpt"
 
 golangci-lint run --fix
 if [ $? -ne 0 ]; then
@@ -6,4 +13,4 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-echo "Successfully linted with golangci-lint"
+echo "[+] Successfully linted with golangci-lint"

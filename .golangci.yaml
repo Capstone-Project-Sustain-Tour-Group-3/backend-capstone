@@ -1,0 +1,19 @@
+run:
+  deadline: 5m
+linters:
+  enable:
+    - gofumpt
+    - errcheck
+
+linters-settings:
+  gofumpt:
+    extra-rules: true
+  errcheck:
+    exclude-functions: ""
+    ignore: ""
+  revive:
+    rules:
+      - name: indent-error-flow
+        arguments: [4]
+      - name: error-strings
+        arguments: ["^Errorf\\("]
