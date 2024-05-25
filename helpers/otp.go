@@ -80,7 +80,7 @@ func SendOTP(to, name, otpCode string) error {
 func TestOnly() {
 	a := true
 
-	if a == true {
+	if a {
 		log.Println("Test Only")
 	}
 }

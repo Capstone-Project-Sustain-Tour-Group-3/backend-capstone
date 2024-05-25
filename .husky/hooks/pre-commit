@@ -1,3 +1,13 @@
 #!/bin/sh
-golangci-lint run
+golangci-lint run --fix
+if [ $? -ne 0 ]; then
+  echo "Linting errors found. Commit aborted."
+  exit 1
+fi
+
+# Jalankan gofumpt
 gofumpt -w .
+if [ $? -ne 0 ]; then
+  echo "Formatting errors found. Commit aborted."
+  exit 1
+fi
