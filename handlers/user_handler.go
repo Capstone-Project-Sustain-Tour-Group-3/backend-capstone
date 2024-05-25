@@ -6,9 +6,10 @@ import (
 	"capstone/helpers"
 	"capstone/usecases"
 	"fmt"
+	"net/http"
+
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"net/http"
 )
 
 type userHandler struct {
