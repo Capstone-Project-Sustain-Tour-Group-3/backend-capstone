@@ -16,6 +16,7 @@ func AuthUserRouter(r *echo.Group) {
 	r.POST("/register", handler.Register)
 	r.POST("/resend-otp", handler.ResendOTP)
 	r.POST("/verify", handler.VerifyEmail)
+	r.POST("/login", handler.Login)
 }
 
 func AuthAdminRouter(r *echo.Group) {

@@ -78,3 +78,28 @@ func (h *userHandler) VerifyEmail(ctx echo.Context) error {
 	})
 	return ctx.JSON(http.StatusOK, response)
 }
+
+func (h *userHandler) Login(ctx echo.Context) error {
+	var req dto.LoginRequest
+	if err := ctx.Bind(&req); err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	if err := helpers.ValidateRequest(req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "failed",
+			Message: "permintaan tidak valid. silakan periksa kembali data yang anda masukkan.",
+			Errors:  err,
+		})
+	}
+	loginResponse, err := h.usecase.Login(&req)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "Login berhasil!",
+		Data:       loginResponse,
+	})
+	return ctx.JSON(http.StatusOK, response)
+}

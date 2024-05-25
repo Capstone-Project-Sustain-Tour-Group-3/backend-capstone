@@ -15,6 +15,7 @@ type UserUsecase interface {
 	Register(request *dto.RegisterRequest) (*dto.RegisterResponse, error)
 	ResendOTP() (*dto.RegisterResponse, error)
 	VerifyEmail(request *dto.VerifyEmailRequest) error
+	Login(request *dto.LoginRequest) (*dto.LoginResponse, error)
 }
 
 type userUsecase struct {
@@ -107,4 +108,27 @@ func (uc *userUsecase) VerifyEmail(request *dto.VerifyEmailRequest) error {
 		return &errorHandlers.InternalServerError{"Akun tidak ditemukan"}
 	}
 	return nil
+}
+
+func (uc *userUsecase) Login(request *dto.LoginRequest) (*dto.LoginResponse, error) {
+	user, err := uc.userRepo.FindByEmail(request.Email)
+	if err != nil {
+		return nil, &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
+	}
+	if user.EmailVerifiedAt == nil {
+		return nil, &errorHandlers.UnAuthorizedError{Message: "Email belum terverifikasi"}
+	}
+	if err := helpers.VerifyPassword(user.Password, request.Password); err != nil {
+		return nil, &errorHandlers.BadRequestError{Message: "Email atau password salah"}
+	}
+
+	accessToken, err := helpers.GenerateAccessToken(user)
+	if err != nil {
+		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
+	}
+
+	response := &dto.LoginResponse{
+		Token: accessToken,
+	}
+	return response, nil
 }

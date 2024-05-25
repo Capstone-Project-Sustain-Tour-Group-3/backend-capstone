@@ -12,6 +12,15 @@ type RegisterResponse struct {
 	ReferenceId string `json:"reference_id"`
 }
 
+type LoginRequest struct {
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=8"`
+}
+
+type LoginResponse struct {
+	Token string `json:"token"`
+}
+
 type VerifyEmailRequest struct {
 	RefId string `json:"ref_id"`
 	OTP   string `json:"otp"`
