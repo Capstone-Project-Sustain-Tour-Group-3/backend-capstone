@@ -20,11 +20,12 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		tokenStr := strings.TrimPrefix(authHeader, "bearer ")
 
 		claims, err := helpers.ParseJWT(tokenStr)
+		id := &claims.Id
 		if err != nil {
 			return echo.NewHTTPError(http.StatusInternalServerError, err)
 		}
 
-		c.Set("claims", &claims)
+		c.Set("userId", id)
 		return next(c)
 	}
 }

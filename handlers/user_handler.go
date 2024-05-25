@@ -6,6 +6,7 @@ import (
 	"capstone/helpers"
 	"capstone/usecases"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"net/http"
 )
@@ -102,4 +103,9 @@ func (h *userHandler) Login(ctx echo.Context) error {
 		Data:       loginResponse,
 	})
 	return ctx.JSON(http.StatusOK, response)
+}
+
+func (h *userHandler) Pong(ctx echo.Context) error {
+	id := ctx.Get("userId").(*uuid.UUID)
+	return ctx.JSON(http.StatusOK, id)
 }

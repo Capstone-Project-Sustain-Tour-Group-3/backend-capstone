@@ -5,13 +5,13 @@ import (
 )
 
 func SetupRouter(e *echo.Echo) {
-	v1User := e.Group("/api/v1")
+	v1User := e.Group("/v1")
 	{
 		auth := v1User.Group("/auth")
 		AuthUserRouter(auth)
 	}
 
-	v1Admin := e.Group("/api/v1/admin")
+	v1Admin := e.Group("/v1/admin")
 	{
 		auth := v1Admin.Group("/auth")
 		AuthAdminRouter(auth)
