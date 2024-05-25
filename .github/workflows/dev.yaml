@@ -1,0 +1,33 @@
+name: Development Workflow
+
+on:
+  pull_request:
+    branches: [development]
+
+jobs:
+  lint:
+    name: Linting code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.2'
+      - name: Golang lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+
+  build-test:
+    name: Unit testing
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.22.2'
+      - name: Run usecase coverage
+        run: go test -race -covermode=atomic -v ./usecases
+      - name: Build image
+        run: docker build -t build-test .

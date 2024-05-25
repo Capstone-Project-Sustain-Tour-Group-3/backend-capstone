@@ -2,9 +2,10 @@ package config
 
 import (
 	"fmt"
+	"log"
+
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"log"
 )
 
 var DB *gorm.DB
@@ -20,7 +21,9 @@ func LoadDb() {
 		log.Fatal(err)
 	}
 
-	db.AutoMigrate()
+	if err = db.AutoMigrate(); err != nil {
+		log.Fatal(err)
+	}
 
 	DB = db
 }
