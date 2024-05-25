@@ -39,7 +39,7 @@ func (uc *userUsecase) Register(request *dto.RegisterRequest) (*dto.RegisterResp
 
 	password, err := helpers.HashPassword(request.Password)
 	if err != nil {
-		return nil, &errorHandlers.InternalServerError{"Gagal hashing password"}
+		return nil, &errorHandlers.InternalServerError{Message: "Gagal hashing password"}
 	}
 	user := &entities.User{
 		Id:          uuid.New(),
@@ -57,11 +57,11 @@ func (uc *userUsecase) Register(request *dto.RegisterRequest) (*dto.RegisterResp
 	uc.cacheRepo.Set("email", user.Email)
 	err = uc.userRepo.Create(user)
 	if err != nil {
-		return nil, &errorHandlers.InternalServerError{"Gagal untuk mendaftar"}
+		return nil, &errorHandlers.InternalServerError{Message: "Gagal untuk mendaftar"}
 	}
 
 	if err := helpers.SendOTP(user.Email, user.Fullname, otp); err != nil {
-		return nil, &errorHandlers.InternalServerError{"Gagal mengirimkan email"}
+		return nil, &errorHandlers.InternalServerError{Message: "Gagal mengirimkan email"}
 	}
 	response := dto.RegisterResponse{ReferenceId: ref}
 	return &response, nil
@@ -71,14 +71,14 @@ func (uc *userUsecase) ResendOTP() (*dto.RegisterResponse, error) {
 	email, _ := uc.cacheRepo.Get("email")
 	user, _ := uc.userRepo.FindByEmail(email)
 	if user == nil {
-		return nil, &errorHandlers.ConflictError{"Akun tidak ditemukan"}
+		return nil, &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
 	}
 	otp := helpers.GenerateOTP()
 	referenceId := helpers.GenerateReferenceId()
 	uc.cacheRepo.Set(referenceId, otp)
 
 	if err := helpers.SendOTP(user.Email, user.Fullname, otp); err != nil {
-		return nil, &errorHandlers.InternalServerError{"Gagal mengirimkan email"}
+		return nil, &errorHandlers.InternalServerError{Message: "Gagal mengirimkan email"}
 	}
 	response := dto.RegisterResponse{ReferenceId: referenceId}
 	return &response, nil
@@ -92,20 +92,20 @@ func (uc *userUsecase) VerifyEmail(request *dto.VerifyEmailRequest) error {
 	fmt.Println("get otp", cachedOTP)
 
 	if cachedOTP != request.OTP {
-		return &errorHandlers.BadRequestError{"Kode OTP tidak cocok. Mohon periksa kembali dan masukkan dengan benar."}
+		return &errorHandlers.BadRequestError{Message: "Kode OTP tidak cocok. Mohon periksa kembali dan masukkan dengan benar."}
 	}
 
 	now := time.Now()
 	email, _ := uc.cacheRepo.Get("email")
 	user, _ := uc.userRepo.FindByEmail(email)
 	if user == nil {
-		return &errorHandlers.ConflictError{"Akun tidak ditemukan"}
+		return &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
 	}
 
 	user.EmailVerifiedAt = &now
 	_, err := uc.userRepo.Update(user)
 	if err != nil {
-		return &errorHandlers.InternalServerError{"Akun tidak ditemukan"}
+		return &errorHandlers.InternalServerError{Message: "Akun tidak ditemukan"}
 	}
 	return nil
 }
