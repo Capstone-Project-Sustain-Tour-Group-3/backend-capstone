@@ -2,9 +2,10 @@ package helpers
 
 import (
 	"fmt"
-	"github.com/go-playground/validator/v10"
 	"mime/multipart"
 	"net/http"
+
+	"github.com/go-playground/validator/v10"
 )
 
 type ApiError struct {
@@ -65,10 +66,7 @@ func IsValidImageSize(fileHeader *multipart.FileHeader) bool {
 	maxSize := 2 * 1024 * 1014
 	fileSize := fileHeader.Size
 	fmt.Println(fileSize, maxSize)
-	if fileSize > int64(maxSize) {
-		return false
-	}
-	return true
+	return fileSize <= int64(maxSize)
 }
 
 func ValidateRequest(str interface{}) interface{} {
