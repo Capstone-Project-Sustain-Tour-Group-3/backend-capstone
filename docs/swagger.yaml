@@ -1,0 +1,31 @@
+openapi: '3.0.2'
+info:
+  title: Tourease API
+  version: '1.0'
+servers:
+  - url: https://api.tourease.my.id/v1
+    description: Production Server
+  - url: http://localhost:1323
+    description: Development Server
+paths:
+  /ping:
+    get:
+      summary: Ping
+      description: Ping
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Hello World
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
