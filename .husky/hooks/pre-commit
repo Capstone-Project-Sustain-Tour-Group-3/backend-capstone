@@ -7,14 +7,20 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+echo "Successfully formatted with gofumpt"
+
 goimports -w .
 if [ $? -ne 0 ]; then
   echo "Goimports formatting errors found. Commit aborted."
   exit 1
 fi
 
+echo "Successfully formatted with goimports"
+
 golangci-lint run --fix
 if [ $? -ne 0 ]; then
   echo "Linting errors found. Commit aborted."
   exit 1
 fi
+
+echo "Successfully linted with golangci-lint"

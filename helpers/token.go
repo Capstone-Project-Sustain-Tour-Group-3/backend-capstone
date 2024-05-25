@@ -1,11 +1,10 @@
 package helpers
 
 import (
+	"capstone/entities"
 	"errors"
 	"fmt"
 	"time"
-
-	"capstone/entities"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
