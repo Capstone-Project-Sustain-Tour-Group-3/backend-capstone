@@ -9,6 +9,7 @@ func SetupRouter(e *echo.Echo) {
 	{
 		auth := v1User.Group("/auth")
 		AuthUserRouter(auth)
+		PingRouter(v1User)
 	}
 
 	v1Admin := e.Group("/v1/admin")
