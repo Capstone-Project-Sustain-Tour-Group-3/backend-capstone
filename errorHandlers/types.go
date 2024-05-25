@@ -31,6 +31,10 @@ func (err *InternalServerError) Error() string {
 	return err.Message
 }
 
+func (err *ConflictError) Error() string {
+	return err.Message
+}
+
 func (err *NotFoundError) Error() string {
 	return err.Message
 }
@@ -38,6 +42,7 @@ func (err *NotFoundError) Error() string {
 func (err *UnAuthorizedError) Error() string {
 	return err.Message
 }
+
 func (err *ForbiddenError) Error() string {
 	return err.Message
 }

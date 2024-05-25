@@ -1,6 +1,7 @@
 package config
 
 import (
+	mysql2 "capstone/drivers/mysql"
 	"fmt"
 	"log"
 
@@ -21,7 +22,8 @@ func LoadDb() {
 		log.Fatal(err)
 	}
 
-	if err = db.AutoMigrate(); err != nil {
+
+	if err = db.AutoMigrate(mysql2.User{}); err != nil {
 		log.Fatal(err)
 	}
 

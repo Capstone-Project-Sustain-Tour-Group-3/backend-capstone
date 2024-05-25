@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kode Verifikasi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .header {
+            text-align: center;
+            padding: 10px 0;
+        }
+        .header img {
+            width: 50px;
+            height: auto;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin: 10px 0 0 0;
+        }
+        .header img{
+            width: 200px;
+        }
+        .content {
+            text-align: center;
+            padding: 20px;
+        }
+        .content h2 {
+            font-size: 20px;
+            margin: 20px 0;
+        }
+        .otp-code {
+            font-size: 36px;
+            letter-spacing: 10px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #888;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <img src="https://res.cloudinary.com/destjdrbz/image/upload/v1716574226/capstone/logo-tourease_cke8y2.png" alt="Tourease Logo">
+    </div>
+    <div class="content">
+        <p>Hai <span style="font-weight: bold"> {{.Name}}</span>,</p>
+        <p>Siap menjelajahi dunia dengan Tourease?</p>
+        <p>Masukkan kode verifikasi ini untuk membuka pintu gerbang petualangan yang tak terlupakan:</p>
+        <p style="font-weight: bold">Kode Verifikasi</p>
+        <div class="otp-code">{{range .OTPCode}}{{.}}{{end}}</div>
+        <p>Kode verifikasi ini hanya berlaku selama 15 menit. Jangan bagikan kode verifikasi ini kepada siapa pun.</p>
+        <p>Ayo, wujudkan mimpimu menjelajahi dunia bersama Tourease!</p>
+    </div>
+    <div class="footer">
+        <p>&copy; 2024 Tourease. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>
