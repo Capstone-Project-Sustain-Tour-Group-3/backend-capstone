@@ -2,6 +2,8 @@ package helpers
 
 import (
 	"capstone/entities"
+	"errors"
+	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/spf13/viper"
@@ -37,4 +39,26 @@ func GenerateAccessToken(user *entities.User) (string, error) {
 		return "", err
 	}
 	return signedString, nil
+}
+
+func ParseJWT(tokenStr string) (*JWTClaims, error) {
+	accessTokenSecret := []byte(viper.GetString("ACCESS_TOKEN_SECRET"))
+	fmt.Println(accessTokenSecret)
+	token, err := jwt.ParseWithClaims(tokenStr, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return accessTokenSecret, nil
+	})
+
+	if err != nil || !token.Valid {
+		if err == jwt.ErrSignatureInvalid {
+			return nil, errors.New("JWT Token tidak valid")
+		}
+		return nil, errors.New("Token sudah kadaluwarsa")
+	}
+
+	claims := token.Claims.(*JWTClaims)
+	if claims == nil {
+		return nil, errors.New("Token sudah kadaluwarsa")
+	}
+
+	return claims, nil
 }
