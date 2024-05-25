@@ -1,11 +1,11 @@
 package dto
 
 type RegisterRequest struct {
-	Username    string `json:"username"`
-	NamaLengkap string `json:"nama_lengkap"`
-	Email       string `json:"email"`
-	NoTelepon   string `json:"no_telepon"`
-	Password    string `json:"password"`
+	Username    string `json:"username" validate:"required,max=16"`
+	NamaLengkap string `json:"nama_lengkap" validate:"required"`
+	Email       string `json:"email" validate:"required,email"`
+	NoTelepon   string `json:"no_telepon" validate:"required,number,startswith=08,min=11,max=13"`
+	Password    string `json:"password" validate:"required,min=8"`
 }
 
 type RegisterResponse struct {

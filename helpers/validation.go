@@ -8,28 +8,26 @@ import (
 )
 
 type ApiError struct {
-	Field   string
-	Message string
+	Field   string `json:"field"`
+	Message string `json:"message"`
 }
 
 func errorMessage(fieldError validator.FieldError) string {
 	switch fieldError.Tag() {
 	case "required":
-		return fmt.Sprintf("Field %s is required", fieldError.Field())
+		return fmt.Sprintf("Kolom %s harus diisi", fieldError.Field())
 	case "number":
-		return fmt.Sprintf("Field %s must be a number", fieldError.Field())
+		return fmt.Sprintf("Kolom %s harus sebuah angka", fieldError.Field())
 	case "startswith":
-		return fmt.Sprintf("Field %s must start with %s", fieldError.Field(), fieldError.Param())
+		return fmt.Sprintf("Kolom %s harus dimulai dengan %s", fieldError.Field(), fieldError.Param())
 	case "min":
-		return fmt.Sprintf("Field %s must greater than  %s", fieldError.Field(), fieldError.Param())
+		return fmt.Sprintf("Kolom %s harus lebih dari %s karakter", fieldError.Field(), fieldError.Param())
 	case "max":
-		return fmt.Sprintf("Field %s must less than  %s", fieldError.Field(), fieldError.Param())
+		return fmt.Sprintf("Kolom %s harus kurang dari %s karakter", fieldError.Field(), fieldError.Param())
 	case "len":
-		return fmt.Sprintf("Field %s must be  %s characters", fieldError.Field(), fieldError.Param())
+		return fmt.Sprintf("Kolom %s harus memiliki panjang %s karakter", fieldError.Field(), fieldError.Param())
 	case "email":
-		return fmt.Sprintf("Field %s must be  a valid email", fieldError.Field())
-	case "maxFileSize":
-		return fmt.Sprintf("Field %s must be  an image", fieldError.Field())
+		return fmt.Sprintf("Kolom %s harus sebuah email yang valid", fieldError.Field())
 	}
 
 	return fieldError.Error()

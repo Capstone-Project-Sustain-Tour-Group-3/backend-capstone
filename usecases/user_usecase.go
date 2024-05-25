@@ -27,9 +27,13 @@ func NewUserUsecase(userRepo repositories.UserRepository, cacheRepo *repositorie
 }
 
 func (uc *userUsecase) Register(request *dto.RegisterRequest) (*dto.RegisterResponse, error) {
-	isExist, _ := uc.userRepo.FindByEmail(request.Email)
-	if isExist != nil {
-		return nil, &errorHandlers.ConflictError{Message: "username/email sudah terdaftar"}
+	ifExistUsername, _ := uc.userRepo.FindByUsername(request.Username)
+	if ifExistUsername != nil {
+		return nil, &errorHandlers.ConflictError{Message: "username sudah ada, silahkan username lain"}
+	}
+	isExistEmail, _ := uc.userRepo.FindByEmail(request.Email)
+	if isExistEmail != nil {
+		return nil, &errorHandlers.ConflictError{Message: "email sudah terdaftar"}
 	}
 
 	password, err := helpers.HashPassword(request.Password)
