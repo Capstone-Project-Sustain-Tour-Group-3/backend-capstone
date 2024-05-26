@@ -1,6 +1,7 @@
 package helpers
 
 import (
+	"errors"
 	"fmt"
 	"mime/multipart"
 	"net/http"
@@ -72,12 +73,13 @@ func ValidateRequest(str interface{}) interface{} {
 	validate := validator.New()
 
 	if err := validate.Struct(str); err != nil {
-		ve := err.(validator.ValidationErrors)
-		errors := make([]ApiError, len(ve))
+		var ve validator.ValidationErrors
+		errors.As(err, &ve)
+		apiErrors := make([]ApiError, len(ve))
 		for i, fieldError := range ve {
-			errors[i] = ApiError{fieldError.Field(), errorMessage(fieldError)}
+			apiErrors[i] = ApiError{fieldError.Field(), errorMessage(fieldError)}
 		}
-		return errors
+		return apiErrors
 	}
 	return nil
 }

@@ -57,7 +57,7 @@ func SendOTP(to, name, otpCode string) error {
 	}
 
 	var body bytes.Buffer
-	if err := tmpl.Execute(&body, data); err != nil {
+	if err = tmpl.Execute(&body, data); err != nil {
 		log.Println("Failed to execute template:", err)
 		return err
 	}
@@ -70,7 +70,7 @@ func SendOTP(to, name, otpCode string) error {
 
 	d := gomail.NewDialer("smtp.gmail.com", 587, "tourease03@gmail.com", "psjyhtudsaxrptvd")
 
-	if err := d.DialAndSend(m); err != nil {
+	if err = d.DialAndSend(m); err != nil {
 		log.Println("Failed to send email:", err)
 		return err
 	}

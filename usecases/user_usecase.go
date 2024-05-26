@@ -1,13 +1,14 @@
 package usecases
 
 import (
+	"fmt"
+	"time"
+
 	"capstone/dto"
 	"capstone/entities"
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/repositories"
-	"fmt"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -61,7 +62,7 @@ func (uc *userUsecase) Register(request *dto.RegisterRequest) (*dto.RegisterResp
 		return nil, &errorHandlers.InternalServerError{Message: "Gagal untuk mendaftar"}
 	}
 
-	if err := helpers.SendOTP(user.Email, user.Fullname, otp); err != nil {
+	if err = helpers.SendOTP(user.Email, user.Fullname, otp); err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: "Gagal mengirimkan email"}
 	}
 	response := dto.RegisterResponse{ReferenceId: ref}
@@ -94,7 +95,9 @@ func (uc *userUsecase) VerifyEmail(request *dto.VerifyEmailRequest) error {
 	fmt.Println("get otp", cachedOTP)
 
 	if cachedOTP != request.OTP {
-		return &errorHandlers.BadRequestError{Message: "Kode OTP tidak cocok. Mohon periksa kembali dan masukkan dengan benar."}
+		return &errorHandlers.BadRequestError{
+			Message: "Kode OTP tidak cocok. Mohon periksa kembali dan masukkan dengan benar.",
+		}
 	}
 
 	now := time.Now()
@@ -120,7 +123,7 @@ func (uc *userUsecase) Login(request *dto.LoginRequest) (*dto.LoginResponse, err
 	if user.EmailVerifiedAt == nil {
 		return nil, &errorHandlers.UnAuthorizedError{Message: "Email belum terverifikasi"}
 	}
-	if err := helpers.VerifyPassword(user.Password, request.Password); err != nil {
+	if err = helpers.VerifyPassword(user.Password, request.Password); err != nil {
 		return nil, &errorHandlers.BadRequestError{Message: "Email atau password salah"}
 	}
 

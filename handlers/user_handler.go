@@ -1,12 +1,13 @@
 package handlers
 
 import (
+	"fmt"
+	"net/http"
+
 	"capstone/dto"
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/usecases"
-	"fmt"
-	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -111,6 +112,9 @@ func (h *userHandler) Login(ctx echo.Context) error {
 }
 
 func (h *userHandler) Pong(ctx echo.Context) error {
-	id := ctx.Get("userId").(*uuid.UUID)
+	id, err := ctx.Get("userId").(*uuid.UUID)
+	if err {
+		return errorHandlers.HandleError(ctx, nil)
+	}
 	return ctx.JSON(http.StatusOK, id)
 }
