@@ -1,10 +1,11 @@
 package main
 
 import (
+	"fmt"
+
 	"capstone/config"
 	"capstone/middlewares"
 	"capstone/routers"
-	"fmt"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
