@@ -17,8 +17,8 @@ type User struct {
 	PhoneNumber     string
 	ProfileImageUrl string
 	Gender          string
-	Country         string
 	City            string
+	Province        string
 	EmailVerifiedAt *time.Time
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
