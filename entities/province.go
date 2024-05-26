@@ -7,15 +7,12 @@ import (
 	"gorm.io/gorm"
 )
 
-type DestinationAddress struct {
-	Id            uuid.UUID
-	DestinationId uuid.UUID
-	ProvinceId    uuid.UUID
-	City          string
-	Subdistrict   string
-	StreetName    string
-	PostalCode    string
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt
+type Province struct {
+	Id                 uuid.UUID
+	DestinationAddress DestinationAddress
+	Name               string
+	Url                string
+	CreatedAt          time.Time
+	UpdatedAt          time.Time
+	DeletedAt          gorm.DeletedAt
 }

@@ -7,17 +7,13 @@ import (
 	"gorm.io/gorm"
 )
 
-type Destination struct {
-	Id          uuid.UUID      `gorm:"primaryKey;not null" json:"id"`
-	Name        string         `gorm:"type:varchar(255);not null" json:"name"`
-	Description string         `gorm:"type:varchar(255)" json:"description"`
-	OpenTime    time.Time      `json:"open_time"`
-	CloseTime   time.Time      `json:"close_time"`
-	EntryPrice  float64        `gorm:"type:decimal(10,2);not null" json:"entry_price"`
-	Longitude   float64        `gorm:"type:decimal(9,6);not null" json:"longitude"`
-	Latitude    float64        `gorm:"type:decimal(9,6);not null" json:"latitude"`
-	VisitCount  int            `gorm:"type:int;not null" json:"visit_count"`
-	CreatedAt   time.Time      `json:"created_at"`
-	UpdatedAt   time.Time      `json:"updated_at"`
-	DeletedAt   gorm.DeletedAt `json:"deleted_at"`
+type DestinationMedia struct {
+	Id            uuid.UUID      `gorm:"primaryKey;not null" json:"id"`
+	Destination   Destination    `gorm:"foreignKey:DestinationId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"destination"` //nolint:lll
+	DestinationId uuid.UUID      `gorm:"type:varchar(191);index;not null" json:"destination_id"`
+	Url           string         `gorm:"type:varchar(255);not null" json:"url"`
+	Type          string         `gorm:"type:varchar(255);not null" json:"type"`
+	CreatedAt     time.Time      `json:"created_at"`
+	UpdatedAt     time.Time      `json:"updated_at"`
+	DeletedAt     gorm.DeletedAt `json:"deleted_at"`
 }

@@ -7,12 +7,12 @@ import (
 	"gorm.io/gorm"
 )
 
-type Province struct {
-	Id                 uuid.UUID
-	DestinationAddress DestinationAddress
-	Name               string
-	Url                string
-	CreatedAt          time.Time
-	UpdatedAt          time.Time
-	DeletedAt          gorm.DeletedAt
+type DestinationMedia struct {
+	Id            uuid.UUID
+	DestinationId uuid.UUID
+	Url           string
+	Type          string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	DeletedAt     gorm.DeletedAt
 }

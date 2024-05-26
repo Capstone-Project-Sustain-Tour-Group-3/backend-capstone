@@ -7,11 +7,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type DestinationCategory struct {
-	Id                 uuid.UUID
-	DestinationId      uuid.UUID
-	CategoryId         uuid.UUID
-	CreatedAt          time.Time
-	UpdatedAt          time.Time
-	DeletedAt          gorm.DeletedAt
+type DestinationFacility struct {
+	Id            uuid.UUID
+	DestinationId uuid.UUID
+	FacilityId    uuid.UUID
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+	DeletedAt     gorm.DeletedAt
 }

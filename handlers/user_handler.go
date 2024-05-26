@@ -13,15 +13,15 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type userHandler struct {
+type UserHandler struct {
 	usecase usecases.UserUsecase
 }
 
-func NewUserHandler(usecase usecases.UserUsecase) *userHandler {
-	return &userHandler{usecase}
+func NewUserHandler(usecase usecases.UserUsecase) *UserHandler {
+	return &UserHandler{usecase}
 }
 
-func (h *userHandler) Register(ctx echo.Context) error {
+func (h *UserHandler) Register(ctx echo.Context) error {
 	var req dto.RegisterRequest
 	if err := ctx.Bind(&req); err != nil {
 		return errorHandlers.HandleError(ctx, err)
@@ -46,7 +46,7 @@ func (h *userHandler) Register(ctx echo.Context) error {
 	return ctx.JSON(http.StatusCreated, response)
 }
 
-func (h *userHandler) ResendOTP(ctx echo.Context) error {
+func (h *UserHandler) ResendOTP(ctx echo.Context) error {
 	var req dto.ResendOTPRequest
 	if err := ctx.Bind(&req); err != nil {
 		return errorHandlers.HandleError(ctx, err)
@@ -63,7 +63,7 @@ func (h *userHandler) ResendOTP(ctx echo.Context) error {
 	return ctx.JSON(http.StatusCreated, response)
 }
 
-func (h *userHandler) VerifyEmail(ctx echo.Context) error {
+func (h *UserHandler) VerifyEmail(ctx echo.Context) error {
 	var req dto.VerifyEmailRequest
 	if err := ctx.Bind(&req); err != nil {
 		return errorHandlers.HandleError(ctx, err)
@@ -86,7 +86,7 @@ func (h *userHandler) VerifyEmail(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response)
 }
 
-func (h *userHandler) Login(ctx echo.Context) error {
+func (h *UserHandler) Login(ctx echo.Context) error {
 	var req dto.LoginRequest
 	if err := ctx.Bind(&req); err != nil {
 		return errorHandlers.HandleError(ctx, err)
@@ -111,7 +111,7 @@ func (h *userHandler) Login(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response)
 }
 
-func (h *userHandler) Pong(ctx echo.Context) error {
+func (h *UserHandler) Pong(ctx echo.Context) error {
 	id, err := ctx.Get("userId").(*uuid.UUID)
 	if err {
 		return errorHandlers.HandleError(ctx, nil)
