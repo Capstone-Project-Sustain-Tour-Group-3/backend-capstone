@@ -77,6 +77,17 @@ paths:
         - Auth
       summary: Kirim Ulang OTP
       description: API untuk mengirim ulang OTP.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
       responses:
         '200':
           description: OTP Berhasil Dikirimkan
@@ -97,6 +108,20 @@ paths:
                       reference_id:
                         type: string
                         example: "WCTp17O4Uu2CZ88O"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Error"
+                  message:
+                    type: string
+                    example: "Invalid email address"
+
   /auth/verify:
       post:
         tags:
