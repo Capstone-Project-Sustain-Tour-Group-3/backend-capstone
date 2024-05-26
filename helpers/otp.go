@@ -68,7 +68,7 @@ func SendOTP(to, name, otpCode string) error {
 	m.SetHeader("Subject", "Kode Verifikasi (OTP)")
 	m.SetBody("text/html", body.String())
 
-	d := gomail.NewDialer("smtp.gmail.com", 587, "tourease03@gmail.com", "psjyhtudsaxrptvd")
+	d := gomail.NewDialer("smtp.gmail.com", 465, "tourease03@gmail.com", "psjyhtudsaxrptvd")
 
 	if err := d.DialAndSend(m); err != nil {
 		log.Println("Failed to send email:", err)

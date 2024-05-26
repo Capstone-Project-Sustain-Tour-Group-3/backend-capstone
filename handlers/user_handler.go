@@ -46,7 +46,11 @@ func (h *userHandler) Register(ctx echo.Context) error {
 }
 
 func (h *userHandler) ResendOTP(ctx echo.Context) error {
-	refId, err := h.usecase.ResendOTP()
+	var req dto.ResendOTPRequest
+	if err := ctx.Bind(&req); err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	refId, err := h.usecase.ResendOTP(req.Email)
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}

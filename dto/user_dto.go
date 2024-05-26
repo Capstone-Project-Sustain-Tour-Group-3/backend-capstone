@@ -25,3 +25,7 @@ type VerifyEmailRequest struct {
 	RefId string `json:"ref_id"`
 	OTP   string `json:"otp"`
 }
+
+type ResendOTPRequest struct {
+	Email string `json:"email"`
+}
