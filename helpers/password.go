@@ -7,7 +7,7 @@ func HashPassword(request string) (string, error) {
 	return string(hashPass), err
 }
 
-func VerifyPassword(hashPass string, password string) error {
+func VerifyPassword(hashPass, password string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(hashPass), []byte(password))
 	return err
 }

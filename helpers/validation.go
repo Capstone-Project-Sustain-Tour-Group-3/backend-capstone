@@ -33,6 +33,7 @@ func errorMessage(fieldError validator.FieldError) string {
 
 	return fieldError.Error()
 }
+
 func IsValidImageType(fileHeader *multipart.FileHeader) bool {
 	allowedTypes := map[string]bool{
 		"image/jpeg": true,

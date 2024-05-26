@@ -7,13 +7,14 @@ import (
 	"capstone/helpers"
 	"capstone/repositories"
 	"fmt"
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type UserUsecase interface {
 	Register(request *dto.RegisterRequest) (*dto.RegisterResponse, error)
-	ResendOTP() (*dto.RegisterResponse, error)
+	ResendOTP(email string) (*dto.RegisterResponse, error)
 	VerifyEmail(request *dto.VerifyEmailRequest) error
 	Login(request *dto.LoginRequest) (*dto.LoginResponse, error)
 }
@@ -67,8 +68,7 @@ func (uc *userUsecase) Register(request *dto.RegisterRequest) (*dto.RegisterResp
 	return &response, nil
 }
 
-func (uc *userUsecase) ResendOTP() (*dto.RegisterResponse, error) {
-	email, _ := uc.cacheRepo.Get("email")
+func (uc *userUsecase) ResendOTP(email string) (*dto.RegisterResponse, error) {
 	user, _ := uc.userRepo.FindByEmail(email)
 	if user == nil {
 		return nil, &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
@@ -76,6 +76,7 @@ func (uc *userUsecase) ResendOTP() (*dto.RegisterResponse, error) {
 	otp := helpers.GenerateOTP()
 	referenceId := helpers.GenerateReferenceId()
 	uc.cacheRepo.Set(referenceId, otp)
+	uc.cacheRepo.Set("email", email)
 
 	if err := helpers.SendOTP(user.Email, user.Fullname, otp); err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: "Gagal mengirimkan email"}
@@ -86,6 +87,7 @@ func (uc *userUsecase) ResendOTP() (*dto.RegisterResponse, error) {
 
 func (uc *userUsecase) VerifyEmail(request *dto.VerifyEmailRequest) error {
 	cachedOTP, exists := uc.cacheRepo.Get(request.RefId)
+	fmt.Println(cachedOTP, exists)
 	if !exists {
 		return &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
 	}

@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"capstone/entities"
+
 	"gorm.io/gorm"
 )
 
