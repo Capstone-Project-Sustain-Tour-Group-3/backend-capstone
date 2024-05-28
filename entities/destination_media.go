@@ -12,6 +12,7 @@ type DestinationMedia struct {
 	DestinationId uuid.UUID
 	Url           string
 	Type          string
+	Title         string
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     gorm.DeletedAt

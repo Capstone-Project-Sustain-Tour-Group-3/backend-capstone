@@ -11,8 +11,8 @@ type Destination struct {
 	Id          uuid.UUID      `gorm:"primaryKey;not null" json:"id"`
 	Name        string         `gorm:"type:varchar(255);not null" json:"name"`
 	Description string         `gorm:"type:varchar(255)" json:"description"`
-	OpenTime    time.Time      `json:"open_time"`
-	CloseTime   time.Time      `json:"close_time"`
+	OpenTime    string         `gorm:"type:varchar(255);not null" json:"open_time"`
+	CloseTime   string         `gorm:"type:varchar(255);not null" json:"close_time"`
 	EntryPrice  float64        `gorm:"type:decimal(10,2);not null" json:"entry_price"`
 	Longitude   float64        `gorm:"type:decimal(9,6);not null" json:"longitude"`
 	Latitude    float64        `gorm:"type:decimal(9,6);not null" json:"latitude"`

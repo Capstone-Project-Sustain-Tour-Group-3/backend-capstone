@@ -9,14 +9,14 @@ import (
 
 type Destination struct {
 	Id                 uuid.UUID
-	DestinationAddress DestinationAddress
-	DestinationMedias  []DestinationMedia
-	Categories         []Category
-	Facilities         []Facility
+	DestinationAddress *DestinationAddress
+	DestinationMedias  *[]DestinationMedia
+	Categories         *[]DestinationCategory
+	Facilities         *[]DestinationFacility
 	Name               string
 	Description        string
 	OpenTime           string
-	ClosedTime         string
+	CloseTime          string
 	EntryPrice         float64
 	Longitude          float64
 	Latitude           float64

@@ -45,9 +45,9 @@ func seed(s Seed, seedMethodName string) {
 		log.Fatal("No method called ", seedMethodName)
 	}
 	// Execute the method
-	log.Println("Seeding", seedMethodName, "...")
+	log.Println("[+] Seeding", seedMethodName, "...")
 	m.Call(nil)
-	log.Println("Seed", seedMethodName, "succeed")
+	log.Println("[+] Seed", seedMethodName, "succeed")
 }
 
 func RunSeeder() {
@@ -57,6 +57,12 @@ func RunSeeder() {
 	methodList := []string{
 		// list of seed method name
 		"SeedCategories",
+		"SeedFacilities",
+		"SeedProvinces",
+		"SeedDestinations",
+		"SeedDestinationMedias",
+		"SeedDestinationCategories",
+		"SeedDestinationFacilities",
 	}
 
 	Execute(config.DB, methodList...)

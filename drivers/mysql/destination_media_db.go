@@ -13,6 +13,7 @@ type DestinationMedia struct {
 	DestinationId uuid.UUID      `gorm:"type:varchar(191);index;not null" json:"destination_id"`
 	Url           string         `gorm:"type:varchar(255);not null" json:"url"`
 	Type          string         `gorm:"type:varchar(255);not null" json:"type"`
+	Title         string         `gorm:"type:varchar(255);not null" json:"title"`
 	CreatedAt     time.Time      `json:"created_at"`
 	UpdatedAt     time.Time      `json:"updated_at"`
 	DeletedAt     gorm.DeletedAt `json:"deleted_at"`
