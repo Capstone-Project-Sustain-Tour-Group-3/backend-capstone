@@ -15,6 +15,7 @@ import (
 type JWTClaims struct {
 	Id       uuid.UUID
 	Username string
+	Role     string
 	jwt.StandardClaims
 }
 
@@ -22,14 +23,36 @@ func init() {
 	viper.AutomaticEnv()
 }
 
-func GenerateAccessToken(user *entities.User) (string, error) {
+func GenerateAccessToken(user interface{}) (string, error) {
 	accessTokenSecret := []byte(viper.GetString("ACCESS_TOKEN_SECRET"))
 
+	var role string
+	var userID uuid.UUID
+	var username string
+
+	switch u := user.(type) {
+	case *entities.User:
+		role = "user"
+		userID = u.Id
+		username = u.Username
+	case *entities.Admin:
+		userID = u.Id
+		username = u.Username
+		if u.Role == "super admin" {
+			role = "superadmin"
+		} else {
+			role = "admin"
+		}
+	default:
+		return "", errors.New("invalid user type")
+	}
+
 	claims := JWTClaims{
-		Id:       user.Id,
-		Username: user.Username,
+		Id:       userID,
+		Username: username,
+		Role:     role,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(60 * time.Minute).Unix(),
+			ExpiresAt: time.Now().Add(30 * time.Minute).Unix(),
 			NotBefore: time.Now().Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},

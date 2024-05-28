@@ -1,6 +1,8 @@
 package routers
 
 import (
+	"capstone/routers/admin"
+
 	"github.com/labstack/echo/v4"
 )
 
@@ -9,12 +11,15 @@ func SetupRouter(e *echo.Echo) {
 	{
 		auth := v1User.Group("/auth")
 		AuthUserRouter(auth)
-		PingRouter(v1User)
+
 	}
 
 	v1Admin := e.Group("/v1/admin")
 	{
 		auth := v1Admin.Group("/auth")
 		AuthAdminRouter(auth)
+
+		user := v1Admin.Group("/users")
+		admin.UserRouter(user)
 	}
 }
