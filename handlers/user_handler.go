@@ -5,11 +5,12 @@ import (
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/usecases"
-	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
 	"math"
 	"net/http"
 	"strconv"
+
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 type userHandler struct {
@@ -37,7 +38,6 @@ func (h *userHandler) FindById(ctx echo.Context) error {
 		Data:       findResponse,
 	})
 	return ctx.JSON(http.StatusOK, response)
-
 }
 
 func (h *userHandler) FindAll(ctx echo.Context) error {

@@ -3,8 +3,9 @@ package repositories
 import (
 	"capstone/entities"
 	"fmt"
-	"github.com/google/uuid"
 	"strings"
+
+	"github.com/google/uuid"
 
 	"gorm.io/gorm"
 )
@@ -46,7 +47,6 @@ func (r *userRepository) FindAll(page, limit int, sortBy, sortType, searchQuery 
 	if searchQuery != "" {
 		db = db.Where("LOWER(username) LIKE ? OR LOWER(email) LIKE ?",
 			"%"+strings.ToLower(searchQuery)+"%", "%"+strings.ToLower(searchQuery)+"%")
-
 	}
 
 	if err := db.Debug().

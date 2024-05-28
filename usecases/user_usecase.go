@@ -6,6 +6,7 @@ import (
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/repositories"
+
 	"github.com/google/uuid"
 )
 
@@ -31,7 +32,6 @@ func (uc *userUsecase) FindById(id uuid.UUID) (*entities.User, error) {
 		return nil, &errorHandlers.NotFoundError{Message: "User tidak ditemukan"}
 	}
 	return user, nil
-
 }
 
 func (uc *userUsecase) FindAll(page, limit int, sortBy, sortType, searchQuery string) (*[]entities.User, *int64, error) {
