@@ -16,9 +16,10 @@ type ResponseWithPaginate struct {
 }
 
 type Paginate struct {
-	TotalData   int `json:"total_data"`
-	TotalPages  int `json:"total_pages"`
-	CurrentPage int `json:"current_page"`
+	Total       int64 `json:"total"`
+	PerPage     int   `json:"per_page"`
+	CurrentPage int   `json:"current_page"`
+	LastPage    int   `json:"last_page"`
 }
 
 type ResponseWithSort struct {
@@ -26,11 +27,7 @@ type ResponseWithSort struct {
 	Message    string   `json:"message"`
 	Data       any      `json:"data"`
 	Pagination Paginate `json:"pagination"`
-	Sort       Sort     `json:"sort"`
-}
-
-type Sort struct {
-	Sort string `json:"sort"`
+	Sort       string   `json:"sort"`
 }
 
 type ResponseWithoutData struct {
@@ -55,7 +52,7 @@ func generateResponseWithPaginate(status, message string, data any, paginate Pag
 	}
 }
 
-func generateResponseWithSort(status, message string, data any, paginate Paginate, sort Sort) ResponseWithSort {
+func generateResponseWithSort(status, message string, data any, paginate Paginate, sort string) ResponseWithSort {
 	return ResponseWithSort{
 		Status:     status,
 		Message:    message,
@@ -83,12 +80,13 @@ func Response(param dto.ResponseParams) any {
 	if param.Data != nil {
 		if param.IsPaginate {
 			paginate := Paginate{
-				TotalData:   param.TotalData,
-				TotalPages:  param.TotalPages,
+				Total:       param.Total,
+				PerPage:     param.PerPage,
 				CurrentPage: param.CurrentPage,
+				LastPage:    param.LastPage,
 			}
 			if param.IsSort {
-				sort := Sort{Sort: param.Sort}
+				sort := param.Sort
 				return generateResponseWithSort(status, param.Message, param.Data, paginate, sort)
 			}
 			return generateResponseWithPaginate(status, param.Message, param.Data, paginate)

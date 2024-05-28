@@ -22,7 +22,7 @@ func LoadDb() {
 		log.Fatal(err)
 	}
 
-	if err = db.AutoMigrate(mysql2.User{}); err != nil {
+	if err = db.AutoMigrate(mysql2.User{}, mysql2.Admin{}); err != nil {
 		log.Fatal(err)
 	}
 
