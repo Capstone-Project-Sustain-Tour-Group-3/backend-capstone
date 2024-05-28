@@ -50,17 +50,8 @@ func (h *userHandler) FindAll(ctx echo.Context) error {
 		limit = 10
 	}
 
-	sortBy := ctx.QueryParam("sort_by")
-	sortType := ctx.QueryParam("sort_type")
-	if sortBy == "" {
-		sortBy = "updated_at"
-		sortType = "desc"
-	}
-	if sortType == "" {
-		sortType = "asc"
-	}
 	searchQuery := ctx.QueryParam("search")
-	users, totalPtr, err := h.usecase.FindAll(page, limit, sortBy, sortType, searchQuery)
+	users, totalPtr, err := h.usecase.FindAll(page, limit, searchQuery)
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
@@ -79,9 +70,6 @@ func (h *userHandler) FindAll(ctx echo.Context) error {
 		PerPage:     limit,
 		CurrentPage: page,
 		LastPage:    lastPage,
-		IsSort:      true,
-		SortBy:      sortBy,
-		SortType:    sortType,
 	})
 	return ctx.JSON(http.StatusOK, response)
 }
@@ -125,7 +113,7 @@ func (h *userHandler) Update(ctx echo.Context) error {
 	}
 	response := helpers.Response(dto.ResponseParams{
 		StatusCode: http.StatusOK,
-		Message:    "data user berhasil diubah",
+		Message:    "data user berhasil diperbarui",
 	})
 	return ctx.JSON(http.StatusOK, response)
 }

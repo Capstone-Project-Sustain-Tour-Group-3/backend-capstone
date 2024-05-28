@@ -10,8 +10,7 @@ type ResponseParams struct {
 	CurrentPage int    `json:"current_page"`
 	LastPage    int    `json:"last_page"`
 	IsSort      bool   `json:"is_sort"`
-	SortBy      string `json:"sort_by"`
-	SortType    string `json:"sort_type"`
+	Sort        string `json:"sort"`
 }
 
 type ResponseError struct {

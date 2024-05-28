@@ -12,7 +12,7 @@ import (
 
 type UserUsecase interface {
 	FindById(id uuid.UUID) (*entities.User, error)
-	FindAll(page, limit int, sortBy, sortType, searchQuery string) (*[]entities.User, *int64, error)
+	FindAll(page, limit int, searchQuery string) (*[]entities.User, *int64, error)
 	Create(request *dto.UserRequest) error
 	Update(id uuid.UUID, request *dto.UserRequest) error
 	Delete(id uuid.UUID) error
@@ -34,8 +34,8 @@ func (uc *userUsecase) FindById(id uuid.UUID) (*entities.User, error) {
 	return user, nil
 }
 
-func (uc *userUsecase) FindAll(page, limit int, sortBy, sortType, searchQuery string) (*[]entities.User, *int64, error) {
-	users, total, err := uc.repository.FindAll(page, limit, sortBy, sortType, searchQuery)
+func (uc *userUsecase) FindAll(page, limit int, searchQuery string) (*[]entities.User, *int64, error) {
+	users, total, err := uc.repository.FindAll(page, limit, searchQuery)
 	if err != nil {
 		return nil, nil, &errorHandlers.InternalServerError{Message: "Gagal untuk menampilkan data user"}
 	}
