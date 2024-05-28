@@ -25,4 +25,9 @@ func AuthUserRouter(r *echo.Group) {
 }
 
 func AuthAdminRouter(r *echo.Group) {
+	repository := repositories.NewAdminRepository(config.DB)
+	usecase := usecases.NewAdminUsecase(repository)
+	handler := handlers.NewAdminHandler(usecase)
+
+	r.POST("/login", handler.Login)
 }
