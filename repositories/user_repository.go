@@ -2,7 +2,6 @@ package repositories
 
 import (
 	"capstone/entities"
-	"fmt"
 	"strings"
 
 	"github.com/google/uuid"
@@ -11,7 +10,7 @@ import (
 )
 
 type UserRepository interface {
-	FindAll(page, limit int, sortBy, sortType, searchQuery string) (*[]entities.User, *int64, error)
+	FindAll(page, limit int, searchQuery string) (*[]entities.User, *int64, error)
 	FindByEmail(email string) (*entities.User, error)
 	FindById(id uuid.UUID) (*entities.User, error)
 	FindByUsername(name string) (*entities.User, error)
@@ -36,14 +35,11 @@ func (r *userRepository) FindByEmail(email string) (*entities.User, error) {
 	return user, nil
 }
 
-func (r *userRepository) FindAll(page, limit int, sortBy, sortType, searchQuery string) (*[]entities.User, *int64, error) {
+func (r *userRepository) FindAll(page, limit int, searchQuery string) (*[]entities.User, *int64, error) {
 	var users []entities.User
 	var total int64
 	offset := (page - 1) * limit
 	db := r.db.Model(&entities.User{})
-	if sortBy != "" {
-		db = db.Order(fmt.Sprintf("%s %s", sortBy, sortType))
-	}
 	if searchQuery != "" {
 		db = db.Where("LOWER(username) LIKE ? OR LOWER(email) LIKE ?",
 			"%"+strings.ToLower(searchQuery)+"%", "%"+strings.ToLower(searchQuery)+"%")
