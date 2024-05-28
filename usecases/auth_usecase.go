@@ -19,16 +19,16 @@ type AuthUsecase interface {
 	Login(request *dto.LoginRequest) (*dto.LoginResponse, error)
 }
 
-type userUsecase struct {
+type authUsecase struct {
 	userRepo  repositories.AuthRepository
 	cacheRepo *repositories.CacheRepository
 }
 
-func NewUserUsecase(userRepo repositories.AuthRepository, cacheRepo *repositories.CacheRepository) *userUsecase {
-	return &userUsecase{userRepo, cacheRepo}
+func NewAuthUsecase(userRepo repositories.AuthRepository, cacheRepo *repositories.CacheRepository) *authUsecase {
+	return &authUsecase{userRepo, cacheRepo}
 }
 
-func (uc *userUsecase) Register(request *dto.RegisterRequest) (*dto.RegisterResponse, error) {
+func (uc *authUsecase) Register(request *dto.RegisterRequest) (*dto.RegisterResponse, error) {
 	ifExistUsername, _ := uc.userRepo.FindByUsername(request.Username)
 	if ifExistUsername != nil {
 		return nil, &errorHandlers.ConflictError{Message: "username sudah ada, silahkan username lain"}
@@ -68,7 +68,7 @@ func (uc *userUsecase) Register(request *dto.RegisterRequest) (*dto.RegisterResp
 	return &response, nil
 }
 
-func (uc *userUsecase) ResendOTP(email string) (*dto.RegisterResponse, error) {
+func (uc *authUsecase) ResendOTP(email string) (*dto.RegisterResponse, error) {
 	user, _ := uc.userRepo.FindByEmail(email)
 	if user == nil {
 		return nil, &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
@@ -85,7 +85,7 @@ func (uc *userUsecase) ResendOTP(email string) (*dto.RegisterResponse, error) {
 	return &response, nil
 }
 
-func (uc *userUsecase) VerifyEmail(request *dto.VerifyEmailRequest) error {
+func (uc *authUsecase) VerifyEmail(request *dto.VerifyEmailRequest) error {
 	cachedOTP, exists := uc.cacheRepo.Get(request.RefId)
 	fmt.Println(cachedOTP, exists)
 	if !exists {
@@ -112,7 +112,7 @@ func (uc *userUsecase) VerifyEmail(request *dto.VerifyEmailRequest) error {
 	return nil
 }
 
-func (uc *userUsecase) Login(request *dto.LoginRequest) (*dto.LoginResponse, error) {
+func (uc *authUsecase) Login(request *dto.LoginRequest) (*dto.LoginResponse, error) {
 	user, err := uc.userRepo.FindByEmail(request.Email)
 	if err != nil {
 		return nil, &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}

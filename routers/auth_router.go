@@ -11,10 +11,10 @@ import (
 )
 
 func AuthUserRouter(r *echo.Group) {
-	userRepo := repositories.NewUserRepository(config.DB)
+	userRepo := repositories.NewAuthRepository(config.DB)
 	cacheRepo := repositories.NewCacheRepository()
-	usecase := usecases.NewUserUsecase(userRepo, cacheRepo)
-	handler := handlers.NewUserHandler(usecase)
+	usecase := usecases.NewAuthUsecase(userRepo, cacheRepo)
+	handler := handlers.NewAuthHandler(usecase)
 	r.POST("/register", handler.Register)
 	r.POST("/resend-otp", handler.ResendOTP)
 	r.POST("/verify", handler.VerifyEmail)
