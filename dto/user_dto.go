@@ -1,31 +1,73 @@
 package dto
 
-type RegisterRequest struct {
-	Username    string `json:"username" validate:"required,max=16"`
-	NamaLengkap string `json:"nama_lengkap" validate:"required"`
-	Email       string `json:"email" validate:"required,email"`
-	NoTelepon   string `json:"no_telepon" validate:"required,number,startswith=08,min=11,max=13"`
-	Password    string `json:"password" validate:"required,min=8"`
+import (
+	"capstone/entities"
+	"github.com/google/uuid"
+)
+
+type UserRequest struct {
+	Username     string `json:"username"`
+	Password     string `json:"password"`
+	NamaLengkap  string `json:"nama_lengkap"`
+	Email        string `json:"email"`
+	Bio          string `json:"bio"`
+	NoTelepon    string `json:"no_telepon"`
+	FotoProfil   string `json:"foto_profil"`
+	JenisKelamin string `json:"jenis_kelamin"`
+	Kota         string `json:"kota"`
+	Provinsi     string `json:"provinsi"`
 }
 
-type RegisterResponse struct {
-	ReferenceId string `json:"reference_id"`
+type findByIdResponse struct {
+	Id           uuid.UUID `json:"id"`
+	Username     string    `json:"username"`
+	NamaLengkap  string    `json:"nama_lengkap"`
+	Bio          string    `json:"bio"`
+	Email        string    `json:"email"`
+	NoTelepon    string    `json:"no_telepon"`
+	FotoProfil   string    `json:"foto_profil"`
+	JenisKelamin string    `json:"jenis_kelamin"`
+	Kota         string    `json:"kota"`
+	Provinsi     string    `json:"provinsi"`
 }
 
-type LoginRequest struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required,min=8"`
+type findAllUserResponse struct {
+	Id           uuid.UUID `json:"id"`
+	Username     string    `json:"username"`
+	Email        string    `json:"email"`
+	NoTelepon    string    `json:"no_telepon"`
+	JenisKelamin string    `json:"jenis_kelamin"`
+	Kota         string    `json:"kota"`
+	Provinsi     string    `json:"provinsi"`
 }
 
-type LoginResponse struct {
-	Token string `json:"token"`
+func ToFindByIdResponse(user *entities.User) *findByIdResponse {
+	return &findByIdResponse{
+		Id:           user.Id,
+		Username:     user.Username,
+		NamaLengkap:  user.Fullname,
+		Bio:          user.Bio,
+		Email:        user.Email,
+		NoTelepon:    user.PhoneNumber,
+		FotoProfil:   user.ProfileImageUrl,
+		JenisKelamin: user.Gender,
+		Kota:         user.City,
+		Provinsi:     user.Province,
+	}
 }
 
-type VerifyEmailRequest struct {
-	RefId string `json:"ref_id"`
-	OTP   string `json:"otp"`
-}
-
-type ResendOTPRequest struct {
-	Email string `json:"email"`
+func ToFindAllUserResponse(user *[]entities.User) *[]findAllUserResponse {
+	var users []findAllUserResponse
+	for _, u := range *user {
+		users = append(users, findAllUserResponse{
+			Id:           u.Id,
+			Username:     u.Username,
+			Email:        u.Email,
+			NoTelepon:    u.PhoneNumber,
+			JenisKelamin: u.Gender,
+			Kota:         u.City,
+			Provinsi:     u.Province,
+		})
+	}
+	return &users
 }
