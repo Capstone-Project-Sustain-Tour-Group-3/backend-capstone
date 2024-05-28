@@ -1,6 +1,9 @@
 package handlers
 
 import (
+	"fmt"
+	"net/http"
+
 	"capstone/dto"
 	"capstone/errorHandlers"
 	"capstone/helpers"
@@ -8,7 +11,6 @@ import (
 	"math"
 	"net/http"
 	"strconv"
-
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
