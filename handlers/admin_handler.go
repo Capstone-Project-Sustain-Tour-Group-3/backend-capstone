@@ -5,8 +5,9 @@ import (
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/usecases"
-	"github.com/labstack/echo/v4"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 type adminHandler struct {
@@ -20,7 +21,7 @@ func NewAdminHandler(uc usecases.AdminUsecase) *adminHandler {
 func (h *adminHandler) Login(ctx echo.Context) error {
 	var req dto.LoginAdminRequest
 	if err := ctx.Bind(&req); err != nil {
-		return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{err.Error()})
+		return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: err.Error()})
 	}
 	if err := helpers.ValidateRequest(req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
