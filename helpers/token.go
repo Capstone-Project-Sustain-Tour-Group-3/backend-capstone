@@ -1,10 +1,11 @@
 package helpers
 
 import (
-	"capstone/entities"
 	"errors"
 	"fmt"
 	"time"
+
+	"capstone/entities"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
@@ -73,13 +74,18 @@ func ParseJWT(tokenStr string) (*JWTClaims, error) {
 	})
 
 	if err != nil || !token.Valid {
-		if err == jwt.ErrSignatureInvalid {
+		if errors.Is(err, jwt.ErrSignatureInvalid) {
 			return nil, errors.New("JWT Token tidak valid")
 		}
 		return nil, errors.New("Token sudah kadaluwarsa")
 	}
 
-	claims := token.Claims.(*JWTClaims)
+	claims, ok := token.Claims.(*JWTClaims)
+
+	if !ok {
+		return nil, errors.New("Token tidak valid")
+	}
+
 	if claims == nil {
 		return nil, errors.New("Token sudah kadaluwarsa")
 	}

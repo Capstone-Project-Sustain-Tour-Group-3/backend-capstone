@@ -1,9 +1,10 @@
 package middlewares
 
 import (
-	"capstone/helpers"
 	"net/http"
 	"strings"
+
+	"capstone/helpers"
 
 	"github.com/labstack/echo/v4"
 )

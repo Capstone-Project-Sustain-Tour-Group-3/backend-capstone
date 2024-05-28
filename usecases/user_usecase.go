@@ -100,6 +100,7 @@ func (uc *userUsecase) Update(id uuid.UUID, request *dto.UserRequest) error {
 	password, err := helpers.HashPassword(request.Password)
 	if err != nil {
 		return &errorHandlers.InternalServerError{Message: "Gagal hashing password"}
+
 	}
 
 	user.Username = request.Username
