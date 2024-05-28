@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type UserRepository interface {
+type AuthRepository interface {
 	FindByEmail(email string) (*entities.User, error)
 	FindByUsername(name string) (*entities.User, error)
 	Create(user *entities.User) error

@@ -12,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type UserUsecase interface {
+type AuthUsecase interface {
 	Register(request *dto.RegisterRequest) (*dto.RegisterResponse, error)
 	ResendOTP(email string) (*dto.RegisterResponse, error)
 	VerifyEmail(request *dto.VerifyEmailRequest) error
@@ -20,11 +20,11 @@ type UserUsecase interface {
 }
 
 type userUsecase struct {
-	userRepo  repositories.UserRepository
+	userRepo  repositories.AuthRepository
 	cacheRepo *repositories.CacheRepository
 }
 
-func NewUserUsecase(userRepo repositories.UserRepository, cacheRepo *repositories.CacheRepository) *userUsecase {
+func NewUserUsecase(userRepo repositories.AuthRepository, cacheRepo *repositories.CacheRepository) *userUsecase {
 	return &userUsecase{userRepo, cacheRepo}
 }
 
