@@ -1,9 +1,6 @@
 package usecases
 
 import (
-	"fmt"
-	"time"
-
 	"capstone/dto"
 	"capstone/entities"
 	"capstone/errorHandlers"
@@ -14,126 +11,123 @@ import (
 )
 
 type UserUsecase interface {
-	Register(request *dto.RegisterRequest) (*dto.RegisterResponse, error)
-	ResendOTP(email string) (*dto.RegisterResponse, error)
-	VerifyEmail(request *dto.VerifyEmailRequest) error
-	Login(request *dto.LoginRequest) (*dto.LoginResponse, error)
+	FindById(id uuid.UUID) (*entities.User, error)
+	FindAll(page, limit int, searchQuery string) (*[]entities.User, *int64, error)
+	Create(request *dto.UserRequest) error
+	Update(id uuid.UUID, request *dto.UserRequest) error
+	Delete(id uuid.UUID) error
 }
 
 type userUsecase struct {
-	userRepo  repositories.UserRepository
-	cacheRepo *repositories.CacheRepository
+	repository repositories.UserRepository
 }
 
-func NewUserUsecase(userRepo repositories.UserRepository, cacheRepo *repositories.CacheRepository) *userUsecase {
-	return &userUsecase{userRepo, cacheRepo}
+func NewUserUsecase(repository repositories.UserRepository) *userUsecase {
+	return &userUsecase{repository}
 }
 
-func (uc *userUsecase) Register(request *dto.RegisterRequest) (*dto.RegisterResponse, error) {
-	ifExistUsername, _ := uc.userRepo.FindByUsername(request.Username)
-	if ifExistUsername != nil {
-		return nil, &errorHandlers.ConflictError{Message: "username sudah ada, silahkan username lain"}
+func (uc *userUsecase) FindById(id uuid.UUID) (*entities.User, error) {
+	user, err := uc.repository.FindById(id)
+	if err != nil {
+		return nil, &errorHandlers.NotFoundError{Message: "User tidak ditemukan"}
 	}
-	isExistEmail, _ := uc.userRepo.FindByEmail(request.Email)
-	if isExistEmail != nil {
-		return nil, &errorHandlers.ConflictError{Message: "email sudah terdaftar"}
+	return user, nil
+}
+
+func (uc *userUsecase) FindAll(page, limit int, searchQuery string) (*[]entities.User, *int64, error) {
+	users, total, err := uc.repository.FindAll(page, limit, searchQuery)
+	if err != nil {
+		return nil, nil, &errorHandlers.InternalServerError{Message: "Gagal untuk menampilkan data user"}
+	}
+	return users, total, nil
+}
+
+func (uc *userUsecase) Create(request *dto.UserRequest) error {
+	existUsername, _ := uc.repository.FindByUsername(request.Username)
+	if existUsername != nil {
+		return &errorHandlers.ConflictError{Message: "Username sudah digunakan"}
+	}
+
+	existEmail, _ := uc.repository.FindByEmail(request.Email)
+	if existEmail != nil {
+		return &errorHandlers.ConflictError{Message: "Email sudah digunakan"}
 	}
 
 	password, err := helpers.HashPassword(request.Password)
 	if err != nil {
-		return nil, &errorHandlers.InternalServerError{Message: "Gagal hashing password"}
+		return &errorHandlers.InternalServerError{Message: "Gagal hashing password"}
 	}
 	user := &entities.User{
-		Id:          uuid.New(),
-		Email:       request.Email,
-		Password:    password,
-		Username:    request.Username,
-		Fullname:    request.NamaLengkap,
-		PhoneNumber: request.NoTelepon,
+		Id:              uuid.New(),
+		Email:           request.Email,
+		Password:        password,
+		Username:        request.Username,
+		Fullname:        request.NamaLengkap,
+		Bio:             request.Bio,
+		PhoneNumber:     request.NoTelepon,
+		ProfileImageUrl: request.FotoProfil,
+		Gender:          request.JenisKelamin,
+		City:            request.Kota,
+		Province:        request.Provinsi,
+		EmailVerifiedAt: nil,
 	}
-	ref := helpers.GenerateReferenceId()
-	otp := helpers.GenerateOTP()
-
-	fmt.Println("otp", otp)
-	uc.cacheRepo.Set(ref, otp)
-	uc.cacheRepo.Set("email", user.Email)
-	err = uc.userRepo.Create(user)
-	if err != nil {
-		return nil, &errorHandlers.InternalServerError{Message: "Gagal untuk mendaftar"}
-	}
-
-	if err = helpers.SendOTP(user.Email, user.Fullname, otp); err != nil {
-		return nil, &errorHandlers.InternalServerError{Message: "Gagal mengirimkan email"}
-	}
-	response := dto.RegisterResponse{ReferenceId: ref}
-	return &response, nil
-}
-
-func (uc *userUsecase) ResendOTP(email string) (*dto.RegisterResponse, error) {
-	user, _ := uc.userRepo.FindByEmail(email)
-	if user == nil {
-		return nil, &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
-	}
-	otp := helpers.GenerateOTP()
-	referenceId := helpers.GenerateReferenceId()
-	uc.cacheRepo.Set(referenceId, otp)
-	uc.cacheRepo.Set("email", email)
-
-	if err := helpers.SendOTP(user.Email, user.Fullname, otp); err != nil {
-		return nil, &errorHandlers.InternalServerError{Message: "Gagal mengirimkan email"}
-	}
-	response := dto.RegisterResponse{ReferenceId: referenceId}
-	return &response, nil
-}
-
-func (uc *userUsecase) VerifyEmail(request *dto.VerifyEmailRequest) error {
-	cachedOTP, exists := uc.cacheRepo.Get(request.RefId)
-	fmt.Println(cachedOTP, exists)
-	if !exists {
-		return &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
-	}
-	fmt.Println("get otp", cachedOTP)
-
-	if cachedOTP != request.OTP {
-		return &errorHandlers.BadRequestError{
-			Message: "Kode OTP tidak cocok. Mohon periksa kembali dan masukkan dengan benar.",
-		}
-	}
-
-	now := time.Now()
-	email, _ := uc.cacheRepo.Get("email")
-	user, _ := uc.userRepo.FindByEmail(email)
-	if user == nil {
-		return &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
-	}
-
-	user.EmailVerifiedAt = &now
-	_, err := uc.userRepo.Update(user)
-	if err != nil {
-		return &errorHandlers.InternalServerError{Message: "Akun tidak ditemukan"}
+	if err := uc.repository.Create(user); err != nil {
+		return &errorHandlers.InternalServerError{Message: "Gagal untuk menambah data user"}
 	}
 	return nil
 }
 
-func (uc *userUsecase) Login(request *dto.LoginRequest) (*dto.LoginResponse, error) {
-	user, err := uc.userRepo.FindByEmail(request.Email)
-	if err != nil {
-		return nil, &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
-	}
-	if user.EmailVerifiedAt == nil {
-		return nil, &errorHandlers.UnAuthorizedError{Message: "Email belum terverifikasi"}
-	}
-	if err = helpers.VerifyPassword(user.Password, request.Password); err != nil {
-		return nil, &errorHandlers.BadRequestError{Message: "Email atau password salah"}
+func (uc *userUsecase) Update(id uuid.UUID, request *dto.UserRequest) error {
+	user, _ := uc.repository.FindById(id)
+	if user == nil {
+		return &errorHandlers.ConflictError{Message: "User tidak ditemukan"}
 	}
 
-	accessToken, err := helpers.GenerateAccessToken(user)
-	if err != nil {
-		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
+	if request.Username != user.Username {
+		existUsername, _ := uc.repository.FindByUsername(request.Username)
+		if existUsername != nil {
+			return &errorHandlers.ConflictError{Message: "Username sudah digunakan"}
+		}
 	}
 
-	response := &dto.LoginResponse{
-		Token: accessToken,
+	if request.Email != user.Email {
+		existEmail, _ := uc.repository.FindByEmail(request.Email)
+		if existEmail != nil {
+			return &errorHandlers.ConflictError{Message: "Email sudah digunakan"}
+		}
 	}
-	return response, nil
+
+	password, err := helpers.HashPassword(request.Password)
+	if err != nil {
+		return &errorHandlers.InternalServerError{Message: "Gagal hashing password"}
+
+	}
+
+	user.Username = request.Username
+	user.Email = request.Email
+	user.Password = password
+	user.Fullname = request.NamaLengkap
+	user.Bio = request.Bio
+	user.PhoneNumber = request.NoTelepon
+	user.ProfileImageUrl = request.FotoProfil
+	user.Gender = request.JenisKelamin
+	user.City = request.Kota
+	user.Province = request.Provinsi
+
+	if err := uc.repository.Update(user); err != nil {
+		return &errorHandlers.InternalServerError{Message: "Gagal untuk memperbarui data user"}
+	}
+	return nil
+}
+
+func (uc *userUsecase) Delete(id uuid.UUID) error {
+	user, _ := uc.repository.FindById(id)
+	if user == nil {
+		return &errorHandlers.ConflictError{Message: "User tidak ditemukan"}
+	}
+
+	if err := uc.repository.Delete(user); err != nil {
+		return &errorHandlers.InternalServerError{Message: "Gagal untuk menghapus data user"}
+	}
+	return nil
 }
