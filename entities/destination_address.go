@@ -11,6 +11,7 @@ type DestinationAddress struct {
 	Id            uuid.UUID
 	DestinationId uuid.UUID
 	ProvinceId    uuid.UUID
+	Province      Province
 	City          string
 	Regency       string
 	StreetName    string

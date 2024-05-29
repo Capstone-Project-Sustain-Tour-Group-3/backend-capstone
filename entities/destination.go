@@ -10,7 +10,7 @@ import (
 type Destination struct {
 	Id                 uuid.UUID
 	DestinationAddress *DestinationAddress
-	DestinationMedias  *[]DestinationMedia
+	DestinationMedias  []DestinationMedia
 	Categories         *[]DestinationCategory
 	Facilities         *[]DestinationFacility
 	Name               string
