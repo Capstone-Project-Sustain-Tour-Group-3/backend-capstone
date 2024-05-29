@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"capstone/dto"
 	"capstone/errorHandlers"
+	"capstone/helpers"
 	"capstone/usecases"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -10,12 +12,12 @@ import (
 	"strconv"
 )
 
-type UserHandler struct {
+type userHandler struct {
 	usecase usecases.UserUsecase
 }
 
-func NewUserHandler(usecase usecases.UserUsecase) *UserHandler {
-	return &UserHandler{usecase}
+func NewUserHandler(usecase usecases.UserUsecase) *userHandler {
+	return &userHandler{usecase}
 }
 
 func (h *userHandler) FindById(ctx echo.Context) error {
