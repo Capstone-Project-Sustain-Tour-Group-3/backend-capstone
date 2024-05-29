@@ -11,6 +11,9 @@ func SetupRouter(e *echo.Echo) {
 	{
 		auth := v1User.Group("/auth")
 		AuthUserRouter(auth)
+
+		destination := v1User.Group("/destinations")
+		DestinationRouter(destination)
 	}
 
 	v1Admin := e.Group("/v1/admin")

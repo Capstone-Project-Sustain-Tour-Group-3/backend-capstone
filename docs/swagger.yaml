@@ -9,6 +9,7 @@ servers:
     description: Development Server
 tags:
   - name: Mobile - Auth
+  - name: Mobile - Destinations
   - name: Admin - Users
   - name: Admin - Auth
 paths:
@@ -628,7 +629,107 @@ paths:
                     type: string
                     example: "User tidak ditemukan"
 
+  /destinations:
+    get:
+      tags:
+        - Mobile - Destinations
+      summary: Mencari destinasi wisata
+      description: API untuk mencari daftar destinasi wisata.
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            description: urutkan berdasarkan
+            enum:
+              - populer
+              - terlama
+              - terbaru
+      security:
+        - BearerAuth: [ ]
+      responses:
+        500:
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Failed"
+                  message:
+                    type: string
+                    example: "gagal untuk mendapatkan destinasi"
+        '200':
+          description: Berhasil menampilkan destinasi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Success"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: "306d305e-3359-4884-8d38-89c04e8adea6"
+                        nama:
+                          type: string
+                          example: "Kawah Ijen"
+                        url_media:
+                          type: string
+                          nullable: true
+                          example: "https://picsum.photos/300/200"
+                        provinsi:
+                          type: string
+                          example: "Papua Barat"
+                        kota:
+                          type: string
+                          example: "Jakarta"
+                  pagination:
+                    $ref: "#/components/schemas/Pagination"
+                  sort:
+                    type: string
+                    example: "populer"
 components:
+  schemas:
+    Pagination:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 10
+        per_page:
+          type: integer
+          example: 10
+        current_page:
+          type: integer
+          example: 1
+        last_page:
+          type: integer
+          example: 1
   securitySchemes:
     BearerAuth:
       type: http

@@ -24,7 +24,7 @@ func (uc *adminUsecase) Login(request *dto.LoginAdminRequest) (*dto.LoginAdminRe
 	if err != nil {
 		return nil, &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
 	}
-	if err := helpers.VerifyPassword(admin.Password, request.Password); err != nil {
+	if err = helpers.VerifyPassword(admin.Password, request.Password); err != nil {
 		return nil, &errorHandlers.BadRequestError{Message: "Email atau password salah"}
 	}
 
