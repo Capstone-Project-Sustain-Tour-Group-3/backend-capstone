@@ -1,12 +1,13 @@
 package handlers
 
 import (
+	"fmt"
+	"net/http"
+
 	"capstone/dto"
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/usecases"
-	"fmt"
-	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
