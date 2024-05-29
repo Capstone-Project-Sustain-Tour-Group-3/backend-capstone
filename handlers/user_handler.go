@@ -5,11 +5,12 @@ import (
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/usecases"
-	"github.com/google/uuid"
-	"github.com/labstack/echo/v4"
 	"math"
 	"net/http"
 	"strconv"
+
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 type userHandler struct {

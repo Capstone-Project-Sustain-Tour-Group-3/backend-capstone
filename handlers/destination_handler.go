@@ -5,9 +5,10 @@ import (
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/usecases"
+	"net/http"
+
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"net/http"
 )
 
 type DestinationHandler struct {
