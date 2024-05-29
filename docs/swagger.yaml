@@ -713,6 +713,57 @@ paths:
                   sort:
                     type: string
                     example: "populer"
+  /destinations/{id}:
+    get:
+      summary: Mendapatkan destinasi berdasarkan ID
+      tags:
+        - Mobile - Destinations
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: ID dari destinasi
+      responses:
+        '200':
+          description: Berhasil mendapatkan destinasi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Success"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "306d305e-3359-4884-8d38-89c04e8adea6"
+                      nama:
+                        type: string
+                        example: "Kawah Ijen"
+                      url_media:
+                        type: string
+                        nullable: true
+                        example: "https://picsum.photos/300/200"
+                      provinsi:
+                        type: string
+        '404':
+          description: Destinasi tidak ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Failed"
+                  message:
+                    type: string
+                    example: "Destinasi tidak ditemukan"
 components:
   schemas:
     Pagination:
