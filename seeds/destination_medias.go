@@ -9,22 +9,49 @@ import (
 )
 
 func (s Seed) SeedDestinationMedias() {
-	destinationMedias := []entities.DestinationMedia{
-		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e971"), Type: "image", Url: "https://picsum.photos/300/200", Title: "Destinasi 1"},                                                                          //nolint:lll
-		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e972"), Type: "image", Url: "https://picsum.photos/300/200", Title: "Destinasi 2"},                                                                          //nolint:lll
-		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e973"), Type: "image", Url: "https://picsum.photos/300/200", Title: "Destinasi 3"},                                                                          //nolint:lll
-		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e974"), Type: "video", Url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.video", Title: "Tears of Steel"},                 //nolint:lll
-		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e975"), Type: "video", Url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.video", Title: "Volkswagen GTI Review"},   //nolint:lll
-		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e976"), Type: "video", Url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.video", Title: "We Are Going On Bullrun"}, //nolint:lll
+	destinationImages := []entities.DestinationMedia{
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e941"), Type: "image", Url: "https://picsum.photos/300/200", Title: "Destinasi 1"},
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e942"), Type: "image", Url: "https://picsum.photos/300/200", Title: "Destinasi 2"},
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e943"), Type: "image", Url: "https://picsum.photos/300/200", Title: "Destinasi 3"},
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e944"), Type: "image", Url: "https://picsum.photos/300/200", Title: "Destinasi 4"},
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e945"), Type: "image", Url: "https://picsum.photos/300/200", Title: "Destinasi 5"},
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e946"), Type: "image", Url: "https://picsum.photos/300/200", Title: "Destinasi 6"},
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e947"), Type: "image", Url: "https://picsum.photos/300/200", Title: "Destinasi 7"},
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e948"), Type: "image", Url: "https://picsum.photos/300/200", Title: "Destinasi 8"},
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e949"), Type: "image", Url: "https://picsum.photos/300/200", Title: "Destinasi 9"},
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e940"), Type: "image", Url: "https://picsum.photos/300/200", Title: "Destinasi 10"},
 	}
 
-	for _, destinationMedia := range destinationMedias {
-		// get random destination
-		destination, _ := getRandomDestination(s)
-		destinationMedia.DestinationId = destination.Id
-		if err := s.db.Where(entities.DestinationMedia{Title: destinationMedia.Title}).
-			FirstOrCreate(&destinationMedia).Error; err != nil {
-			log.Fatalf("failed to create destination media: %v", err)
+	destinationVideos := []entities.DestinationMedia{
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e931"), Type: "video", Url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.video", Title: "Tears of Steel 1"},
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e932"), Type: "video", Url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.video", Title: "Volkswagen GTI Review 2"},
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e933"), Type: "video", Url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.video", Title: "We Are Going On Bullrun 3"},
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e934"), Type: "video", Url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.video", Title: "Tears of Steel 4"},
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e935"), Type: "video", Url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.video", Title: "Volkswagen GTI Review 5"},
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e936"), Type: "video", Url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.video", Title: "We Are Going On Bullrun 6"},
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e937"), Type: "video", Url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.video", Title: "Tears of Steel 7"},
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e938"), Type: "video", Url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/VolkswagenGTIReview.video", Title: "Volkswagen GTI Review 8"},
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e939"), Type: "video", Url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.video", Title: "We Are Going On Bullrun 9"},
+		{Id: uuid.MustParse("1bde58e3-ef19-4daa-9df7-084ba5d3e930"), Type: "video", Url: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.video", Title: "Tears of Steel 10"},
+	}
+
+	destinations, _ := getAllDestinations(s)
+
+	for idx, destination := range destinations {
+		destinationImages[idx].DestinationId = destination.Id
+
+		if err := s.db.Where(entities.DestinationMedia{Id: destinationImages[idx].Id}).
+			FirstOrCreate(&destinationImages).Error; err != nil {
+			log.Fatalf("failed to create destination image: %v", err)
+		}
+	}
+
+	for idx, destination := range destinations {
+		destinationVideos[idx].DestinationId = destination.Id
+
+		if err := s.db.Where(entities.DestinationMedia{Id: destinationVideos[idx].Id}).
+			FirstOrCreate(&destinationVideos).Error; err != nil {
+			log.Fatalf("failed to create destination video: %v", err)
 		}
 	}
 }

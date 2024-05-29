@@ -27,7 +27,13 @@ func NewDestinationRepository(db *gorm.DB) *DestinationRepository {
 
 func (r *DestinationRepository) FindById(id uuid.UUID) (*entities.Destination, error) {
 	var destination *entities.Destination
-	if err := r.db.Where("id = ?", id).First(&destination).Error; err != nil {
+	if err := r.db.Where("id = ?", id).
+		Preload("DestinationMedias").
+		Preload("Categories").
+		Preload("Facilities").
+		Preload("DestinationAddress").
+		Preload("DestinationAddress.Province").
+		First(&destination).Error; err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: "gagal mencari tempat wisata"}
 	}
 	return destination, nil
