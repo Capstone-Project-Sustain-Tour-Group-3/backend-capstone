@@ -1,14 +1,13 @@
 package handlers
 
 import (
-	"net/http"
-
 	"capstone/dto"
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/usecases"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"net/http"
 )
 
 type DestinationHandler struct {

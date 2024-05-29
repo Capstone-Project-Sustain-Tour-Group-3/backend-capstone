@@ -9,7 +9,7 @@ import (
 
 type Province struct {
 	Id uuid.UUID
-	// DestinationAddressId uuid.UUID
+	//DestinationAddressId uuid.UUID
 	Name      string
 	Url       string
 	CreatedAt time.Time
