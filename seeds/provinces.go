@@ -57,3 +57,13 @@ func (s Seed) SeedProvinces() {
 		}
 	}
 }
+
+func getRandomProvince(s Seed) (*entities.Province, error) {
+	var province entities.Province
+
+	if err := s.db.Order("RAND()").First(&province).Error; err != nil {
+		return nil, err
+	}
+
+	return &province, nil
+}
