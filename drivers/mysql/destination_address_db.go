@@ -15,6 +15,8 @@ type DestinationAddress struct {
 	ProvinceId    uuid.UUID      `gorm:"type:varchar(191);index;not null" json:"province_id"`
 	City          string         `gorm:"type:varchar(255);not null" json:"city"`
 	Regency       string         `gorm:"type:varchar(255);not null" json:"regency"`
+	StreetName    string         `gorm:"type:varchar(255);not null" json:"street_name"`
+	PostalCode    string         `gorm:"type:varchar(255);not null" json:"postal_code"`
 	CreatedAt     time.Time      `json:"created_at"`
 	UpdatedAt     time.Time      `json:"updated_at"`
 	DeletedAt     gorm.DeletedAt `json:"deleted_at"`

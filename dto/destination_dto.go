@@ -36,8 +36,32 @@ func ToSearchDestinationsResponse(destinations *[]entities.Destination) *[]Searc
 	return &responses
 }
 
+type UrlImage struct {
+	Id   uuid.UUID `json:"id_media"`
+	Url  string    `json:"url_media"`
+	Type string    `json:"tipe"`
+}
+
+type DestinationAddress struct {
+	Province   string `json:"provinsi"`
+	City       string `json:"kota"`
+	Regency    string `json:"kabupaten"`
+	StreetName string `json:"nama_jalan"`
+	PostalCode string `json:"kode_pos"`
+}
+
+type Category struct {
+	Id   uuid.UUID `json:"id_kategori"`
+	Name string    `json:"nama"`
+}
+
+type Facility struct {
+	Id   uuid.UUID `json:"id_fasilitas"`
+	Name string    `json:"nama"`
+}
+
 type DetailDestinationResponse struct {
-	Destination *entities.Destination `json:"destination"`
+	Destination *entities.Destination `json:"destinasi"`
 }
 
 type DestinationSort string
