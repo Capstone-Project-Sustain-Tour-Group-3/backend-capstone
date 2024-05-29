@@ -121,3 +121,26 @@ func (h *authHandler) Pong(ctx echo.Context) error {
 	}
 	return ctx.JSON(http.StatusOK, id)
 }
+
+func (h *authHandler) ForgotPassword(ctx echo.Context) error {
+	var req dto.ChangePasswordRequest
+	if err := ctx.Bind(&req); err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	if err := helpers.ValidateRequest(req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "failed",
+			Message: "permintaan tidak valid. silakan periksa kembali data yang anda masukkan.",
+			Errors:  err,
+		})
+	}
+	err := h.usecase.ForgotPassword(&req)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "Password berhasil diubah",
+	})
+	return ctx.JSON(http.StatusOK, response)
+}

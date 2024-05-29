@@ -15,13 +15,17 @@ func AuthUserRouter(r *echo.Group) {
 	cacheRepo := repositories.NewCacheRepository()
 	usecase := usecases.NewAuthUsecase(userRepo, cacheRepo)
 	handler := handlers.NewAuthHandler(usecase)
+
 	r.POST("/register", handler.Register)
 	r.POST("/resend-otp", handler.ResendOTP)
 	r.POST("/verify", handler.VerifyEmail)
 	r.POST("/login", handler.Login)
+	r.PUT("/forgot-password", handler.ForgotPassword)
 
+	// Routes that require JWT middleware
 	r.Use(middlewares.JWTMiddleware)
 	r.GET("/pong", handler.Pong)
+
 }
 
 func AuthAdminRouter(r *echo.Group) {
