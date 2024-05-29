@@ -3,6 +3,7 @@ package routers
 import (
 	"capstone/config"
 	"capstone/handlers"
+	"capstone/middlewares"
 	"capstone/repositories"
 	"capstone/usecases"
 
@@ -10,7 +11,7 @@ import (
 )
 
 func DestinationRouter(r *echo.Group) {
-	// r.Use(middlewares.JWTMiddleware)
+	r.Use(middlewares.JWTMiddleware)
 	destinationRepo := repositories.NewDestinationRepository(config.DB)
 	usecase := usecases.NewDestinationUsecase(destinationRepo)
 	handler := handlers.NewDestinationHandler(usecase)
