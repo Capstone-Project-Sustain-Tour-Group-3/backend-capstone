@@ -6,16 +6,17 @@ import (
 	"github.com/google/uuid"
 )
 
-type SearchDestinationsResponse struct {
-	Id       uuid.UUID `json:"id"`
-	Name     string    `json:"nama"`
-	Url      *string   `json:"url_media"`
-	Province string    `json:"provinsi"`
-	City     string    `json:"kota"`
+type SearchDestination struct {
+	Id       uuid.UUID  `json:"id"`
+	Name     string     `json:"nama"`
+	Url      *string    `json:"url_media"`
+	Province string     `json:"provinsi"`
+	City     string     `json:"kota"`
+	Category []Category `json:"kategori"`
 }
 
-func ToSearchDestinationsResponse(destinations *[]entities.Destination) *[]SearchDestinationsResponse {
-	responses := make([]SearchDestinationsResponse, len(*destinations))
+func ToSearchDestinationsResponse(destinations *[]entities.Destination) *[]SearchDestination {
+	responses := make([]SearchDestination, len(*destinations))
 
 	for idx, destination := range *destinations {
 		var url *string
@@ -24,12 +25,13 @@ func ToSearchDestinationsResponse(destinations *[]entities.Destination) *[]Searc
 			url = &destination.DestinationMedias[0].Url
 		}
 
-		responses[idx] = SearchDestinationsResponse{
+		responses[idx] = SearchDestination{
 			Id:       destination.Id,
 			Name:     destination.Name,
 			Url:      url,
 			Province: destination.DestinationAddress.Province.Name,
 			City:     destination.DestinationAddress.City,
+			Category: *ToCategories(&destination),
 		}
 	}
 
@@ -77,17 +79,18 @@ const (
 )
 
 type DetailDestinationResponse struct {
-	Id                 uuid.UUID           `json:"id_destinasi"`
-	Name               string              `json:"nama_destinasi"`
-	OpenTime           string              `json:"jam_buka"`
-	CloseTime          string              `json:"jam_tutup"`
-	EntryPrice         float64             `json:"harga_masuk"`
-	Description        string              `json:"deskripsi"`
-	DestinationAddress *DestinationAddress `json:"alamat_destinasi"`
-	UrlImages          *[]UrlImage         `json:"url_gambar"`
-	UrlVideos          *[]UrlVideo         `json:"url_video"`
-	Categories         *[]Category         `json:"kategori"`
-	Facilities         *[]Facility         `json:"fasilitas"`
+	Id                 uuid.UUID            `json:"id_destinasi"`
+	Name               string               `json:"nama_destinasi"`
+	OpenTime           string               `json:"jam_buka"`
+	CloseTime          string               `json:"jam_tutup"`
+	EntryPrice         float64              `json:"harga_masuk"`
+	Description        string               `json:"deskripsi"`
+	DestinationAddress *DestinationAddress  `json:"alamat_destinasi"`
+	UrlImages          *[]UrlImage          `json:"url_gambar"`
+	UrlVideos          *[]UrlVideo          `json:"url_video"`
+	Categories         *[]Category          `json:"kategori"`
+	Facilities         *[]Facility          `json:"fasilitas"`
+	SimilarDestination *[]SearchDestination `json:"destinasi_serupa"`
 }
 
 func ToUrlImages(destination *entities.Destination) *[]UrlImage {
@@ -121,10 +124,10 @@ func ToUrlVideos(destination *entities.Destination) *[]UrlVideo {
 
 func ToCategories(destination *entities.Destination) *[]Category {
 	var categories []Category
-	for _, category := range *destination.Categories {
+	for _, destinationCategory := range *destination.DestinationCategories {
 		categories = append(categories, Category{
-			Id:   category.Id,
-			Name: category.Category.Name,
+			Id:   destinationCategory.CategoryId,
+			Name: destinationCategory.Category.Name,
 		})
 	}
 	return &categories
@@ -132,17 +135,17 @@ func ToCategories(destination *entities.Destination) *[]Category {
 
 func ToFacilities(destination *entities.Destination) *[]Facility {
 	var facilities []Facility
-	for _, facility := range *destination.Facilities {
+	for _, destinationFacility := range *destination.DestinationFacilities {
 		facilities = append(facilities, Facility{
-			Id:   facility.Id,
-			Name: facility.Facility.Name,
-			Url:  facility.Facility.Url,
+			Id:   destinationFacility.FacilityId,
+			Name: destinationFacility.Facility.Name,
+			Url:  destinationFacility.Facility.Url,
 		})
 	}
 	return &facilities
 }
 
-func ToDetailDestinationResponse(destination *entities.Destination) *DetailDestinationResponse {
+func ToDetailDestinationResponse(destination *entities.Destination, similarDestinations *[]entities.Destination) *DetailDestinationResponse {
 	return &DetailDestinationResponse{
 		Id:          destination.Id,
 		Name:        destination.Name,
@@ -157,9 +160,10 @@ func ToDetailDestinationResponse(destination *entities.Destination) *DetailDesti
 			StreetName: destination.DestinationAddress.StreetName,
 			PostalCode: destination.DestinationAddress.PostalCode,
 		},
-		UrlImages:  ToUrlImages(destination),
-		UrlVideos:  ToUrlVideos(destination),
-		Categories: ToCategories(destination),
-		Facilities: ToFacilities(destination),
+		UrlImages:          ToUrlImages(destination),
+		UrlVideos:          ToUrlVideos(destination),
+		Categories:         ToCategories(destination),
+		Facilities:         ToFacilities(destination),
+		SimilarDestination: ToSearchDestinationsResponse(similarDestinations),
 	}
 }

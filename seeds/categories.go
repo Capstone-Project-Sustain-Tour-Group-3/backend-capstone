@@ -10,9 +10,9 @@ import (
 
 func (s Seed) SeedCategories() {
 	categories := []entities.Category{
-		{Id: uuid.MustParse("eb77b590-b255-4ea1-b11a-d445a259ac41"), Name: "Alam", Url: "https://picsum.photos/300/200"},
-		{Id: uuid.MustParse("eb77b590-b255-4ea1-b11a-d445a259ac42"), Name: "Seni dan Budaya", Url: "https://picsum.photos/300/200"}, //nolint:lll
-		{Id: uuid.MustParse("eb77b590-b255-4ea1-b11a-d445a259ac43"), Name: "Sejarah", Url: "https://picsum.photos/300/200"},
+		{Id: uuid.MustParse("eb77b590-b255-4ea1-b11a-d445a259ac61"), Name: "Alam", Url: "https://picsum.photos/300/200"},
+		{Id: uuid.MustParse("eb77b590-b255-4ea1-b11a-d445a259ac62"), Name: "Seni dan Budaya", Url: "https://picsum.photos/300/200"}, //nolint:lll
+		{Id: uuid.MustParse("eb77b590-b255-4ea1-b11a-d445a259ac63"), Name: "Sejarah", Url: "https://picsum.photos/300/200"},
 	}
 
 	for _, category := range categories {

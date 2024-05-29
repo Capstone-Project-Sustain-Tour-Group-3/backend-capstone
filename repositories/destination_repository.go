@@ -1,12 +1,11 @@
 package repositories
 
 import (
+	"fmt"
 	"strings"
 
 	"capstone/dto"
 	"capstone/entities"
-	"capstone/errorHandlers"
-
 	"github.com/google/uuid"
 
 	"gorm.io/gorm"
@@ -15,6 +14,7 @@ import (
 type IDestinationRepository interface {
 	FindById(id uuid.UUID) (*entities.Destination, error)
 	FindAll(page, limit int, searchQuery, sortQuery string) (*int64, []entities.Destination, error)
+	FindByCategoryIds(ids []uuid.UUID) ([]entities.Destination, error)
 }
 
 type DestinationRepository struct {
@@ -29,13 +29,14 @@ func (r *DestinationRepository) FindById(id uuid.UUID) (*entities.Destination, e
 	var destination *entities.Destination
 	if err := r.db.Where("id = ?", id).
 		Preload("DestinationMedias").
-		Preload("Categories").
-		Preload("Facilities").
+		Preload("DestinationFacilities.Facility").
+		Preload("DestinationCategories.Category").
 		Preload("DestinationAddress").
 		Preload("DestinationAddress.Province").
 		First(&destination).Error; err != nil {
-		return nil, &errorHandlers.InternalServerError{Message: "gagal mencari tempat wisata"}
+		return nil, nil
 	}
+
 	return destination, nil
 }
 
@@ -62,10 +63,9 @@ func (r *DestinationRepository) FindAll(page, limit int, searchQuery, sortQuery 
 	if err := db.Debug().
 		Offset(offset).Limit(limit).
 		Preload("DestinationMedias", "type = ?", "image").
-		Preload("Categories").
-		Preload("Facilities").
 		Preload("DestinationAddress").
 		Preload("DestinationAddress.Province").
+		Preload("DestinationCategories.Category").
 		Find(&destinations).
 		Error; err != nil {
 		return nil, nil, err
@@ -75,4 +75,24 @@ func (r *DestinationRepository) FindAll(page, limit int, searchQuery, sortQuery 
 		return nil, nil, err
 	}
 	return &total, destinations, nil
+}
+
+func (r *DestinationRepository) FindByCategoryIds(ids []uuid.UUID) ([]entities.Destination, error) {
+	var destinations []entities.Destination
+
+	fmt.Println(ids)
+
+	if err := r.db.Model(&entities.Destination{}).
+		Limit(5).
+		Joins("JOIN destination_categories ON destination_categories.destination_id = destinations.id").
+		Where("destination_categories.category_id IN (?)", ids).
+		Preload("DestinationMedias", "type = ?", "image").
+		Preload("DestinationAddress").
+		Preload("DestinationAddress.Province").
+		Preload("DestinationCategories.Category").
+		Find(&destinations).
+		Error; err != nil {
+		return nil, err
+	}
+	return destinations, nil
 }

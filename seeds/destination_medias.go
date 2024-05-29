@@ -38,20 +38,23 @@ func (s Seed) SeedDestinationMedias() {
 	destinations, _ := getAllDestinations(s)
 
 	for idx, destination := range destinations {
-		destinationImages[idx].DestinationId = destination.Id
+		destinationImage := destinationImages[idx]
+		destinationImage.DestinationId = destination.Id
 
-		if err := s.db.Where(entities.DestinationMedia{Id: destinationImages[idx].Id}).
-			FirstOrCreate(&destinationImages).Error; err != nil {
+		if err := s.db.Where(entities.DestinationMedia{Id: destinationImage.Id}).
+			FirstOrCreate(&destinationImage).Error; err != nil {
 			log.Fatalf("failed to create destination image: %v", err)
 		}
 	}
 
 	for idx, destination := range destinations {
-		destinationVideos[idx].DestinationId = destination.Id
+		destinationVideo := destinationVideos[idx]
+		destinationVideo.DestinationId = destination.Id
 
-		if err := s.db.Where(entities.DestinationMedia{Id: destinationVideos[idx].Id}).
-			FirstOrCreate(&destinationVideos).Error; err != nil {
-			log.Fatalf("failed to create destination video: %v", err)
+		if err := s.db.Where(entities.DestinationMedia{Id: destinationVideo.Id}).
+			FirstOrCreate(&destinationVideo).Error; err != nil {
+			log.Fatalf("failed to create destination image: %v", err)
 		}
 	}
+
 }
