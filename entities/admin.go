@@ -7,19 +7,13 @@ import (
 	"gorm.io/gorm"
 )
 
-type User struct {
+type Admin struct {
 	Id              uuid.UUID
 	Email           string
-	Password        string
 	Username        string
-	Fullname        string
-	Bio             string
-	PhoneNumber     string
-	ProfileImageUrl string
-	Gender          string
-	City            string
-	Province        string
-	EmailVerifiedAt *time.Time
+	Password        string
+	ProfileImageURL string
+	Role            string
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	DeletedAt       gorm.DeletedAt

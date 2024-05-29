@@ -5,9 +5,10 @@ type ResponseParams struct {
 	Message     string `json:"message"`
 	Data        any    `json:"data"`
 	IsPaginate  bool   `json:"is_paginate"`
-	TotalData   int    `json:"total_data"`
-	TotalPages  int    `json:"total_pages"`
+	Total       int64  `json:"total"`
+	PerPage     int    `json:"per_page"`
 	CurrentPage int    `json:"current_page"`
+	LastPage    int    `json:"last_page"`
 	IsSort      bool   `json:"is_sort"`
 	Sort        string `json:"sort"`
 }

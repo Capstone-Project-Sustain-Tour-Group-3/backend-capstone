@@ -8,12 +8,14 @@ servers:
   - url: http://localhost:1323/v1
     description: Development Server
 tags:
-  - name: Auth
+  - name: Mobile - Auth
+  - name: Admin - Users
+  - name: Admin - Auth
 paths:
   /auth/register:
     post:
       tags:
-        - Auth
+        - Mobile - Auth
       summary: Registrasi Pengguna
       description: API untuk registrasi pengguna baru.
       requestBody:
@@ -74,9 +76,20 @@ paths:
   /auth/resend-otp:
     post:
       tags:
-        - Auth
+        - Mobile - Auth
       summary: Kirim Ulang OTP
       description: API untuk mengirim ulang OTP.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "user@example.com"
       responses:
         '200':
           description: OTP Berhasil Dikirimkan
@@ -97,10 +110,24 @@ paths:
                       reference_id:
                         type: string
                         example: "WCTp17O4Uu2CZ88O"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Error"
+                  message:
+                    type: string
+                    example: "Invalid email address"
+
   /auth/verify:
       post:
         tags:
-          - Auth
+          - Mobile - Auth
         summary: Verifikasi OTP
         description: API untuk verifikasi OTP.
         requestBody:
@@ -146,7 +173,7 @@ paths:
   /auth/login:
       post:
         tags:
-          - Auth
+          - Mobile - Auth
         summary: Login Pengguna
         description: API untuk login pengguna.
         requestBody:
@@ -208,6 +235,399 @@ paths:
                     message:
                       type: string
                       example: "Email belum terverifikasi"
+  /admin/auth/users:
+    post:
+      tags:
+        - Admin - Auth
+      summary: Admin Login
+      description: API untuk login admin.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "tourease"
+                password:
+                  type: string
+                  example: "12345678"
+      responses:
+        '200':
+          description: Login Successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Success"
+                  message:
+                    type: string
+                    example: "You have successfully logged in"
+                  data:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+                        example: "admintourease"
+                      profile_image:
+                        type: string
+                        example: ""
+                      role:
+                        type: string
+                        example: "admin"
+                      token:
+                        type: string
+                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6ImFhNjJjZDA5LTU0YjUtNGViNC04MjNmLWMzNjI4ZWFlYmQ0MSIsIlVzZXJuYW1lIjoiYWRtaW50b3VyZWFzZSIsIlJvbGUiOiJhZG1pbiIsImV4cCI6MTcxNjkxMTIzMCwiaWF0IjoxNzE2OTA5NDMwLCJuYmYiOjE3MTY5MDk0MzB9.Iesz7CdqiA-5xyJa3I3w2rkZTjC7ZR27FMPz3HwhYOs"
+        '409':
+          description: Account Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Failed"
+                  message:
+                    type: string
+                    example: "Akun tidak ditemukan"
+  /admin/users:
+    get:
+      tags:
+        - Admin - Users
+      summary: Mendapatkan Data User
+      description: API untuk mendapatkan daftar pengguna.
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Data User Ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Success"
+                  message:
+                    type: string
+                    example: "data user berhasil ditemukan"
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: "803f6cc0-e598-4b59-a300-8b8603482d14"
+                        username:
+                          type: string
+                          example: "username"
+                        email:
+                          type: string
+                          example: "email@example.com"
+                        no_telepon:
+                          type: string
+                          example: "081234567890"
+                        jenis_kelamin:
+                          type: string
+                          example: "pria"
+                        kota:
+                          type: string
+                          example: "Jaksel"
+                        provinsi:
+                          type: string
+                          example: "Jakarta"
+                  pagination:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                        example: 4
+                      per_page:
+                        type: integer
+                        example: 10
+                      current_page:
+                        type: integer
+                        example: 1
+                      last_page:
+                        type: integer
+                        example: 1
+    post:
+      tags:
+        - Admin - Users
+      summary: Menambah data user
+      description: API untuk menambah pengguna baru.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "username"
+                password:
+                  type: string
+                  example: "12345678"
+                nama_lengkap:
+                  type: string
+                  example: "nama_lengkap"
+                bio:
+                  type: string
+                  example: "bio"
+                email:
+                  type: string
+                  example: "email3@example.com"
+                no_telepon:
+                  type: string
+                  example: "081234567890"
+                foto_profil:
+                  type: string
+                  example: "img.jpg"
+                jenis_kelamin:
+                  type: string
+                  example: "pria"
+                kota:
+                  type: string
+                  example: "Jaksel"
+                provinsi:
+                  type: string
+                  example: "Jakarta"
+      responses:
+        '201':
+          description: Data User Berhasil Ditambah
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Success"
+                  message:
+                    type: string
+                    example: "data user berhasil ditambah"
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Failed"
+                  message:
+                    type: string
+                    example: "gagal untuk menambah data user"
+  /admin/users/{id}:
+    get:
+      tags:
+        - Admin - Users
+      summary: Get User Detail
+      description: API untuk mendapatkan detail pengguna.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Data User Ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Success"
+                  message:
+                    type: string
+                    example: "data user berhasil ditemukan"
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "803f6cc0-e598-4b59-a300-8b8603482d14"
+                      username:
+                        type: string
+                        example: "username"
+                      nama_lengkap:
+                        type: string
+                        example: "username lengkap"
+                      bio:
+                        type: string
+                        example: "bio"
+                      email:
+                        type: string
+                        example: "email@example.com"
+                      no_telepon:
+                        type: string
+                        example: "081234567890"
+                      foto_profil:
+                        type: string
+                        example: "img.jpg"
+                      jenis_kelamin:
+                        type: string
+                        example: "pria"
+                      kota:
+                        type: string
+                        example: "Jaksel"
+                      provinsi:
+                        type: string
+                        example: "Jakarta"
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Failed"
+                  message:
+                    type: string
+                    example: "Gagal untuk memperbarui data user"
+    put:
+      tags:
+        - Admin - Users
+      summary: Data user diperbarui
+      description: API untuk memperbarui data pengguna.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "username"
+                password:
+                  type: string
+                  example: "12345678"
+                nama_lengkap:
+                  type: string
+                  example: "nama_lengkap"
+                bio:
+                  type: string
+                  example: "bio"
+                email:
+                  type: string
+                  example: "email3@example.com"
+                no_telepon:
+                  type: string
+                  example: "081234567890"
+                foto_profil:
+                  type: string
+                  example: "img.jpg"
+                jenis_kelamin:
+                  type: string
+                  example: "pria"
+                kota:
+                  type: string
+                  example: "Jaksel"
+                provinsi:
+                  type: string
+                  example: "Jakarta"
+      responses:
+        '200':
+          description: Data User Berhasil Diubah
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Success"
+                  message:
+                    type: string
+                    example: "data user berhasil diubah"
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Failed"
+                  message:
+                    type: string
+                    example: "Gagal untuk memperbarui data user"
+    delete:
+      tags:
+        - Admin - Users
+      summary: Delete User
+      description: API untuk menghapus pengguna.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Data User Berhasil Dihapus
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Success"
+                  message:
+                    type: string
+                    example: "data user berhasil dihapus"
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Failed"
+                  message:
+                    type: string
+                    example: "User tidak ditemukan"
+
 components:
   securitySchemes:
     BearerAuth:
