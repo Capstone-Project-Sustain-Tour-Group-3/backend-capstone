@@ -12,13 +12,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type userHandler struct {
+type UserHandler struct {
 	usecase usecases.UserUsecase
 }
 
-func NewUserHandler(usecase usecases.UserUsecase) *userHandler {
-	return &userHandler{usecase}
+func NewUserHandler(usecase usecases.UserUsecase) *UserHandler {
+	return &UserHandler{usecase}
 }
+
 
 func (h *userHandler) FindById(ctx echo.Context) error {
 	id := ctx.Param("id")
@@ -96,6 +97,7 @@ func (h *userHandler) Create(ctx echo.Context) error {
 	return ctx.JSON(http.StatusCreated, response)
 }
 
+
 func (h *userHandler) Update(ctx echo.Context) error {
 	var req dto.UserRequest
 	if err := ctx.Bind(&req); err != nil {
@@ -116,6 +118,7 @@ func (h *userHandler) Update(ctx echo.Context) error {
 	})
 	return ctx.JSON(http.StatusOK, response)
 }
+
 
 func (h *userHandler) Delete(ctx echo.Context) error {
 	id := ctx.Param("id")
