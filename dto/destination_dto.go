@@ -39,3 +39,11 @@ func ToSearchDestinationsResponse(destinations *[]entities.Destination) *[]Searc
 type DetailDestinationResponse struct {
 	Destination *entities.Destination `json:"destination"`
 }
+
+type DestinationSort string
+
+const (
+	Terbaru DestinationSort = "terbaru"
+	Terlama DestinationSort = "terlama"
+	Populer DestinationSort = "populer"
+)

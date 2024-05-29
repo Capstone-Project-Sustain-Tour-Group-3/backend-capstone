@@ -1,12 +1,13 @@
 package handlers
 
 import (
+	"fmt"
+	"net/http"
+
 	"capstone/dto"
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/usecases"
-	"fmt"
-	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -111,6 +112,12 @@ func (h *authHandler) Login(ctx echo.Context) error {
 }
 
 func (h *authHandler) Pong(ctx echo.Context) error {
-	id := ctx.Get("userId").(*uuid.UUID)
+	id, ok := ctx.Get("userId").(*uuid.UUID)
+	if !ok {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "failed",
+			Message: "permintaan tidak valid. silakan periksa kembali data yang anda masukkan.",
+		})
+	}
 	return ctx.JSON(http.StatusOK, id)
 }

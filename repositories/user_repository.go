@@ -1,8 +1,9 @@
 package repositories
 
 import (
-	"capstone/entities"
 	"strings"
+
+	"capstone/entities"
 
 	"github.com/google/uuid"
 

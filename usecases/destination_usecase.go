@@ -2,13 +2,14 @@ package usecases
 
 import (
 	"capstone/dto"
+	"capstone/errorHandlers"
 	"capstone/repositories"
 
 	"github.com/google/uuid"
 )
 
 type IDestinationUsecase interface {
-	SearchDestinations() (*[]dto.SearchDestinationsResponse, error)
+	SearchDestinations(page, limit int, searchQuery, sortQuery string) (*int64, *[]dto.SearchDestinationsResponse, error)
 	DetailDestination(id uuid.UUID) (*dto.DetailDestinationResponse, error)
 }
 
@@ -20,13 +21,13 @@ func NewDestinationUsecase(destinationRepo repositories.IDestinationRepository) 
 	return &DestinationUsecase{destinationRepo}
 }
 
-func (uc *DestinationUsecase) SearchDestinations() (*[]dto.SearchDestinationsResponse, error) {
-	destinations, err := uc.destinationRepo.FindAll()
+func (uc *DestinationUsecase) SearchDestinations(page, limit int, searchQuery, sortQuery string) (*int64, *[]dto.SearchDestinationsResponse, error) {
+	total, destinations, err := uc.destinationRepo.FindAll(page, limit, searchQuery, sortQuery)
 	if err != nil {
-		return nil, err
+		return nil, nil, &errorHandlers.InternalServerError{Message: "Gagal untuk menemukan data destinasi"}
 	}
 	response := dto.ToSearchDestinationsResponse(&destinations)
-	return response, nil
+	return total, response, nil
 }
 
 func (uc *DestinationUsecase) DetailDestination(id uuid.UUID) (*dto.DetailDestinationResponse, error) {
