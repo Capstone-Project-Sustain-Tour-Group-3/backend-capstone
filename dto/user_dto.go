@@ -7,16 +7,16 @@ import (
 )
 
 type UserRequest struct {
-	Username     string `json:"username"`
-	Password     string `json:"password"`
-	NamaLengkap  string `json:"nama_lengkap"`
-	Email        string `json:"email"`
-	Bio          string `json:"bio"`
-	NoTelepon    string `json:"no_telepon"`
-	FotoProfil   string `json:"foto_profil"`
-	JenisKelamin string `json:"jenis_kelamin"`
-	Kota         string `json:"kota"`
-	Provinsi     string `json:"provinsi"`
+	Username     string `json:"username" validate:"required,max=16"`
+	Password     string `json:"password" validate:"required,min=8"`
+	NamaLengkap  string `json:"nama_lengkap" validate:"required"`
+	Email        string `json:"email" validate:"required,email"`
+	Bio          string `json:"bio" validate:"required"`
+	NoTelepon    string `json:"no_telepon" validate:"required,number,startswith=08,min=11,max=13"`
+	FotoProfil   string `json:"foto_profil" validate:"required"`
+	JenisKelamin string `json:"jenis_kelamin" validate:"required"`
+	Kota         string `json:"kota" validate:"required"`
+	Provinsi     string `json:"provinsi" validate:"required"`
 }
 
 type findByIdResponse struct {

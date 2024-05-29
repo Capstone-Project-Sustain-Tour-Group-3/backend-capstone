@@ -171,6 +171,55 @@ paths:
                     message:
                       type: string
                       example: "Kode OTP tidak cocok. Mohon periksa kembali dan masukkan dengan benar."
+  /auth/forgot-password:
+    put:
+      tags:
+        - Mobile - Auth
+      summary: Reset Password
+      description: API untuk mengatur ulang kata sandi pengguna.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ref_id:
+                  type: string
+                  example: "gCGBw4IB8boTMG5B"
+                password:
+                  type: string
+                  example: "password"
+                konfirmasi_password:
+                  type: string
+                  example: "password"
+      responses:
+        '200':
+          description: Password Berhasil Diubah
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Success"
+                  message:
+                    type: string
+                    example: "Password berhasil diubah"
+        '400':
+          description: Password Tidak Cocok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Failed"
+                  message:
+                    type: string
+                    example: "Password tidak cocok"
   /auth/login:
       post:
         tags:
