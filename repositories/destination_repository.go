@@ -50,7 +50,7 @@ func (r *DestinationRepository) FindAll(page, limit int, searchQuery, sortQuery 
 	case dto.DestinationSort(sortQuery) == dto.Terlama:
 		db = db.Order("created_at ASC")
 	case dto.DestinationSort(sortQuery) == dto.Populer:
-		db = db.Order("view_count DESC")
+		db = db.Order("visit_count DESC")
 	}
 
 	if err := db.Debug().
