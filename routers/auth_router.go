@@ -25,7 +25,6 @@ func AuthUserRouter(r *echo.Group) {
 	// Routes that require JWT middleware
 	r.Use(middlewares.JWTMiddleware)
 	r.GET("/pong", handler.Pong)
-
 }
 
 func AuthAdminRouter(r *echo.Group) {

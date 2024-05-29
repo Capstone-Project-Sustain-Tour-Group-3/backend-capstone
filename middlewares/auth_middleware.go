@@ -28,6 +28,7 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		c.Set("userId", id)
+		c.Set("role", claims.Role)
 		return next(c)
 	}
 }
