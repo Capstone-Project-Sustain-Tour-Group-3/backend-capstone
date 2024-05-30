@@ -71,7 +71,7 @@ func (uc *userUsecase) Create(request *dto.UserRequest) error {
 		Province:        request.Provinsi,
 		EmailVerifiedAt: nil,
 	}
-	if err := uc.repository.Create(user); err != nil {
+	if err = uc.repository.Create(user); err != nil {
 		return &errorHandlers.InternalServerError{Message: "Gagal untuk menambah data user"}
 	}
 	return nil
@@ -100,7 +100,6 @@ func (uc *userUsecase) Update(id uuid.UUID, request *dto.UserRequest) error {
 	password, err := helpers.HashPassword(request.Password)
 	if err != nil {
 		return &errorHandlers.InternalServerError{Message: "Gagal hashing password"}
-
 	}
 
 	user.Username = request.Username
@@ -114,7 +113,7 @@ func (uc *userUsecase) Update(id uuid.UUID, request *dto.UserRequest) error {
 	user.City = request.Kota
 	user.Province = request.Provinsi
 
-	if err := uc.repository.Update(user); err != nil {
+	if err = uc.repository.Update(user); err != nil {
 		return &errorHandlers.InternalServerError{Message: "Gagal untuk memperbarui data user"}
 	}
 	return nil

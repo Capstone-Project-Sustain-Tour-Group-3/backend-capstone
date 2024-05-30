@@ -16,10 +16,10 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusUnauthorized, "Token tidak terisi")
 		}
 
-		if !strings.HasPrefix(authHeader, "bearer ") {
+		if !strings.HasPrefix(authHeader, "Bearer ") {
 			return echo.NewHTTPError(http.StatusBadRequest, "Format token tidak valid, gunakan bearer token")
 		}
-		tokenStr := strings.TrimPrefix(authHeader, "bearer ")
+		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
 
 		claims, err := helpers.ParseJWT(tokenStr)
 		id := &claims.Id
@@ -28,6 +28,7 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		c.Set("userId", id)
+		c.Set("role", claims.Role)
 		return next(c)
 	}
 }

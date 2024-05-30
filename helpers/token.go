@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"capstone/entities"
@@ -68,7 +67,6 @@ func GenerateAccessToken(user interface{}) (string, error) {
 
 func ParseJWT(tokenStr string) (*JWTClaims, error) {
 	accessTokenSecret := []byte(viper.GetString("ACCESS_TOKEN_SECRET"))
-	fmt.Println(accessTokenSecret)
 	token, err := jwt.ParseWithClaims(tokenStr, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return accessTokenSecret, nil
 	})

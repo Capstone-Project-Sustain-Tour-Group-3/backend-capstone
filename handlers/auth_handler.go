@@ -1,12 +1,12 @@
 package handlers
 
 import (
+	"net/http"
+
 	"capstone/dto"
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/usecases"
-	"fmt"
-	"net/http"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -36,7 +36,6 @@ func (h *authHandler) Register(ctx echo.Context) error {
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
-	fmt.Println(refId)
 	response := helpers.Response(dto.ResponseParams{
 		StatusCode: http.StatusCreated,
 		Message:    "Registrasi berhasil!",
@@ -111,6 +110,35 @@ func (h *authHandler) Login(ctx echo.Context) error {
 }
 
 func (h *authHandler) Pong(ctx echo.Context) error {
-	id := ctx.Get("userId").(*uuid.UUID)
+	id, ok := ctx.Get("userId").(*uuid.UUID)
+	if !ok {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "failed",
+			Message: "permintaan tidak valid. silakan periksa kembali data yang anda masukkan.",
+		})
+	}
 	return ctx.JSON(http.StatusOK, id)
+}
+
+func (h *authHandler) ForgotPassword(ctx echo.Context) error {
+	var req dto.ChangePasswordRequest
+	if err := ctx.Bind(&req); err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	if err := helpers.ValidateRequest(req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "failed",
+			Message: "permintaan tidak valid. silakan periksa kembali data yang anda masukkan.",
+			Errors:  err,
+		})
+	}
+	err := h.usecase.ForgotPassword(&req)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "Password berhasil diubah",
+	})
+	return ctx.JSON(http.StatusOK, response)
 }

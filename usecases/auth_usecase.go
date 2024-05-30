@@ -1,13 +1,13 @@
 package usecases
 
 import (
+	"time"
+
 	"capstone/dto"
 	"capstone/entities"
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/repositories"
-	"fmt"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -17,6 +17,7 @@ type AuthUsecase interface {
 	ResendOTP(email string) (*dto.RegisterResponse, error)
 	VerifyEmail(request *dto.VerifyEmailRequest) error
 	Login(request *dto.LoginRequest) (*dto.LoginResponse, error)
+	ForgotPassword(request *dto.ChangePasswordRequest) error
 }
 
 type authUsecase struct {
@@ -53,15 +54,14 @@ func (uc *authUsecase) Register(request *dto.RegisterRequest) (*dto.RegisterResp
 	ref := helpers.GenerateReferenceId()
 	otp := helpers.GenerateOTP()
 
-	fmt.Println("otp", otp)
 	uc.cacheRepo.Set(ref, otp)
-	uc.cacheRepo.Set("email", user.Email)
+	uc.cacheRepo.Set(ref+"_email", request.Email)
 	err = uc.userRepo.Create(user)
 	if err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: "Gagal untuk mendaftar"}
 	}
 
-	if err := helpers.SendOTP(user.Email, user.Fullname, otp); err != nil {
+	if err = helpers.SendOTP(user.Email, user.Fullname, otp); err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: "Gagal mengirimkan email"}
 	}
 	response := dto.RegisterResponse{ReferenceId: ref}
@@ -76,7 +76,7 @@ func (uc *authUsecase) ResendOTP(email string) (*dto.RegisterResponse, error) {
 	otp := helpers.GenerateOTP()
 	referenceId := helpers.GenerateReferenceId()
 	uc.cacheRepo.Set(referenceId, otp)
-	uc.cacheRepo.Set("email", email)
+	uc.cacheRepo.Set(referenceId+"_email", user.Email)
 
 	if err := helpers.SendOTP(user.Email, user.Fullname, otp); err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: "Gagal mengirimkan email"}
@@ -87,18 +87,16 @@ func (uc *authUsecase) ResendOTP(email string) (*dto.RegisterResponse, error) {
 
 func (uc *authUsecase) VerifyEmail(request *dto.VerifyEmailRequest) error {
 	cachedOTP, exists := uc.cacheRepo.Get(request.RefId)
-	fmt.Println(cachedOTP, exists)
 	if !exists {
 		return &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
 	}
-	fmt.Println("get otp", cachedOTP)
 
 	if cachedOTP != request.OTP {
 		return &errorHandlers.BadRequestError{Message: "Kode OTP tidak cocok. Mohon periksa kembali dan masukkan dengan benar."}
 	}
 
 	now := time.Now()
-	email, _ := uc.cacheRepo.Get("email")
+	email, _ := uc.cacheRepo.Get(request.RefId + "_email")
 	user, _ := uc.userRepo.FindByEmail(email)
 	if user == nil {
 		return &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
@@ -120,7 +118,7 @@ func (uc *authUsecase) Login(request *dto.LoginRequest) (*dto.LoginResponse, err
 	if user.EmailVerifiedAt == nil {
 		return nil, &errorHandlers.UnAuthorizedError{Message: "Email belum terverifikasi"}
 	}
-	if err := helpers.VerifyPassword(user.Password, request.Password); err != nil {
+	if err = helpers.VerifyPassword(user.Password, request.Password); err != nil {
 		return nil, &errorHandlers.BadRequestError{Message: "Email atau password salah"}
 	}
 
@@ -133,4 +131,26 @@ func (uc *authUsecase) Login(request *dto.LoginRequest) (*dto.LoginResponse, err
 		Token: accessToken,
 	}
 	return response, nil
+}
+
+func (uc *authUsecase) ForgotPassword(request *dto.ChangePasswordRequest) error {
+	email, _ := uc.cacheRepo.Get(request.RefId + "_email")
+
+	user, _ := uc.userRepo.FindByEmail(email)
+	if user == nil {
+		return &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
+	}
+	if request.Password != request.KonfirmasiPassword {
+		return &errorHandlers.BadRequestError{Message: "Password tidak cocok"}
+	}
+	password, err := helpers.HashPassword(request.Password)
+	if err != nil {
+		return &errorHandlers.InternalServerError{Message: "Gagal hashing password"}
+	}
+	user.Password = password
+	_, err = uc.userRepo.Update(user)
+	if err != nil {
+		return &errorHandlers.InternalServerError{Message: "Gagal mengubah password"}
+	}
+	return nil
 }

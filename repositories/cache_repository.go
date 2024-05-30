@@ -22,6 +22,6 @@ func (c *CacheRepository) Set(name, val string) {
 func (c *CacheRepository) Get(name string) (string, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
-	otp, exists := c.data[name]
-	return otp, exists
+	res, exists := c.data[name]
+	return res, exists
 }
