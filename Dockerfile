@@ -24,4 +24,4 @@ EXPOSE 8080
 
 USER nonroot:nonroot
 
-ENTRYPOINT [ "/tourease" ]
+ENTRYPOINT [ "/tourease", "--seed" ]
