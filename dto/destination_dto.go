@@ -78,6 +78,14 @@ const (
 	Populer DestinationSort = "populer"
 )
 
+type DestinationFilter string
+
+const (
+	Alam          DestinationFilter = "Alam"
+	SeniDanBudaya DestinationFilter = "Seni dan Budaya"
+	Sejarah       DestinationFilter = "Sejarah"
+)
+
 type DetailDestinationResponse struct {
 	Id                 uuid.UUID            `json:"id_destinasi"`
 	Name               string               `json:"nama_destinasi"`

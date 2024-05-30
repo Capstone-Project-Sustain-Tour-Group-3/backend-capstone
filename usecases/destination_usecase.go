@@ -9,7 +9,7 @@ import (
 )
 
 type IDestinationUsecase interface {
-	SearchDestinations(page, limit int, searchQuery, sortQuery string) (*int64, *[]dto.SearchDestination, error)
+	SearchDestinations(page, limit int, searchQuery, sortQuery, filterQuery string) (string, *int64, *[]dto.SearchDestination, error)
 	DetailDestination(id uuid.UUID) (*dto.DetailDestinationResponse, error)
 }
 
@@ -21,13 +21,13 @@ func NewDestinationUsecase(destinationRepo repositories.IDestinationRepository) 
 	return &DestinationUsecase{destinationRepo}
 }
 
-func (uc *DestinationUsecase) SearchDestinations(page, limit int, searchQuery, sortQuery string) (*int64, *[]dto.SearchDestination, error) {
-	total, destinations, err := uc.destinationRepo.FindAll(page, limit, searchQuery, sortQuery)
+func (uc *DestinationUsecase) SearchDestinations(page, limit int, searchQuery, sortQuery, filterQuery string) (string, *int64, *[]dto.SearchDestination, error) {
+	categoryName, total, destinations, err := uc.destinationRepo.FindAll(page, limit, searchQuery, sortQuery, filterQuery)
 	if err != nil {
-		return nil, nil, &errorHandlers.InternalServerError{Message: "Gagal untuk menemukan data destinasi"}
+		return categoryName, nil, nil, &errorHandlers.InternalServerError{Message: "Gagal untuk menemukan data destinasi"}
 	}
 	response := dto.ToSearchDestinationsResponse(&destinations)
-	return total, response, nil
+	return categoryName, total, response, nil
 }
 
 func (uc *DestinationUsecase) DetailDestination(id uuid.UUID) (*dto.DetailDestinationResponse, error) {
@@ -42,7 +42,6 @@ func (uc *DestinationUsecase) DetailDestination(id uuid.UUID) (*dto.DetailDestin
 	}
 
 	similarDestinations, err := uc.destinationRepo.FindByCategoryIds(categoryIds)
-
 	if err != nil {
 		return nil, err
 	}

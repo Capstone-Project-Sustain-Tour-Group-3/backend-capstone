@@ -11,6 +11,8 @@ type ResponseParams struct {
 	LastPage    int    `json:"last_page"`
 	IsSort      bool   `json:"is_sort"`
 	Sort        string `json:"sort"`
+	IsFilter    bool   `json:"is_filter"`
+	Filter      string `json:"filter"`
 }
 
 type ResponseError struct {

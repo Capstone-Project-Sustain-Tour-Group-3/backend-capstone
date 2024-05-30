@@ -33,8 +33,9 @@ func (h *DestinationHandler) SearchDestinations(ctx echo.Context) error {
 	}
 	searchQuery := ctx.QueryParam("search")
 	sortQuery := ctx.QueryParam("sort")
+	filterQuery := ctx.QueryParam("filter")
 
-	totalPtr, destinations, err := h.usecase.SearchDestinations(page, limit, searchQuery, sortQuery)
+	categoryName, totalPtr, destinations, err := h.usecase.SearchDestinations(page, limit, searchQuery, sortQuery, filterQuery)
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
@@ -56,6 +57,8 @@ func (h *DestinationHandler) SearchDestinations(ctx echo.Context) error {
 		LastPage:    lastPage,
 		IsSort:      true,
 		Sort:        sortQuery,
+		IsFilter:    true,
+		Filter:      categoryName,
 	})
 
 	return ctx.JSON(http.StatusOK, response)

@@ -56,5 +56,4 @@ func (s Seed) SeedDestinationMedias() {
 			log.Fatalf("failed to create destination image: %v", err)
 		}
 	}
-
 }
