@@ -1,7 +1,6 @@
 package usecases
 
 import (
-	"fmt"
 	"time"
 
 	"capstone/dto"
@@ -136,7 +135,7 @@ func (uc *authUsecase) Login(request *dto.LoginRequest) (*dto.LoginResponse, err
 
 func (uc *authUsecase) ForgotPassword(request *dto.ChangePasswordRequest) error {
 	email, _ := uc.cacheRepo.Get(request.RefId + "_email")
-	fmt.Println("email", email)
+
 	user, _ := uc.userRepo.FindByEmail(email)
 	if user == nil {
 		return &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}

@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/labstack/echo/v4"
@@ -14,7 +13,7 @@ func RoleMiddleware(roles ...string) echo.MiddlewareFunc {
 			if !ok {
 				return echo.NewHTTPError(http.StatusInternalServerError, "Gagal mendapatkan role")
 			}
-			fmt.Println(userRole)
+
 			for _, role := range roles {
 				if userRole == role {
 					return next(c)
