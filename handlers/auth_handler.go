@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"capstone/dto"
@@ -37,7 +36,6 @@ func (h *authHandler) Register(ctx echo.Context) error {
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
-	fmt.Println(refId)
 	response := helpers.Response(dto.ResponseParams{
 		StatusCode: http.StatusCreated,
 		Message:    "Registrasi berhasil!",

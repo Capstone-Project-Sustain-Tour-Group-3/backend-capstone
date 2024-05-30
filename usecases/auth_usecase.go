@@ -55,7 +55,6 @@ func (uc *authUsecase) Register(request *dto.RegisterRequest) (*dto.RegisterResp
 	ref := helpers.GenerateReferenceId()
 	otp := helpers.GenerateOTP()
 
-	fmt.Println("otp", otp)
 	uc.cacheRepo.Set(ref, otp)
 	uc.cacheRepo.Set(ref+"_email", request.Email)
 	err = uc.userRepo.Create(user)
@@ -89,11 +88,9 @@ func (uc *authUsecase) ResendOTP(email string) (*dto.RegisterResponse, error) {
 
 func (uc *authUsecase) VerifyEmail(request *dto.VerifyEmailRequest) error {
 	cachedOTP, exists := uc.cacheRepo.Get(request.RefId)
-	fmt.Println(cachedOTP, exists)
 	if !exists {
 		return &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
 	}
-	fmt.Println("get otp", cachedOTP)
 
 	if cachedOTP != request.OTP {
 		return &errorHandlers.BadRequestError{Message: "Kode OTP tidak cocok. Mohon periksa kembali dan masukkan dengan benar."}
