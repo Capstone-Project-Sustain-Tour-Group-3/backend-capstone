@@ -710,6 +710,12 @@ paths:
               - populer
               - terlama
               - terbaru
+        - name: filter
+          in: query
+          required: false
+          schema:
+            type: string
+            description: filter berdasarkan kategori (masukkan id category)
       security:
         - BearerAuth: [ ]
       responses:
@@ -762,6 +768,9 @@ paths:
                   sort:
                     type: string
                     example: "populer"
+                  filter:
+                    type: string
+                    example: "Alam"
   /destinations/{id}:
     get:
       summary: Mendapatkan destinasi berdasarkan ID
@@ -774,6 +783,8 @@ paths:
           schema:
             type: string
           description: ID dari destinasi
+      security:
+        - BearerAuth: [ ]
       responses:
         '200':
           description: Berhasil mendapatkan destinasi
@@ -785,21 +796,11 @@ paths:
                   status:
                     type: string
                     example: "Success"
+                  message:
+                    type: string
+                    example: "berhasil menampilkan destinasi"
                   data:
-                    type: object
-                    properties:
-                      id:
-                        type: string
-                        example: "306d305e-3359-4884-8d38-89c04e8adea6"
-                      nama:
-                        type: string
-                        example: "Kawah Ijen"
-                      url_media:
-                        type: string
-                        nullable: true
-                        example: "https://picsum.photos/300/200"
-                      provinsi:
-                        type: string
+                    $ref: '#/components/schemas/DestinationResponse'
         '404':
           description: Destinasi tidak ditemukan
           content:
@@ -830,6 +831,144 @@ components:
         last_page:
           type: integer
           example: 1
+
+    DestinationAddress:
+      type: object
+      properties:
+        provinsi:
+          type: string
+          example: "Sumatera Utara"
+        kota:
+          type: string
+          example: "Jakarta"
+        kabupaten:
+          type: string
+          example: "Jakarta Pusat"
+        nama_jalan:
+          type: string
+          example: "Jalan MH Thamrin"
+        kode_pos:
+          type: string
+          example: "10110"
+
+    UrlImage:
+      type: object
+      properties:
+        id_media:
+          type: string
+          example: "1bde58e3-ef19-4daa-9df7-084ba5d3e941"
+        url_media:
+          type: string
+          example: "https://picsum.photos/300/200"
+        tipe:
+          type: string
+          example: "image"
+
+    UrlVideo:
+      type: object
+      properties:
+        id_media:
+          type: string
+          example: "1bde58e3-ef19-4daa-9df7-084ba5d3e931"
+        url_media:
+          type: string
+          example: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.video"
+        tipe:
+          type: string
+          example: "video"
+        judul:
+          type: string
+          example: "Tears of Steel 1"
+
+    Category:
+      type: object
+      properties:
+        id_kategori:
+          type: string
+          example: "eb77b590-b255-4ea1-b11a-d445a259ac41"
+        nama:
+          type: string
+          example: "Alam"
+
+    Facility:
+      type: object
+      properties:
+        id_fasilitas:
+          type: string
+          example: "515cb2da-3361-48b8-99fd-bd894828efd3"
+        nama:
+          type: string
+          example: "Area Parkir"
+        url_logo:
+          type: string
+          example: "https://picsum.photos/300/200"
+
+    SimilarDestination:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "306d305e-3359-4884-8d38-89c04e8adea6"
+        nama:
+          type: string
+          example: "Kawah Ijen"
+        url_media:
+          type: string
+          example: "https://picsum.photos/300/200"
+        provinsi:
+          type: string
+          example: "Sumatera Utara"
+        kota:
+          type: string
+          example: "Jakarta"
+        kategori:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+
+    DestinationResponse:
+      type: object
+      properties:
+        id_destinasi:
+          type: string
+          example: "306d305e-3359-4884-8d38-89c04e8adea6"
+        nama_destinasi:
+          type: string
+          example: "Kawah Ijen"
+        jam_buka:
+          type: string
+          example: "08:00"
+        jam_tutup:
+          type: string
+          example: "17:00"
+        harga_masuk:
+          type: integer
+          example: 100000
+        deskripsi:
+          type: string
+          example: "Kawah Ijen adalah sebuah kompleks gunung berapi di Banyuwangi, Jawa Timur, Indonesia."
+        alamat_destinasi:
+          $ref: '#/components/schemas/DestinationAddress'
+        url_gambar:
+          type: array
+          items:
+            $ref: '#/components/schemas/UrlImage'
+        url_video:
+          type: array
+          items:
+            $ref: '#/components/schemas/UrlVideo'
+        kategori:
+          type: array
+          items:
+            $ref: '#/components/schemas/Category'
+        fasilitas:
+          type: array
+          items:
+            $ref: '#/components/schemas/Facility'
+        destinasi_serupa:
+          type: array
+          items:
+            $ref: '#/components/schemas/SimilarDestination'
   securitySchemes:
     BearerAuth:
       type: http

@@ -5,7 +5,6 @@ import (
 
 	"capstone/dto"
 	"capstone/entities"
-	"capstone/errorHandlers"
 
 	"github.com/google/uuid"
 
@@ -14,7 +13,8 @@ import (
 
 type IDestinationRepository interface {
 	FindById(id uuid.UUID) (*entities.Destination, error)
-	FindAll(page, limit int, searchQuery, sortQuery string) (*int64, []entities.Destination, error)
+	FindAll(page, limit int, searchQuery, sortQuery, filterQuery string) (string, *int64, []entities.Destination, error)
+	FindByCategoryIds(ids []uuid.UUID) ([]entities.Destination, error)
 }
 
 type DestinationRepository struct {
@@ -27,13 +27,20 @@ func NewDestinationRepository(db *gorm.DB) *DestinationRepository {
 
 func (r *DestinationRepository) FindById(id uuid.UUID) (*entities.Destination, error) {
 	var destination *entities.Destination
-	if err := r.db.Where("id = ?", id).First(&destination).Error; err != nil {
-		return nil, &errorHandlers.InternalServerError{Message: "gagal mencari tempat wisata"}
+	if err := r.db.Where("id = ?", id).
+		Preload("DestinationMedias").
+		Preload("DestinationFacilities.Facility").
+		Preload("DestinationCategories.Category").
+		Preload("DestinationAddress").
+		Preload("DestinationAddress.Province").
+		First(&destination).Error; err != nil {
+		return nil, err
 	}
+
 	return destination, nil
 }
 
-func (r *DestinationRepository) FindAll(page, limit int, searchQuery, sortQuery string) (*int64, []entities.Destination, error) {
+func (r *DestinationRepository) FindAll(page, limit int, searchQuery, sortQuery, filterQuery string) (string, *int64, []entities.Destination, error) {
 	var destinations []entities.Destination
 	var total int64
 	offset := (page - 1) * limit
@@ -53,20 +60,55 @@ func (r *DestinationRepository) FindAll(page, limit int, searchQuery, sortQuery 
 		db = db.Order("visit_count DESC")
 	}
 
+	var category entities.Category
+	var filterName string
+
+	if filterQuery != "" {
+		db = db.Joins("JOIN destination_categories ON destination_categories.destination_id = destinations.id").
+			Where("destination_categories.category_id = ?", filterQuery)
+		// Group("destinations.id")
+
+		if err := r.db.Model(&entities.Category{}).
+			Select("name").
+			Where("id = ?", filterQuery).
+			First(&category).Error; err != nil {
+			return filterName, nil, nil, err
+		}
+
+		filterName = category.Name
+	}
+
 	if err := db.Debug().
 		Offset(offset).Limit(limit).
 		Preload("DestinationMedias", "type = ?", "image").
-		Preload("Categories").
-		Preload("Facilities").
 		Preload("DestinationAddress").
 		Preload("DestinationAddress.Province").
+		Preload("DestinationCategories.Category").
 		Find(&destinations).
 		Error; err != nil {
-		return nil, nil, err
+		return filterName, nil, nil, err
 	}
 
 	if err := db.Count(&total).Error; err != nil {
-		return nil, nil, err
+		return filterName, nil, nil, err
 	}
-	return &total, destinations, nil
+	return filterName, &total, destinations, nil
+}
+
+func (r *DestinationRepository) FindByCategoryIds(ids []uuid.UUID) ([]entities.Destination, error) {
+	var destinations []entities.Destination
+
+	if err := r.db.Model(&entities.Destination{}).
+		Limit(5).
+		Joins("JOIN destination_categories ON destination_categories.destination_id = destinations.id").
+		Where("destination_categories.category_id IN (?)", ids).
+		Preload("DestinationMedias", "type = ?", "image").
+		Preload("DestinationAddress").
+		Preload("DestinationAddress.Province").
+		Preload("DestinationCategories.Category").
+		Find(&destinations).
+		Error; err != nil {
+		return nil, err
+	}
+	return destinations, nil
 }

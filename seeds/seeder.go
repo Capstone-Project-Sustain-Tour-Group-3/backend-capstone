@@ -60,10 +60,10 @@ func RunSeeder() {
 		"SeedFacilities",
 		"SeedProvinces",
 		"SeedDestinations",
-		"SeedDestinationMedias",
 		"SeedDestinationCategories",
 		"SeedDestinationFacilities",
 		"SeedDestinationAddresses",
+		"SeedDestinationMedias",
 	}
 
 	Execute(config.DB, methodList...)

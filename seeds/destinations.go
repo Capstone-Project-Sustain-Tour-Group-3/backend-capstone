@@ -33,16 +33,6 @@ func (s Seed) SeedDestinations() {
 	}
 }
 
-func getRandomDestination(s Seed) (*entities.Destination, error) {
-	var destination entities.Destination
-
-	if err := s.db.Order("RAND()").First(&destination).Error; err != nil {
-		return nil, err
-	}
-
-	return &destination, nil
-}
-
 func getAllDestinations(s Seed) ([]entities.Destination, error) {
 	var destinations []entities.Destination
 

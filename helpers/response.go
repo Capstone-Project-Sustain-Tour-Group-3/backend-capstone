@@ -30,6 +30,15 @@ type ResponseWithSort struct {
 	Sort       string   `json:"sort"`
 }
 
+type ResponseWithFilter struct {
+	Status     string   `json:"status"`
+	Message    string   `json:"message"`
+	Data       any      `json:"data"`
+	Pagination Paginate `json:"pagination"`
+	Sort       string   `json:"sort"`
+	Filter     string   `json:"filter"`
+}
+
 type ResponseWithoutData struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
@@ -62,6 +71,17 @@ func generateResponseWithSort(status, message string, data any, paginate Paginat
 	}
 }
 
+func generateResponseWithFilter(status, message string, data any, paginate Paginate, sort, filter string) ResponseWithFilter {
+	return ResponseWithFilter{
+		Status:     status,
+		Message:    message,
+		Data:       data,
+		Pagination: paginate,
+		Sort:       sort,
+		Filter:     filter,
+	}
+}
+
 func generateResponseWithoutData(status, message string) ResponseWithoutData {
 	return ResponseWithoutData{
 		Status:  status,
@@ -77,21 +97,35 @@ func Response(param dto.ResponseParams) any {
 		status = "Failed"
 	}
 
-	if param.Data != nil {
-		if param.IsPaginate {
-			paginate := Paginate{
-				Total:       param.Total,
-				PerPage:     param.PerPage,
-				CurrentPage: param.CurrentPage,
-				LastPage:    param.LastPage,
-			}
-			if param.IsSort {
-				sort := param.Sort
-				return generateResponseWithSort(status, param.Message, param.Data, paginate, sort)
-			}
-			return generateResponseWithPaginate(status, param.Message, param.Data, paginate)
-		}
-		return generateResponseWithData(status, param.Message, param.Data)
+	if param.Data == nil {
+		return generateResponseWithoutData(status, param.Message)
 	}
-	return generateResponseWithoutData(status, param.Message)
+
+	if param.IsPaginate {
+		paginate := Paginate{
+			Total:       param.Total,
+			PerPage:     param.PerPage,
+			CurrentPage: param.CurrentPage,
+			LastPage:    param.LastPage,
+		}
+		return handlePaginateResponse(status, param, paginate)
+	}
+
+	return generateResponseWithData(status, param.Message, param.Data)
+}
+
+func handlePaginateResponse(status string, param dto.ResponseParams, paginate Paginate) any {
+	if param.IsSort {
+		return handleSortResponse(status, param, paginate)
+	}
+	return generateResponseWithPaginate(status, param.Message, param.Data, paginate)
+}
+
+func handleSortResponse(status string, param dto.ResponseParams, paginate Paginate) any {
+	sort := param.Sort
+	if param.IsFilter {
+		filter := param.Filter
+		return generateResponseWithFilter(status, param.Message, param.Data, paginate, sort, filter)
+	}
+	return generateResponseWithSort(status, param.Message, param.Data, paginate, sort)
 }
