@@ -1,7 +1,7 @@
 package dto
 
 type ChatbotRequest struct {
-	Question string `json:"question" validate:"required"`
+	Message string `json:"message" validate:"required"`
 }
 
 type ChatbotResponse struct {
