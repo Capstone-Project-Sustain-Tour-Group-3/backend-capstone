@@ -1,6 +1,7 @@
 package usecases
 
 import (
+	"strings"
 	"time"
 
 	"capstone/dto"
@@ -17,6 +18,8 @@ type AuthUsecase interface {
 	ResendOTP(email string) (*dto.RegisterResponse, error)
 	VerifyEmail(request *dto.VerifyEmailRequest) error
 	Login(request *dto.LoginRequest) (*dto.LoginResponse, error)
+	Logout(token string) error
+	GetNewAccessToken(refreshToken string) (*dto.NewToken, error)
 	ForgotPassword(request *dto.ChangePasswordRequest) error
 }
 
@@ -37,6 +40,10 @@ func (uc *authUsecase) Register(request *dto.RegisterRequest) (*dto.RegisterResp
 	isExistEmail, _ := uc.userRepo.FindByEmail(request.Email)
 	if isExistEmail != nil {
 		return nil, &errorHandlers.ConflictError{Message: "email sudah terdaftar"}
+	}
+
+	if strings.Contains(request.Username, " ") {
+		return nil, &errorHandlers.BadRequestError{Message: "username tidak boleh mengandung spasi"}
 	}
 
 	password, err := helpers.HashPassword(request.Password)
@@ -103,7 +110,7 @@ func (uc *authUsecase) VerifyEmail(request *dto.VerifyEmailRequest) error {
 	}
 
 	user.EmailVerifiedAt = &now
-	_, err := uc.userRepo.Update(user)
+	err := uc.userRepo.Update(user)
 	if err != nil {
 		return &errorHandlers.InternalServerError{Message: "Akun tidak ditemukan"}
 	}
@@ -111,14 +118,11 @@ func (uc *authUsecase) VerifyEmail(request *dto.VerifyEmailRequest) error {
 }
 
 func (uc *authUsecase) Login(request *dto.LoginRequest) (*dto.LoginResponse, error) {
-	user, err := uc.userRepo.FindByEmail(request.Email)
-	if err != nil {
+	user, _ := uc.userRepo.FindByEmail(request.Email)
+	if user == nil {
 		return nil, &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
 	}
-	if user.EmailVerifiedAt == nil {
-		return nil, &errorHandlers.UnAuthorizedError{Message: "Email belum terverifikasi"}
-	}
-	if err = helpers.VerifyPassword(user.Password, request.Password); err != nil {
+	if err := helpers.VerifyPassword(user.Password, request.Password); err != nil {
 		return nil, &errorHandlers.BadRequestError{Message: "Email atau password salah"}
 	}
 
@@ -126,9 +130,20 @@ func (uc *authUsecase) Login(request *dto.LoginRequest) (*dto.LoginResponse, err
 	if err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
 	}
-
+	refreshToken, err := helpers.GenerateRefreshToken(user)
+	if err != nil {
+		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
+	}
+	user.RefreshToken = refreshToken
+	err = uc.userRepo.Update(user)
+	if err != nil {
+		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
+	}
 	response := &dto.LoginResponse{
-		Token: accessToken,
+		Username:     user.Username,
+		ProfileImage: user.ProfileImageUrl,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}
 	return response, nil
 }
@@ -148,9 +163,40 @@ func (uc *authUsecase) ForgotPassword(request *dto.ChangePasswordRequest) error 
 		return &errorHandlers.InternalServerError{Message: "Gagal hashing password"}
 	}
 	user.Password = password
-	_, err = uc.userRepo.Update(user)
+	err = uc.userRepo.Update(user)
 	if err != nil {
 		return &errorHandlers.InternalServerError{Message: "Gagal mengubah password"}
 	}
 	return nil
+}
+
+func (uc *authUsecase) Logout(token string) error {
+	user, err := uc.userRepo.GetUserByRefreshToken(token)
+	if err != nil {
+		return &errorHandlers.UnAuthorizedError{Message: "Token tidak valid"}
+	}
+	user.RefreshToken = ""
+	err = uc.userRepo.Update(user)
+	if err != nil {
+		return &errorHandlers.InternalServerError{Message: err.Error()}
+	}
+	return nil
+}
+
+func (uc *authUsecase) GetNewAccessToken(refreshToken string) (*dto.NewToken, error) {
+	user, err := uc.userRepo.GetUserByRefreshToken(refreshToken)
+	if err != nil {
+		return nil, &errorHandlers.UnAuthorizedError{Message: "Token tidak valid"}
+	}
+	if user.RefreshToken != refreshToken {
+		return nil, &errorHandlers.UnAuthorizedError{Message: "Token tidak valid"}
+	}
+	accessToken, err := helpers.GenerateAccessToken(user)
+	if err != nil {
+		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
+	}
+	token := &dto.NewToken{
+		AccessToken: accessToken,
+	}
+	return token, nil
 }

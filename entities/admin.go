@@ -12,7 +12,7 @@ type Admin struct {
 	Email           string
 	Username        string
 	Password        string
-	ProfileImageURL string
+	ProfileImageURL *string
 	Role            string
 	RefreshToken    string
 	CreatedAt       time.Time
