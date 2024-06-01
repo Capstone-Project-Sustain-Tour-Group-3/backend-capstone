@@ -256,9 +256,15 @@ paths:
                   data:
                     type: object
                     properties:
-                      token:
+                      username:
                         type: string
-                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjFjMmYwNzNmLTExYjQtNDdkMi1hYjQ2LThmNGY3YTQyOGNmMyIsIlVzZXJuYW1lIjoiam9obmRvZSIsImV4cCI6MTcxNjYyNDUxMSwiaWF0IjoxNzE2NjIwOTExLCJuYmYiOjE3MTY2MjA5MTF9.8fs4oFCGo2eRxiw4hnm0emajeG1rpZKGvAi_O-vfW5o'
+                        example: 'johndoe'
+                      profile_image:
+                        type: string
+                        example: 'john.jpg'
+                      access_token:
+                        type: string
+                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLWMzNmQ1OTgwZTI4NyIsIlVzZXJuYW1lIjoiYWt1bmNvYmEiLCJSb2xlIjoidXNlciIsImV4cCI6MTcxNzIyNjIxOCwiaWF0IjoxNzE3MjI1MDE4LCJuYmYiOjE3MTcyMjUwMTh9.Gn_fMMsXeSDaonB0oHDeZ-ug0fv7XTwoCwpXnh49oU4'
         '409':
           description: Akun Tidak Ditemukan
           content:
@@ -326,7 +332,7 @@ paths:
                         example: 'admintourease'
                       profile_image:
                         type: string
-                        example: ''
+                        example: 'admin.jpg'
                       role:
                         type: string
                         example: 'admin'
@@ -346,6 +352,127 @@ paths:
                   message:
                     type: string
                     example: 'Akun tidak ditemukan'
+  /admin/auth/logout:
+    delete:
+      tags:
+        - Admin - Auth
+      summary: Logout Admin
+      description: API untuk logout admin.
+      responses:
+        '200':
+          description: Logout Berhasil
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Logout berhasil!'
+
+  /admin/auth/token:
+    get:
+      tags:
+        - Admin - Auth
+      summary: Mendapatkan Token Baru
+      description: API untuk mendapatkan token baru.
+      responses:
+        '200':
+          description: Berhasil Mendapatkan Token Baru
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Berhasil mendapatkan token baru'
+                  data:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLWMzNmQ1OTgwZTI4NyIsIlVzZXJuYW1lIjoiYWt1bmNvYmEiLCJSb2xlIjoidXNlciIsImV4cCI6MTcxNzIyNjI2NCwiaWF0IjoxNzE3MjI1MDY0LCJuYmYiOjE3MTcyMjUwNjR9.Av2DF2H2HBcZsH2pXDEpmb9W1UKvkSDFq0T7-Y0OJ2k'
+        '409':
+          description: Token Tidak Ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Token tidak ditemukan'
+  /mobile/auth/logout:
+    delete:
+      tags:
+        - Mobile - Auth
+      summary: Logout Pengguna
+      description: API untuk logout pengguna.
+      responses:
+        '200':
+          description: Logout Berhasil
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Logout berhasil!'
+
+  /mobile/auth/token:
+    get:
+      tags:
+        - Mobile - Auth
+      summary: Mendapatkan Token Baru
+      description: API untuk mendapatkan token baru.
+      responses:
+        '200':
+          description: Berhasil Mendapatkan Token Baru
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Berhasil mendapatkan token baru'
+                  data:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLWMzNmQ1OTgwZTI4NyIsIlVzZXJuYW1lIjoiYWt1bmNvYmEiLCJSb2xlIjoidXNlciIsImV4cCI6MTcxNzIyNjI2NCwiaWF0IjoxNzE3MjI1MDY0LCJuYmYiOjE3MTcyMjUwNjR9.Av2DF2H2HBcZsH2pXDEpmb9W1UKvkSDFq0T7-Y0OJ2k'
+        '409':
+          description: Token Tidak Ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Token tidak ditemukan'
+
   /admin/users:
     get:
       tags:

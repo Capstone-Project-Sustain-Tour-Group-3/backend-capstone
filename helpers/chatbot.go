@@ -6,6 +6,8 @@ import (
 	"github.com/google/generative-ai-go/genai"
 )
 
+const roleuser = "user"
+
 func GetSystemInstruction() *genai.Content {
 	prompt := "kamu adalah virtual assistant dengan karakteristik ceria dan tidak membosankan. kamu bisa memberikan rekomendasi tempat wisata yang ada di wilayah Indonesia (alam, seni & budaya, dan sejarah) dan menjawab pertanyaan seputar travelling dengan jawaban yang singkat, pdat, dan jelas. namun selain itu kamu tidak akan bisa menjawab pertanyaan tersebut."
 
@@ -23,7 +25,7 @@ func ToChatbotHistory(history *[]string) []*genai.Content {
 	}
 
 	for i := len(*history) - 1; i >= 0; i-- {
-		role = "user"
+		role = roleuser
 		if i%2 == 0 {
 			role = "model"
 		}

@@ -9,6 +9,8 @@ import (
 
 type AdminUsecase interface {
 	Login(request *dto.LoginAdminRequest) (*dto.LoginAdminResponse, error)
+	Logout(token string) error
+	GetNewAccessToken(refreshToken string) (*dto.NewToken, error)
 }
 
 type adminUsecase struct {
@@ -32,13 +34,51 @@ func (uc *adminUsecase) Login(request *dto.LoginAdminRequest) (*dto.LoginAdminRe
 	if err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
 	}
-
+	refreshToken, err := helpers.GenerateRefreshToken(admin)
+	if err != nil {
+		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
+	}
+	admin.RefreshToken = refreshToken
+	if err = uc.repository.Update(admin); err != nil {
+		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
+	}
 	response := &dto.LoginAdminResponse{
 		Username:     admin.Username,
 		ProfileImage: admin.ProfileImageURL,
 		Role:         admin.Role,
-		Token:        accessToken,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}
 
 	return response, nil
+}
+
+func (uc *adminUsecase) Logout(token string) error {
+	admin, err := uc.repository.GetUserByRefreshToken(token)
+	if err != nil {
+		return &errorHandlers.UnAuthorizedError{Message: "Token tidak valid"}
+	}
+	admin.RefreshToken = ""
+	if err = uc.repository.Update(admin); err != nil {
+		return &errorHandlers.InternalServerError{Message: err.Error()}
+	}
+	return nil
+}
+
+func (uc *adminUsecase) GetNewAccessToken(refreshToken string) (*dto.NewToken, error) {
+	admin, err := uc.repository.GetUserByRefreshToken(refreshToken)
+	if err != nil {
+		return nil, &errorHandlers.UnAuthorizedError{Message: "Token tidak valid"}
+	}
+	if admin.RefreshToken != refreshToken {
+		return nil, &errorHandlers.UnAuthorizedError{Message: "Token tidak valid"}
+	}
+	accessToken, err := helpers.GenerateAccessToken(admin)
+	if err != nil {
+		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
+	}
+	token := &dto.NewToken{
+		AccessToken: accessToken,
+	}
+	return token, nil
 }
