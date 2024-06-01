@@ -19,6 +19,7 @@ type User struct {
 	Gender          string         `gorm:"type:varchar(255)" json:"gender"`
 	City            string         `gorm:"type:varchar(255)" json:"city"`
 	Province        string         `gorm:"type:varchar(255)" json:"province"`
+	RefreshToken    string         `gorm:"type:text" json:"refresh_token"`
 	EmailVerifiedAt *time.Time     `json:"email_verified_at"`
 	CreatedAt       time.Time      `json:"created_at"`
 	UpdatedAt       time.Time      `json:"updated_at"`

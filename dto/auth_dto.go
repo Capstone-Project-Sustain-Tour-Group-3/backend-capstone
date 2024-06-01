@@ -18,7 +18,10 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Token string `json:"token"`
+	Username     string `json:"username"`
+	ProfileImage string `json:"profile_image"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token,omitempty"`
 }
 
 type VerifyEmailRequest struct {
@@ -34,4 +37,12 @@ type ChangePasswordRequest struct {
 	RefId              string `json:"ref_id"`
 	Password           string `json:"password" validate:"required,min=8"`
 	KonfirmasiPassword string `json:"konfirmasi_password" validate:"required,min=8"`
+}
+
+func ToLoginResponse(response *LoginResponse) *LoginResponse {
+	return &LoginResponse{
+		Username:     response.Username,
+		ProfileImage: response.ProfileImage,
+		AccessToken:  response.AccessToken,
+	}
 }
