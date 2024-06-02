@@ -22,7 +22,7 @@ func AuthUserRouter(r *echo.Group) {
 	r.POST("/login", handler.Login)
 	r.PUT("/forgot-password", handler.ForgotPassword)
 	r.DELETE("/logout", handler.Logout)
-	r.GET("/token", handler.GetNewAccessToken)
+	r.POST("/token", handler.GetNewAccessToken)
 
 	// Routes that require JWT middleware
 	r.Use(middlewares.JWTMiddleware)

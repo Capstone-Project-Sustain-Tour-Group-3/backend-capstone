@@ -100,20 +100,11 @@ func (h *authHandler) Login(ctx echo.Context) error {
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
-	ctx.SetCookie(&http.Cookie{
-		Name:     "refreshToken",
-		Value:    result.RefreshToken,
-		Path:     "/",
-		Domain:   "",
-		MaxAge:   24 * 60 * 60,
-		Secure:   true,
-		HttpOnly: true,
-	})
-	loginResponse := dto.ToLoginResponse(result)
+
 	response := helpers.Response(dto.ResponseParams{
 		StatusCode: http.StatusOK,
 		Message:    "Login berhasil!",
-		Data:       loginResponse,
+		Data:       result,
 	})
 	return ctx.JSON(http.StatusOK, response)
 }
@@ -153,22 +144,14 @@ func (h *authHandler) ForgotPassword(ctx echo.Context) error {
 }
 
 func (h *authHandler) Logout(ctx echo.Context) error {
-	cookie, err := ctx.Cookie("refreshToken")
-	if err != nil {
-		return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "Token tidak ditemukan"})
-	}
-	if err = h.usecase.Logout(cookie.Value); err != nil {
+	var req dto.RefreshTokenRequest
+	if err := ctx.Bind(&req); err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
-	ctx.SetCookie(&http.Cookie{
-		Name:     "refreshToken",
-		Value:    "",
-		Path:     "/",
-		Domain:   "",
-		MaxAge:   -1,
-		Secure:   true,
-		HttpOnly: true,
-	})
+	err := h.usecase.Logout(req.RefreshToken)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
 	response := helpers.Response(dto.ResponseParams{
 		StatusCode: http.StatusOK,
 		Message:    "Logout berhasil!",
@@ -177,11 +160,12 @@ func (h *authHandler) Logout(ctx echo.Context) error {
 }
 
 func (h *authHandler) GetNewAccessToken(ctx echo.Context) error {
-	cookie, err := ctx.Cookie("refreshToken")
-	if err != nil {
-		return errorHandlers.HandleError(ctx, &errorHandlers.ConflictError{Message: "Token tidak ditemukan"})
+	var req dto.RefreshTokenRequest
+	if err := ctx.Bind(&req); err != nil {
+		return errorHandlers.HandleError(ctx, err)
 	}
-	token, err := h.usecase.GetNewAccessToken(cookie.Value)
+
+	token, err := h.usecase.GetNewAccessToken(req.RefreshToken)
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
