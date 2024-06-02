@@ -18,6 +18,9 @@ func SetupRouter(e *echo.Echo) {
 
 		chatbot := v1Mobile.Group("/chatbot")
 		mobile.ChatbotRouter(chatbot)
+
+		profile := v1Mobile.Group("/profile")
+		mobile.ProfileRouter(profile)
 	}
 
 	v1Admin := e.Group("/v1/admin")
