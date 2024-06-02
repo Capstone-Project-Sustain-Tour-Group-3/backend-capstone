@@ -27,7 +27,13 @@ func main() {
 		seeds.RunSeeder()
 	}
 
-	e.Use(middleware.CORS())
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{echo.GET, echo.POST, echo.PUT, echo.DELETE},
+		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept, echo.HeaderAuthorization},
+		AllowCredentials: true,
+	}))
+
 	e.Static("static", "static")
 	e.File("/docs", "./static/index.html")
 	e.GET("/docs/swagger.yaml", func(c echo.Context) error {
