@@ -39,10 +39,6 @@ type ChangePasswordRequest struct {
 	KonfirmasiPassword string `json:"konfirmasi_password" validate:"required,min=8"`
 }
 
-func ToLoginResponse(response *LoginResponse) *LoginResponse {
-	return &LoginResponse{
-		Username:     response.Username,
-		ProfileImage: response.ProfileImage,
-		AccessToken:  response.AccessToken,
-	}
+type RefreshTokenRequest struct {
+	RefreshToken string `json:"refresh_token"`
 }

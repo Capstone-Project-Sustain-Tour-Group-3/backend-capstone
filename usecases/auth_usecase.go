@@ -175,6 +175,12 @@ func (uc *authUsecase) Logout(token string) error {
 	if err != nil {
 		return &errorHandlers.UnAuthorizedError{Message: "Token tidak valid"}
 	}
+	if token == "" {
+		return &errorHandlers.BadRequestError{Message: "Token tidak boleh kosong"}
+	}
+	if user.RefreshToken != token {
+		return &errorHandlers.UnAuthorizedError{Message: "Token tidak valid"}
+	}
 	user.RefreshToken = ""
 	err = uc.userRepo.Update(user)
 	if err != nil {
@@ -187,6 +193,9 @@ func (uc *authUsecase) GetNewAccessToken(refreshToken string) (*dto.NewToken, er
 	user, err := uc.userRepo.GetUserByRefreshToken(refreshToken)
 	if err != nil {
 		return nil, &errorHandlers.UnAuthorizedError{Message: "Token tidak valid"}
+	}
+	if refreshToken == "" {
+		return nil, &errorHandlers.BadRequestError{Message: "Token tidak boleh kosong"}
 	}
 	if user.RefreshToken != refreshToken {
 		return nil, &errorHandlers.UnAuthorizedError{Message: "Token tidak valid"}
