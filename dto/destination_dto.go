@@ -175,3 +175,20 @@ func ToDetailDestinationResponse(destination *entities.Destination, similarDesti
 		SimilarDestination: ToSearchDestinationsResponse(similarDestinations),
 	}
 }
+
+type CreateDestinationRequest struct {
+	Name        string  `json:"nama_destinasi"`
+	OpenTime    string  `json:"jam_buka"`
+	CloseTime   string  `json:"jam_tutup"`
+	EntryPrice  float64 `json:"harga_masuk"`
+	Description string  `json:"deskripsi"`
+	// DestinationAddress *DestinationAddress  `json:"alamat_destinasi"`
+	// UrlImages          *[]UrlImage          `json:"url_gambar"`
+	// UrlVideos          *[]UrlVideo          `json:"url_video"`
+	// Categories         *[]Category          `json:"kategori"`
+	// Facilities         *[]Facility          `json:"fasilitas"`
+}
+
+type CreateDestinationResponse struct {
+	Id uuid.UUID `json:"id_destinasi"`
+}

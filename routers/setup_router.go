@@ -14,7 +14,7 @@ func SetupRouter(e *echo.Echo) {
 		AuthUserRouter(auth)
 
 		destination := v1Mobile.Group("/destinations")
-		DestinationRouter(destination)
+		mobile.DestinationRouter(destination)
 
 		chatbot := v1Mobile.Group("/chatbot")
 		mobile.ChatbotRouter(chatbot)
