@@ -57,6 +57,9 @@ func ToFindByIdResponse(user *entities.User) *findByIdResponse {
 	}
 }
 
+type UserDetailRequest struct {
+}
+
 func ToFindAllUserResponse(user *[]entities.User) *[]findAllUserResponse {
 	var users []findAllUserResponse
 	for _, u := range *user {
