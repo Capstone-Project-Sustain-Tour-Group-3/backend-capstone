@@ -22,6 +22,8 @@ type Config struct {
 	REDIS_ADDR     string
 	REDIS_USERNAME string
 	REDIS_PASSWORD string
+
+	CLOUDINARY_URL string
 }
 
 var ENV *Config
@@ -47,6 +49,8 @@ func LoadConfig() {
 			REDIS_ADDR:     os.Getenv("REDIS_ADDR"),
 			REDIS_USERNAME: os.Getenv("REDIS_USERNAME"),
 			REDIS_PASSWORD: os.Getenv("REDIS_PASSWORD"),
+
+			CLOUDINARY_URL: os.Getenv("CLOUDINARY_URL"),
 		}
 
 		return
