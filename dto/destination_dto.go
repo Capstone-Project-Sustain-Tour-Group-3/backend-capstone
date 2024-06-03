@@ -7,12 +7,12 @@ import (
 )
 
 type SearchDestination struct {
-	Id       uuid.UUID  `json:"id"`
-	Name     string     `json:"nama"`
-	Url      *string    `json:"url_media"`
-	Province string     `json:"provinsi"`
-	City     string     `json:"kota"`
-	Category []Category `json:"kategori"`
+	Id       uuid.UUID `json:"id"`
+	Name     string    `json:"nama"`
+	Url      *string   `json:"url_media"`
+	Province string    `json:"provinsi"`
+	City     string    `json:"kota"`
+	Category Category  `json:"kategori"`
 }
 
 func ToSearchDestinationsResponse(destinations *[]entities.Destination) *[]SearchDestination {
@@ -30,8 +30,8 @@ func ToSearchDestinationsResponse(destinations *[]entities.Destination) *[]Searc
 			Name:     destination.Name,
 			Url:      url,
 			Province: destination.DestinationAddress.Province.Name,
-			City:     destination.DestinationAddress.City,
-			Category: *ToCategories(&destination),
+			City:     destination.DestinationAddress.City.Name,
+			Category: *ToCategory(&destination),
 		}
 	}
 
@@ -52,11 +52,11 @@ type UrlVideo struct {
 }
 
 type DestinationAddress struct {
-	Province   string `json:"provinsi"`
-	City       string `json:"kota"`
-	Regency    string `json:"kabupaten"`
-	StreetName string `json:"nama_jalan"`
-	PostalCode string `json:"kode_pos"`
+	Province    string `json:"provinsi"`
+	City        string `json:"kota"`
+	Subdistrict string `json:"kecamatan"`
+	StreetName  string `json:"nama_jalan"`
+	PostalCode  string `json:"kode_pos"`
 }
 
 type Category struct {
@@ -96,7 +96,7 @@ type DetailDestinationResponse struct {
 	DestinationAddress *DestinationAddress  `json:"alamat_destinasi"`
 	UrlImages          *[]UrlImage          `json:"url_gambar"`
 	UrlVideos          *[]UrlVideo          `json:"url_video"`
-	Categories         *[]Category          `json:"kategori"`
+	Categories         *Category            `json:"kategori"`
 	Facilities         *[]Facility          `json:"fasilitas"`
 	SimilarDestination *[]SearchDestination `json:"destinasi_serupa"`
 }
@@ -130,15 +130,11 @@ func ToUrlVideos(destination *entities.Destination) *[]UrlVideo {
 	return &videos
 }
 
-func ToCategories(destination *entities.Destination) *[]Category {
-	var categories []Category
-	for _, destinationCategory := range *destination.DestinationCategories {
-		categories = append(categories, Category{
-			Id:   destinationCategory.CategoryId,
-			Name: destinationCategory.Category.Name,
-		})
+func ToCategory(destination *entities.Destination) *Category {
+	return &Category{
+		Id:   destination.CategoryId,
+		Name: destination.Category.Name,
 	}
-	return &categories
 }
 
 func ToFacilities(destination *entities.Destination) *[]Facility {
@@ -162,15 +158,15 @@ func ToDetailDestinationResponse(destination *entities.Destination, similarDesti
 		EntryPrice:  destination.EntryPrice,
 		Description: destination.Description,
 		DestinationAddress: &DestinationAddress{
-			Province:   destination.DestinationAddress.Province.Name,
-			City:       destination.DestinationAddress.City,
-			Regency:    destination.DestinationAddress.Regency,
-			StreetName: destination.DestinationAddress.StreetName,
-			PostalCode: destination.DestinationAddress.PostalCode,
+			Province:    destination.DestinationAddress.Province.Name,
+			City:        destination.DestinationAddress.City.Name,
+			Subdistrict: destination.DestinationAddress.Subdistrict.Name,
+			StreetName:  destination.DestinationAddress.StreetName,
+			PostalCode:  destination.DestinationAddress.PostalCode,
 		},
 		UrlImages:          ToUrlImages(destination),
 		UrlVideos:          ToUrlVideos(destination),
-		Categories:         ToCategories(destination),
+		Categories:         ToCategory(destination),
 		Facilities:         ToFacilities(destination),
 		SimilarDestination: ToSearchDestinationsResponse(similarDestinations),
 	}
@@ -178,10 +174,10 @@ func ToDetailDestinationResponse(destination *entities.Destination, similarDesti
 
 type CreateDestinationRequest struct {
 	Name        string  `json:"nama_destinasi"`
+	Description string  `json:"deskripsi"`
 	OpenTime    string  `json:"jam_buka"`
 	CloseTime   string  `json:"jam_tutup"`
 	EntryPrice  float64 `json:"harga_masuk"`
-	Description string  `json:"deskripsi"`
 	// DestinationAddress *DestinationAddress  `json:"alamat_destinasi"`
 	// UrlImages          *[]UrlImage          `json:"url_gambar"`
 	// UrlVideos          *[]UrlVideo          `json:"url_video"`

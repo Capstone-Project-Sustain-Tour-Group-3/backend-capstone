@@ -3,7 +3,6 @@ package seeds
 import (
 	"log"
 
-	"capstone/drivers/mysql"
 	"capstone/entities"
 
 	"github.com/google/uuid"
@@ -13,7 +12,7 @@ func (s Seed) SeedDestinations() {
 	openTime := "08:00"
 	closeTime := "17:00"
 
-	destinations := []mysql.Destination{
+	destinations := []entities.Destination{
 		{Id: uuid.MustParse("306d305e-3359-4884-8d38-89c04e8adec6"), Name: "Goa Pindul", Description: "Gua tempat Joko terbentur tersebut dinamai Gua Pindul yang berasal dari kata dalam bahasa Jawa pipi gebendul yang berarti pipi yang terbentur.", OpenTime: openTime, CloseTime: closeTime, EntryPrice: 25000, Longitude: 123.456, Latitude: 456.789, VisitCount: 0}, //nolint:lll
 		{Id: uuid.MustParse("306d305e-3359-4884-8d38-89c04e8adec1"), Name: "Candi Borobudur", Description: "Candi Borobudur adalah sebuah candi Buddha yang terletak di Magelang, Jawa Tengah.", OpenTime: openTime, CloseTime: closeTime, EntryPrice: 50000, Longitude: 110.2038, Latitude: -7.6079, VisitCount: 0},                                                       //nolint:lll
 		{Id: uuid.MustParse("306d305e-3359-4884-8d38-89c04e8adec2"), Name: "Pantai Kuta", Description: "Pantai Kuta adalah salah satu pantai yang terkenal di Bali, Indonesia.", OpenTime: openTime, CloseTime: closeTime, EntryPrice: 0, Longitude: 115.1675, Latitude: -8.7174, VisitCount: 0},                                                                           //nolint:lll
@@ -27,6 +26,12 @@ func (s Seed) SeedDestinations() {
 	}
 
 	for _, destination := range destinations {
+		category, err := getRandomCategory(s)
+		if err != nil {
+			log.Fatalf("failed to get random category: %v", err)
+		}
+
+		destination.CategoryId = category.Id
 		if err := s.db.Where(entities.Destination{Name: destination.Name}).FirstOrCreate(&destination).Error; err != nil {
 			log.Fatalf("failed to create destination: %v", err)
 		}

@@ -36,12 +36,7 @@ func (uc *DestinationUsecase) DetailDestination(id uuid.UUID) (*dto.DetailDestin
 		return nil, err
 	}
 
-	categoryIds := make([]uuid.UUID, len(*destination.DestinationCategories))
-	for idx, category := range *destination.DestinationCategories {
-		categoryIds[idx] = category.CategoryId
-	}
-
-	similarDestinations, err := uc.destinationRepo.FindByCategoryIds(categoryIds)
+	similarDestinations, err := uc.destinationRepo.FindByCategoryId(destination.CategoryId)
 	if err != nil {
 		return nil, err
 	}

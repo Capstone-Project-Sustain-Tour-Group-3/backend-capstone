@@ -27,11 +27,12 @@ func LoadDb() {
 		mysql2.Destination{},
 		mysql2.Category{},
 		mysql2.Facility{},
-		mysql2.DestinationCategory{},
 		mysql2.DestinationFacility{},
 		mysql2.DestinationAddress{},
 		mysql2.DestinationMedia{},
 		mysql2.Province{},
+		mysql2.City{},
+		mysql2.Subdistrict{},
 		mysql2.Admin{},
 	); err != nil {
 		log.Fatal(err)
