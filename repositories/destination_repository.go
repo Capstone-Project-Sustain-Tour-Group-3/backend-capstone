@@ -15,6 +15,9 @@ type IDestinationRepository interface {
 	FindById(id uuid.UUID) (*entities.Destination, error)
 	FindAll(page, limit int, searchQuery, sortQuery, filterQuery string) (string, *int64, []entities.Destination, error)
 	FindByCategoryIds(ids []uuid.UUID) ([]entities.Destination, error)
+	Create(destination *entities.Destination) error
+	Update(destination *entities.Destination) error
+	Delete(destination *entities.Destination) error
 }
 
 type DestinationRepository struct {
@@ -111,4 +114,25 @@ func (r *DestinationRepository) FindByCategoryIds(ids []uuid.UUID) ([]entities.D
 		return nil, err
 	}
 	return destinations, nil
+}
+
+func (r *DestinationRepository) Create(destination *entities.Destination) error {
+	if err := r.db.Create(&destination).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *DestinationRepository) Update(destination *entities.Destination) error {
+	if err := r.db.Save(&destination).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *DestinationRepository) Delete(destination *entities.Destination) error {
+	if err := r.db.Delete(&destination).Error; err != nil {
+		return err
+	}
+	return nil
 }
