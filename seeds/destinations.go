@@ -32,7 +32,7 @@ func (s Seed) SeedDestinations() {
 		}
 
 		destination.CategoryId = category.Id
-		if err := s.db.Where(entities.Destination{Name: destination.Name}).FirstOrCreate(&destination).Error; err != nil {
+		if err = s.db.Where(entities.Destination{Name: destination.Name}).FirstOrCreate(&destination).Error; err != nil {
 			log.Fatalf("failed to create destination: %v", err)
 		}
 	}

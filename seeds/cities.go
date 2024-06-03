@@ -2588,12 +2588,12 @@ func (s Seed) SeedCities() {
 	}
 }
 
-func getRandomCity(s Seed) (*entities.City, error) {
-	var city entities.City
-
-	if err := s.db.Order("RAND()").First(&city).Error; err != nil {
-		return nil, err
-	}
-
-	return &city, nil
-}
+// func getRandomCity(s Seed) (*entities.City, error) {
+//	var city entities.City
+//
+//	if err := s.db.Order("RAND()").First(&city).Error; err != nil {
+//		return nil, err
+//	}
+//
+//	return &city, nil
+//}

@@ -10,7 +10,7 @@ import (
 )
 
 func DestinationRouter(r *echo.Group) {
-	//r.Use(middlewares.JWTMiddleware)
+	// r.Use(middlewares.JWTMiddleware)
 
 	destinationRepo := repositories.NewDestinationRepository(config.DB)
 	usecase := usecases.NewDestinationUsecase(destinationRepo)
