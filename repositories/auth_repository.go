@@ -9,8 +9,9 @@ import (
 type AuthRepository interface {
 	FindByEmail(email string) (*entities.User, error)
 	FindByUsername(name string) (*entities.User, error)
+	GetUserByRefreshToken(refreshToken string) (*entities.User, error)
 	Create(user *entities.User) error
-	Update(user *entities.User) (*entities.User, error)
+	Update(user *entities.User) error
 }
 
 type authRepository struct {
@@ -29,6 +30,14 @@ func (r *authRepository) FindByEmail(email string) (*entities.User, error) {
 	return user, nil
 }
 
+func (r *authRepository) GetUserByRefreshToken(refreshToken string) (*entities.User, error) {
+	var user *entities.User
+	if err := r.db.Where("refresh_token = ?", refreshToken).First(&user).Error; err != nil {
+		return nil, err
+	}
+	return user, nil
+}
+
 func (r *authRepository) Create(user *entities.User) error {
 	if err := r.db.Create(&user).Error; err != nil {
 		return err
@@ -36,11 +45,11 @@ func (r *authRepository) Create(user *entities.User) error {
 	return nil
 }
 
-func (r *authRepository) Update(user *entities.User) (*entities.User, error) {
+func (r *authRepository) Update(user *entities.User) error {
 	if err := r.db.Save(&user).Error; err != nil {
-		return nil, err
+		return err
 	}
-	return user, nil
+	return nil
 }
 
 func (r *authRepository) FindByUsername(name string) (*entities.User, error) {

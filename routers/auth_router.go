@@ -21,6 +21,8 @@ func AuthUserRouter(r *echo.Group) {
 	r.POST("/verify", handler.VerifyEmail)
 	r.POST("/login", handler.Login)
 	r.PUT("/forgot-password", handler.ForgotPassword)
+	r.DELETE("/logout", handler.Logout)
+	r.POST("/token", handler.GetNewAccessToken)
 
 	// Routes that require JWT middleware
 	r.Use(middlewares.JWTMiddleware)
@@ -33,4 +35,6 @@ func AuthAdminRouter(r *echo.Group) {
 	handler := handlers.NewAdminHandler(usecase)
 
 	r.POST("/login", handler.Login)
+	r.DELETE("/logout", handler.Logout)
+	r.GET("/token", handler.GetNewAccessToken)
 }

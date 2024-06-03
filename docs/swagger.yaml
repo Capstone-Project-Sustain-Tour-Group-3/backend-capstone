@@ -13,7 +13,7 @@ tags:
   - name: Admin - Users
   - name: Admin - Auth
 paths:
-  /auth/register:
+  /mobile/auth/register:
     post:
       tags:
         - Mobile - Auth
@@ -28,19 +28,19 @@ paths:
               properties:
                 username:
                   type: string
-                  example: "johndoe"
+                  example: 'johndoe'
                 nama_lengkap:
                   type: string
-                  example: "John Doe"
+                  example: 'John Doe'
                 email:
                   type: string
-                  example: "johndoe@example.com"
+                  example: 'johndoe@example.com'
                 no_telepon:
                   type: string
-                  example: "081234567891"
+                  example: '081234567891'
                 password:
                   type: string
-                  example: "password123"
+                  example: 'password123'
       responses:
         '201':
           description: Registrasi Berhasil
@@ -51,16 +51,16 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Success"
+                    example: 'Success'
                   message:
                     type: string
-                    example: "Registrasi berhasil!"
+                    example: 'Registrasi berhasil!'
                   data:
                     type: object
                     properties:
                       reference_id:
                         type: string
-                        example: "fAwCnf3TSOkSqB9M"
+                        example: 'fAwCnf3TSOkSqB9M'
         '409':
           description: Konflik
           content:
@@ -70,11 +70,11 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Failed"
+                    example: 'Failed'
                   message:
                     type: string
-                    example: "username sudah ada, silahkan gunakan username lain"
-  /auth/resend-otp:
+                    example: 'username sudah ada, silahkan gunakan username lain'
+  /mobile/auth/resend-otp:
     post:
       tags:
         - Mobile - Auth
@@ -90,7 +90,7 @@ paths:
                 email:
                   type: string
                   format: email
-                  example: "user@example.com"
+                  example: 'user@example.com'
       responses:
         '200':
           description: OTP Berhasil Dikirimkan
@@ -101,16 +101,16 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Success"
+                    example: 'Success'
                   message:
                     type: string
-                    example: "OTP berhasil dikirimkan"
+                    example: 'OTP berhasil dikirimkan'
                   data:
                     type: object
                     properties:
                       reference_id:
                         type: string
-                        example: "WCTp17O4Uu2CZ88O"
+                        example: 'WCTp17O4Uu2CZ88O'
         '400':
           description: Bad Request
           content:
@@ -120,58 +120,58 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Error"
+                    example: 'Error'
                   message:
                     type: string
-                    example: "Invalid email address"
+                    example: 'Invalid email address'
 
-  /auth/verify:
-      post:
-        tags:
-          - Mobile - Auth
-        summary: Verifikasi OTP
-        description: API untuk verifikasi OTP.
-        requestBody:
-          required: true
+  /mobile/auth/verify:
+    post:
+      tags:
+        - Mobile - Auth
+      summary: Verifikasi OTP
+      description: API untuk verifikasi OTP.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ref_id:
+                  type: string
+                  example: 'WCTp17O4Uu2CZ88O'
+                otp:
+                  type: string
+                  example: '7523'
+      responses:
+        '200':
+          description: OTP Valid
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  ref_id:
+                  status:
                     type: string
-                    example: "WCTp17O4Uu2CZ88O"
-                  otp:
+                    example: 'Success'
+                  message:
                     type: string
-                    example: "7523"
-        responses:
-          '200':
-            description: OTP Valid
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    status:
-                      type: string
-                      example: "Success"
-                    message:
-                      type: string
-                      example: "OTP Valid"
-          '400':
-            description: OTP Tidak Cocok
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    status:
-                      type: string
-                      example: "Failed"
-                    message:
-                      type: string
-                      example: "Kode OTP tidak cocok. Mohon periksa kembali dan masukkan dengan benar."
-  /auth/forgot-password:
+                    example: 'OTP Valid'
+        '400':
+          description: OTP Tidak Cocok
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Kode OTP tidak cocok. Mohon periksa kembali dan masukkan dengan benar.'
+  /mobile/auth/forgot-password:
     put:
       tags:
         - Mobile - Auth
@@ -186,13 +186,13 @@ paths:
               properties:
                 ref_id:
                   type: string
-                  example: "gCGBw4IB8boTMG5B"
+                  example: 'gCGBw4IB8boTMG5B'
                 password:
                   type: string
-                  example: "password"
+                  example: 'password'
                 konfirmasi_password:
                   type: string
-                  example: "password"
+                  example: 'password'
       responses:
         '200':
           description: Password Berhasil Diubah
@@ -203,10 +203,10 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Success"
+                    example: 'Success'
                   message:
                     type: string
-                    example: "Password berhasil diubah"
+                    example: 'Password berhasil diubah'
         '400':
           description: Password Tidak Cocok
           content:
@@ -216,76 +216,82 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Failed"
+                    example: 'Failed'
                   message:
                     type: string
-                    example: "Password tidak cocok"
-  /auth/login:
-      post:
-        tags:
-          - Mobile - Auth
-        summary: Login Pengguna
-        description: API untuk login pengguna.
-        requestBody:
-          required: true
+                    example: 'Password tidak cocok'
+  /mobile/auth/login:
+    post:
+      tags:
+        - Mobile - Auth
+      summary: Login Pengguna
+      description: API untuk login pengguna.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  example: 'johndoe@example.com'
+                password:
+                  type: string
+                  example: 'password123'
+      responses:
+        '200':
+          description: Login Berhasil
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  email:
+                  status:
                     type: string
-                    example: "johndoe@example.com"
-                  password:
+                    example: 'Success'
+                  message:
                     type: string
-                    example: "password123"
-        responses:
-          '200':
-            description: Login Berhasil
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    status:
-                      type: string
-                      example: "Success"
-                    message:
-                      type: string
-                      example: "Login berhasil!"
-                    data:
-                      type: object
-                      properties:
-                        token:
-                          type: string
-                          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjFjMmYwNzNmLTExYjQtNDdkMi1hYjQ2LThmNGY3YTQyOGNmMyIsIlVzZXJuYW1lIjoiam9obmRvZSIsImV4cCI6MTcxNjYyNDUxMSwiaWF0IjoxNzE2NjIwOTExLCJuYmYiOjE3MTY2MjA5MTF9.8fs4oFCGo2eRxiw4hnm0emajeG1rpZKGvAi_O-vfW5o"
-          '409':
-            description: Akun Tidak Ditemukan
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    status:
-                      type: string
-                      example: "Failed"
-                    message:
-                      type: string
-                      example: "Akun tidak ditemukan"
-          '401':
-            description: Email Belum Terverifikasi
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    status:
-                      type: string
-                      example: "Failed"
-                    message:
-                      type: string
-                      example: "Email belum terverifikasi"
-  /admin/auth/users:
+                    example: 'Login berhasil!'
+                  data:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+                        example: 'johndoe'
+                      profile_image:
+                        type: string
+                        example: 'john.jpg'
+                      access_token:
+                        type: string
+                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLWMzNmQ1OTgwZTI4NyIsIlVzZXJuYW1lIjoiYWt1bmNvYmEiLCJSb2xlIjoidXNlciIsImV4cCI6MTcxNzIyNjIxOCwiaWF0IjoxNzE3MjI1MDE4LCJuYmYiOjE3MTcyMjUwMTh9.Gn_fMMsXeSDaonB0oHDeZ-ug0fv7XTwoCwpXnh49oU4'
+        '409':
+          description: Akun Tidak Ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Akun tidak ditemukan'
+        '401':
+          description: Email Belum Terverifikasi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Email belum terverifikasi'
+  /admin/auth/login:
     post:
       tags:
         - Admin - Auth
@@ -300,10 +306,10 @@ paths:
               properties:
                 username:
                   type: string
-                  example: "tourease"
+                  example: 'tourease'
                 password:
                   type: string
-                  example: "12345678"
+                  example: '12345678'
       responses:
         '200':
           description: Login Successful
@@ -314,25 +320,25 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Success"
+                    example: 'Success'
                   message:
                     type: string
-                    example: "You have successfully logged in"
+                    example: 'You have successfully logged in'
                   data:
                     type: object
                     properties:
                       username:
                         type: string
-                        example: "admintourease"
+                        example: 'admintourease'
                       profile_image:
                         type: string
-                        example: ""
+                        example: 'admin.jpg'
                       role:
                         type: string
-                        example: "admin"
+                        example: 'admin'
                       token:
                         type: string
-                        example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6ImFhNjJjZDA5LTU0YjUtNGViNC04MjNmLWMzNjI4ZWFlYmQ0MSIsIlVzZXJuYW1lIjoiYWRtaW50b3VyZWFzZSIsIlJvbGUiOiJhZG1pbiIsImV4cCI6MTcxNjkxMTIzMCwiaWF0IjoxNzE2OTA5NDMwLCJuYmYiOjE3MTY5MDk0MzB9.Iesz7CdqiA-5xyJa3I3w2rkZTjC7ZR27FMPz3HwhYOs"
+                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6ImFhNjJjZDA5LTU0YjUtNGViNC04MjNmLWMzNjI4ZWFlYmQ0MSIsIlVzZXJuYW1lIjoiYWRtaW50b3VyZWFzZSIsIlJvbGUiOiJhZG1pbiIsImV4cCI6MTcxNjkxMTIzMCwiaWF0IjoxNzE2OTA5NDMwLCJuYmYiOjE3MTY5MDk0MzB9.Iesz7CdqiA-5xyJa3I3w2rkZTjC7ZR27FMPz3HwhYOs'
         '409':
           description: Account Not Found
           content:
@@ -342,16 +348,139 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Failed"
+                    example: 'Failed'
                   message:
                     type: string
-                    example: "Akun tidak ditemukan"
+                    example: 'Akun tidak ditemukan'
+  /admin/auth/logout:
+    delete:
+      tags:
+        - Admin - Auth
+      summary: Logout Admin
+      description: API untuk logout admin.
+      responses:
+        '200':
+          description: Logout Berhasil
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Logout berhasil!'
+
+  /admin/auth/token:
+    get:
+      tags:
+        - Admin - Auth
+      summary: Mendapatkan Token Baru
+      description: API untuk mendapatkan token baru.
+      responses:
+        '200':
+          description: Berhasil Mendapatkan Token Baru
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Berhasil mendapatkan token baru'
+                  data:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLWMzNmQ1OTgwZTI4NyIsIlVzZXJuYW1lIjoiYWt1bmNvYmEiLCJSb2xlIjoidXNlciIsImV4cCI6MTcxNzIyNjI2NCwiaWF0IjoxNzE3MjI1MDY0LCJuYmYiOjE3MTcyMjUwNjR9.Av2DF2H2HBcZsH2pXDEpmb9W1UKvkSDFq0T7-Y0OJ2k'
+        '409':
+          description: Token Tidak Ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Token tidak ditemukan'
+  /mobile/auth/logout:
+    delete:
+      tags:
+        - Mobile - Auth
+      summary: Logout Pengguna
+      description: API untuk logout pengguna.
+      responses:
+        '200':
+          description: Logout Berhasil
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Logout berhasil!'
+
+  /mobile/auth/token:
+    get:
+      tags:
+        - Mobile - Auth
+      summary: Mendapatkan Token Baru
+      description: API untuk mendapatkan token baru.
+      responses:
+        '200':
+          description: Berhasil Mendapatkan Token Baru
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Berhasil mendapatkan token baru'
+                  data:
+                    type: object
+                    properties:
+                      access_token:
+                        type: string
+                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLWMzNmQ1OTgwZTI4NyIsIlVzZXJuYW1lIjoiYWt1bmNvYmEiLCJSb2xlIjoidXNlciIsImV4cCI6MTcxNzIyNjI2NCwiaWF0IjoxNzE3MjI1MDY0LCJuYmYiOjE3MTcyMjUwNjR9.Av2DF2H2HBcZsH2pXDEpmb9W1UKvkSDFq0T7-Y0OJ2k'
+        '409':
+          description: Token Tidak Ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Token tidak ditemukan'
+
   /admin/users:
     get:
       tags:
         - Admin - Users
       summary: Mendapatkan Data User
       description: API untuk mendapatkan daftar pengguna.
+      security:
+        - BearerAuth: []
       parameters:
         - name: search
           in: query
@@ -378,10 +507,10 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Success"
+                    example: 'Success'
                   message:
                     type: string
-                    example: "data user berhasil ditemukan"
+                    example: 'data user berhasil ditemukan'
                   data:
                     type: array
                     items:
@@ -389,25 +518,25 @@ paths:
                       properties:
                         id:
                           type: string
-                          example: "803f6cc0-e598-4b59-a300-8b8603482d14"
+                          example: '803f6cc0-e598-4b59-a300-8b8603482d14'
                         username:
                           type: string
-                          example: "username"
+                          example: 'username'
                         email:
                           type: string
-                          example: "email@example.com"
+                          example: 'email@example.com'
                         no_telepon:
                           type: string
-                          example: "081234567890"
+                          example: '081234567890'
                         jenis_kelamin:
                           type: string
-                          example: "pria"
+                          example: 'pria'
                         kota:
                           type: string
-                          example: "Jaksel"
+                          example: 'Jaksel'
                         provinsi:
                           type: string
-                          example: "Jakarta"
+                          example: 'Jakarta'
                   pagination:
                     type: object
                     properties:
@@ -428,6 +557,8 @@ paths:
         - Admin - Users
       summary: Menambah data user
       description: API untuk menambah pengguna baru.
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -437,34 +568,34 @@ paths:
               properties:
                 username:
                   type: string
-                  example: "username"
+                  example: 'username'
                 password:
                   type: string
-                  example: "12345678"
+                  example: '12345678'
                 nama_lengkap:
                   type: string
-                  example: "nama_lengkap"
+                  example: 'nama_lengkap'
                 bio:
                   type: string
-                  example: "bio"
+                  example: 'bio'
                 email:
                   type: string
-                  example: "email3@example.com"
+                  example: 'email3@example.com'
                 no_telepon:
                   type: string
-                  example: "081234567890"
+                  example: '081234567890'
                 foto_profil:
                   type: string
-                  example: "img.jpg"
+                  example: 'img.jpg'
                 jenis_kelamin:
                   type: string
-                  example: "pria"
+                  example: 'pria'
                 kota:
                   type: string
-                  example: "Jaksel"
+                  example: 'Jaksel'
                 provinsi:
                   type: string
-                  example: "Jakarta"
+                  example: 'Jakarta'
       responses:
         '201':
           description: Data User Berhasil Ditambah
@@ -475,10 +606,10 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Success"
+                    example: 'Success'
                   message:
                     type: string
-                    example: "data user berhasil ditambah"
+                    example: 'data user berhasil ditambah'
         '409':
           description: Conflict
           content:
@@ -488,10 +619,10 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Failed"
+                    example: 'Failed'
                   message:
                     type: string
-                    example: "gagal untuk menambah data user"
+                    example: 'gagal untuk menambah data user'
   /admin/users/{id}:
     get:
       tags:
@@ -504,6 +635,8 @@ paths:
           required: true
           schema:
             type: string
+      security:
+        - BearerAuth: []
       responses:
         '200':
           description: Data User Ditemukan
@@ -514,43 +647,43 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Success"
+                    example: 'Success'
                   message:
                     type: string
-                    example: "data user berhasil ditemukan"
+                    example: 'data user berhasil ditemukan'
                   data:
                     type: object
                     properties:
                       id:
                         type: string
-                        example: "803f6cc0-e598-4b59-a300-8b8603482d14"
+                        example: '803f6cc0-e598-4b59-a300-8b8603482d14'
                       username:
                         type: string
-                        example: "username"
+                        example: 'username'
                       nama_lengkap:
                         type: string
-                        example: "username lengkap"
+                        example: 'username lengkap'
                       bio:
                         type: string
-                        example: "bio"
+                        example: 'bio'
                       email:
                         type: string
-                        example: "email@example.com"
+                        example: 'email@example.com'
                       no_telepon:
                         type: string
-                        example: "081234567890"
+                        example: '081234567890'
                       foto_profil:
                         type: string
-                        example: "img.jpg"
+                        example: 'img.jpg'
                       jenis_kelamin:
                         type: string
-                        example: "pria"
+                        example: 'pria'
                       kota:
                         type: string
-                        example: "Jaksel"
+                        example: 'Jaksel'
                       provinsi:
                         type: string
-                        example: "Jakarta"
+                        example: 'Jakarta'
         '409':
           description: Conflict
           content:
@@ -560,15 +693,17 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Failed"
+                    example: 'Failed'
                   message:
                     type: string
-                    example: "Gagal untuk memperbarui data user"
+                    example: 'Gagal untuk memperbarui data user'
     put:
       tags:
         - Admin - Users
       summary: Data user diperbarui
       description: API untuk memperbarui data pengguna.
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -584,34 +719,34 @@ paths:
               properties:
                 username:
                   type: string
-                  example: "username"
+                  example: 'username'
                 password:
                   type: string
-                  example: "12345678"
+                  example: '12345678'
                 nama_lengkap:
                   type: string
-                  example: "nama_lengkap"
+                  example: 'nama_lengkap'
                 bio:
                   type: string
-                  example: "bio"
+                  example: 'bio'
                 email:
                   type: string
-                  example: "email3@example.com"
+                  example: 'email3@example.com'
                 no_telepon:
                   type: string
-                  example: "081234567890"
+                  example: '081234567890'
                 foto_profil:
                   type: string
-                  example: "img.jpg"
+                  example: 'img.jpg'
                 jenis_kelamin:
                   type: string
-                  example: "pria"
+                  example: 'pria'
                 kota:
                   type: string
-                  example: "Jaksel"
+                  example: 'Jaksel'
                 provinsi:
                   type: string
-                  example: "Jakarta"
+                  example: 'Jakarta'
       responses:
         '200':
           description: Data User Berhasil Diubah
@@ -622,10 +757,10 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Success"
+                    example: 'Success'
                   message:
                     type: string
-                    example: "data user berhasil diubah"
+                    example: 'data user berhasil diubah'
         '409':
           description: Conflict
           content:
@@ -635,15 +770,17 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Failed"
+                    example: 'Failed'
                   message:
                     type: string
-                    example: "Gagal untuk memperbarui data user"
+                    example: 'Gagal untuk memperbarui data user'
     delete:
       tags:
         - Admin - Users
       summary: Delete User
       description: API untuk menghapus pengguna.
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -660,10 +797,10 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Success"
+                    example: 'Success'
                   message:
                     type: string
-                    example: "data user berhasil dihapus"
+                    example: 'data user berhasil dihapus'
         '409':
           description: Conflict
           content:
@@ -673,12 +810,12 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Failed"
+                    example: 'Failed'
                   message:
                     type: string
-                    example: "User tidak ditemukan"
+                    example: 'User tidak ditemukan'
 
-  /destinations:
+  /mobile/destinations:
     get:
       tags:
         - Mobile - Destinations
@@ -717,7 +854,7 @@ paths:
             type: string
             description: filter berdasarkan kategori (masukkan id category)
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       responses:
         500:
           description: Internal Server Error
@@ -728,10 +865,10 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Failed"
+                    example: 'Failed'
                   message:
                     type: string
-                    example: "gagal untuk mendapatkan destinasi"
+                    example: 'gagal untuk mendapatkan destinasi'
         '200':
           description: Berhasil menampilkan destinasi
           content:
@@ -741,7 +878,7 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Success"
+                    example: 'Success'
                   data:
                     type: array
                     items:
@@ -749,29 +886,29 @@ paths:
                       properties:
                         id:
                           type: string
-                          example: "306d305e-3359-4884-8d38-89c04e8adea6"
+                          example: '306d305e-3359-4884-8d38-89c04e8adea6'
                         nama:
                           type: string
-                          example: "Kawah Ijen"
+                          example: 'Kawah Ijen'
                         url_media:
                           type: string
                           nullable: true
-                          example: "https://picsum.photos/300/200"
+                          example: 'https://picsum.photos/300/200'
                         provinsi:
                           type: string
-                          example: "Papua Barat"
+                          example: 'Papua Barat'
                         kota:
                           type: string
-                          example: "Jakarta"
+                          example: 'Jakarta'
                   pagination:
-                    $ref: "#/components/schemas/Pagination"
+                    $ref: '#/components/schemas/Pagination'
                   sort:
                     type: string
-                    example: "populer"
+                    example: 'populer'
                   filter:
                     type: string
-                    example: "Alam"
-  /destinations/{id}:
+                    example: 'Alam'
+  /mobile/destinations/{id}:
     get:
       summary: Mendapatkan destinasi berdasarkan ID
       tags:
@@ -784,7 +921,7 @@ paths:
             type: string
           description: ID dari destinasi
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       responses:
         '200':
           description: Berhasil mendapatkan destinasi
@@ -795,10 +932,10 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Success"
+                    example: 'Success'
                   message:
                     type: string
-                    example: "berhasil menampilkan destinasi"
+                    example: 'berhasil menampilkan destinasi'
                   data:
                     $ref: '#/components/schemas/DestinationResponse'
         '404':
@@ -810,10 +947,10 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Failed"
+                    example: 'Failed'
                   message:
                     type: string
-                    example: "Destinasi tidak ditemukan"
+                    example: 'Destinasi tidak ditemukan'
 components:
   schemas:
     Pagination:
@@ -837,90 +974,90 @@ components:
       properties:
         provinsi:
           type: string
-          example: "Sumatera Utara"
+          example: 'Sumatera Utara'
         kota:
           type: string
-          example: "Jakarta"
+          example: 'Jakarta'
         kabupaten:
           type: string
-          example: "Jakarta Pusat"
+          example: 'Jakarta Pusat'
         nama_jalan:
           type: string
-          example: "Jalan MH Thamrin"
+          example: 'Jalan MH Thamrin'
         kode_pos:
           type: string
-          example: "10110"
+          example: '10110'
 
     UrlImage:
       type: object
       properties:
         id_media:
           type: string
-          example: "1bde58e3-ef19-4daa-9df7-084ba5d3e941"
+          example: '1bde58e3-ef19-4daa-9df7-084ba5d3e941'
         url_media:
           type: string
-          example: "https://picsum.photos/300/200"
+          example: 'https://picsum.photos/300/200'
         tipe:
           type: string
-          example: "image"
+          example: 'image'
 
     UrlVideo:
       type: object
       properties:
         id_media:
           type: string
-          example: "1bde58e3-ef19-4daa-9df7-084ba5d3e931"
+          example: '1bde58e3-ef19-4daa-9df7-084ba5d3e931'
         url_media:
           type: string
-          example: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.video"
+          example: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.video'
         tipe:
           type: string
-          example: "video"
+          example: 'video'
         judul:
           type: string
-          example: "Tears of Steel 1"
+          example: 'Tears of Steel 1'
 
     Category:
       type: object
       properties:
         id_kategori:
           type: string
-          example: "eb77b590-b255-4ea1-b11a-d445a259ac41"
+          example: 'eb77b590-b255-4ea1-b11a-d445a259ac41'
         nama:
           type: string
-          example: "Alam"
+          example: 'Alam'
 
     Facility:
       type: object
       properties:
         id_fasilitas:
           type: string
-          example: "515cb2da-3361-48b8-99fd-bd894828efd3"
+          example: '515cb2da-3361-48b8-99fd-bd894828efd3'
         nama:
           type: string
-          example: "Area Parkir"
+          example: 'Area Parkir'
         url_logo:
           type: string
-          example: "https://picsum.photos/300/200"
+          example: 'https://picsum.photos/300/200'
 
     SimilarDestination:
       type: object
       properties:
         id:
           type: string
-          example: "306d305e-3359-4884-8d38-89c04e8adea6"
+          example: '306d305e-3359-4884-8d38-89c04e8adea6'
         nama:
           type: string
-          example: "Kawah Ijen"
+          example: 'Kawah Ijen'
         url_media:
           type: string
-          example: "https://picsum.photos/300/200"
+          example: 'https://picsum.photos/300/200'
         provinsi:
           type: string
-          example: "Sumatera Utara"
+          example: 'Sumatera Utara'
         kota:
           type: string
-          example: "Jakarta"
+          example: 'Jakarta'
         kategori:
           type: array
           items:
@@ -931,22 +1068,22 @@ components:
       properties:
         id_destinasi:
           type: string
-          example: "306d305e-3359-4884-8d38-89c04e8adea6"
+          example: '306d305e-3359-4884-8d38-89c04e8adea6'
         nama_destinasi:
           type: string
-          example: "Kawah Ijen"
+          example: 'Kawah Ijen'
         jam_buka:
           type: string
-          example: "08:00"
+          example: '08:00'
         jam_tutup:
           type: string
-          example: "17:00"
+          example: '17:00'
         harga_masuk:
           type: integer
           example: 100000
         deskripsi:
           type: string
-          example: "Kawah Ijen adalah sebuah kompleks gunung berapi di Banyuwangi, Jawa Timur, Indonesia."
+          example: 'Kawah Ijen adalah sebuah kompleks gunung berapi di Banyuwangi, Jawa Timur, Indonesia.'
         alamat_destinasi:
           $ref: '#/components/schemas/DestinationAddress'
         url_gambar:

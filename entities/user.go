@@ -19,6 +19,7 @@ type User struct {
 	Gender          string
 	City            string
 	Province        string
+	RefreshToken    string
 	EmailVerifiedAt *time.Time
 	CreatedAt       time.Time
 	UpdatedAt       time.Time

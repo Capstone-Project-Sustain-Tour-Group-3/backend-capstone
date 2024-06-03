@@ -56,6 +56,11 @@ jobs:
             DB_USERNAME=${{ secrets.DB_USERNAME }}
             DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             ACCESS_TOKEN_SECRET=${{ secrets.ACCESS_TOKEN_SECRET }}
+            REFRESH_TOKEN_SECRET=${{ secrets.REFRESH_TOKEN_SECRET }}
+            GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+            REDIS_ADDR=${{ secrets.REDIS_ADDR }}
+            REDIS_USERNAME=${{ secrets.REDIS_USERNAME }}
+            REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
           task-definition: ${{ secrets.ECS_TASK_DEFINITION }}
 
       - name: Deploy to Amazon ECS

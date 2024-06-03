@@ -15,5 +15,3 @@ jobs:
           go-version: '1.22.2'
       - name: Run usecase coverage
         run: go test -race -covermode=atomic -v ./usecases
-      - name: Build image
-        run: docker build -t build-test .

@@ -65,7 +65,6 @@ func IsValidImageType(fileHeader *multipart.FileHeader) bool {
 func IsValidImageSize(fileHeader *multipart.FileHeader) bool {
 	maxSize := 2 * 1024 * 1014
 	fileSize := fileHeader.Size
-	fmt.Println(fileSize, maxSize)
 	return fileSize <= int64(maxSize)
 }
 

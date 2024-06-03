@@ -2,7 +2,6 @@ package helpers
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"capstone/entities"
@@ -52,7 +51,50 @@ func GenerateAccessToken(user interface{}) (string, error) {
 		Username: username,
 		Role:     role,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(30 * time.Minute).Unix(),
+			ExpiresAt: time.Now().Add(5 * time.Minute).Unix(),
+			NotBefore: time.Now().Unix(),
+			IssuedAt:  time.Now().Unix(),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	signedString, err := token.SignedString(accessTokenSecret)
+	if err != nil {
+		return "", err
+	}
+	return signedString, nil
+}
+
+func GenerateRefreshToken(user interface{}) (string, error) {
+	accessTokenSecret := []byte(viper.GetString("REFRESH_TOKEN_SECRET"))
+
+	var role string
+	var userID uuid.UUID
+	var username string
+
+	switch u := user.(type) {
+	case *entities.User:
+		role = "user"
+		userID = u.Id
+		username = u.Username
+	case *entities.Admin:
+		userID = u.Id
+		username = u.Username
+		if u.Role == "super admin" {
+			role = "superadmin"
+		} else {
+			role = "admin"
+		}
+	default:
+		return "", errors.New("invalid user type")
+	}
+
+	claims := JWTClaims{
+		Id:       userID,
+		Username: username,
+		Role:     role,
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
 			NotBefore: time.Now().Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
@@ -68,7 +110,6 @@ func GenerateAccessToken(user interface{}) (string, error) {
 
 func ParseJWT(tokenStr string) (*JWTClaims, error) {
 	accessTokenSecret := []byte(viper.GetString("ACCESS_TOKEN_SECRET"))
-	fmt.Println(accessTokenSecret)
 	token, err := jwt.ParseWithClaims(tokenStr, &JWTClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return accessTokenSecret, nil
 	})

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
 
 	"capstone/dto"
@@ -37,7 +36,6 @@ func (h *authHandler) Register(ctx echo.Context) error {
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
-	fmt.Println(refId)
 	response := helpers.Response(dto.ResponseParams{
 		StatusCode: http.StatusCreated,
 		Message:    "Registrasi berhasil!",
@@ -98,7 +96,7 @@ func (h *authHandler) Login(ctx echo.Context) error {
 			Errors:  err,
 		})
 	}
-	loginResponse, err := h.usecase.Login(&req)
+	result, err := h.usecase.Login(&req)
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
@@ -106,7 +104,7 @@ func (h *authHandler) Login(ctx echo.Context) error {
 	response := helpers.Response(dto.ResponseParams{
 		StatusCode: http.StatusOK,
 		Message:    "Login berhasil!",
-		Data:       loginResponse,
+		Data:       result,
 	})
 	return ctx.JSON(http.StatusOK, response)
 }
@@ -141,6 +139,40 @@ func (h *authHandler) ForgotPassword(ctx echo.Context) error {
 	response := helpers.Response(dto.ResponseParams{
 		StatusCode: http.StatusOK,
 		Message:    "Password berhasil diubah",
+	})
+	return ctx.JSON(http.StatusOK, response)
+}
+
+func (h *authHandler) Logout(ctx echo.Context) error {
+	var req dto.RefreshTokenRequest
+	if err := ctx.Bind(&req); err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	err := h.usecase.Logout(req.RefreshToken)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "Logout berhasil!",
+	})
+	return ctx.JSON(http.StatusOK, response)
+}
+
+func (h *authHandler) GetNewAccessToken(ctx echo.Context) error {
+	var req dto.RefreshTokenRequest
+	if err := ctx.Bind(&req); err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	token, err := h.usecase.GetNewAccessToken(req.RefreshToken)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "Berhasil mendapatkan token baru",
+		Data:       token,
 	})
 	return ctx.JSON(http.StatusOK, response)
 }
