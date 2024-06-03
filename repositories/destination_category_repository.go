@@ -2,58 +2,59 @@ package repositories
 
 import (
 	"capstone/entities"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-type IFacilityRepository interface {
-	Create(facility *entities.Facility) error
-	FindAll() ([]entities.Facility, error)
-	FindById(id uuid.UUID) (*entities.Facility, error)
-	Update(facility *entities.Facility) error
-	Delete(facility *entities.Facility) error
+type IDestinationCategoryRepository interface {
+	Create(destinationCategory *entities.DestinationCategory) error
+	FindAll() ([]entities.DestinationCategory, error)
+	FindById(id uuid.UUID) (*entities.DestinationCategory, error)
+	Update(destinationCategory *entities.DestinationCategory) error
+	Delete(destinationCategory *entities.DestinationCategory) error
 }
 
-type FacilityRepository struct {
+type DestinationCategoryRepository struct {
 	db *gorm.DB
 }
 
-func NewFacilityRepository(db *gorm.DB) *FacilityRepository {
-	return &FacilityRepository{db}
+func NewDestinationCategoryRepository(db *gorm.DB) *DestinationCategoryRepository {
+	return &DestinationCategoryRepository{db}
 }
 
-func (r *FacilityRepository) Create(facility *entities.Facility) error {
-	if err := r.db.Create(facility).Error; err != nil {
+func (r *DestinationCategoryRepository) Create(destinationCategory *entities.DestinationCategory) error {
+	if err := r.db.Create(destinationCategory).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *FacilityRepository) FindAll() ([]entities.Facility, error) {
-	var facilities []entities.Facility
-	if err := r.db.Find(&facilities).Error; err != nil {
+func (r *DestinationCategoryRepository) FindAll() ([]entities.DestinationCategory, error) {
+	var destinationCategories []entities.DestinationCategory
+	if err := r.db.Find(&destinationCategories).Error; err != nil {
 		return nil, err
 	}
-	return facilities, nil
+	return destinationCategories, nil
 }
 
-func (r *FacilityRepository) FindById(id uuid.UUID) (*entities.Facility, error) {
-	var facility *entities.Facility
-	if err := r.db.Where("id = ?", id).First(&facility).Error; err != nil {
+func (r *DestinationCategoryRepository) FindById(id uuid.UUID) (*entities.DestinationCategory, error) {
+	var destinationCategory *entities.DestinationCategory
+	if err := r.db.Where("id = ?", id).First(&destinationCategory).Error; err != nil {
 		return nil, err
 	}
-	return facility, nil
+	return destinationCategory, nil
 }
 
-func (r *FacilityRepository) Update(facility *entities.Facility) error {
-	if err := r.db.Save(facility).Error; err != nil {
+func (r *DestinationCategoryRepository) Update(destinationCategory *entities.DestinationCategory) error {
+	if err := r.db.Save(destinationCategory).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *FacilityRepository) Delete(facility *entities.Facility) error {
-	if err := r.db.Delete(facility).Error; err != nil {
+func (r *DestinationCategoryRepository) Delete(destinationCategory *entities.DestinationCategory) error {
+	if err := r.db.Delete(destinationCategory).Error; err != nil {
 		return err
 	}
 	return nil

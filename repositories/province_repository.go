@@ -2,58 +2,59 @@ package repositories
 
 import (
 	"capstone/entities"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-type IFacilityRepository interface {
-	Create(facility *entities.Facility) error
-	FindAll() ([]entities.Facility, error)
-	FindById(id uuid.UUID) (*entities.Facility, error)
-	Update(facility *entities.Facility) error
-	Delete(facility *entities.Facility) error
+type IProvinceRepository interface {
+	Create(province *entities.Province) error
+	FindAll() ([]entities.Province, error)
+	FindById(id uuid.UUID) (*entities.Province, error)
+	Update(province *entities.Province) error
+	Delete(province *entities.Province) error
 }
 
-type FacilityRepository struct {
+type ProvinceRepository struct {
 	db *gorm.DB
 }
 
-func NewFacilityRepository(db *gorm.DB) *FacilityRepository {
-	return &FacilityRepository{db}
+func NewProvinceRepository(db *gorm.DB) *ProvinceRepository {
+	return &ProvinceRepository{db}
 }
 
-func (r *FacilityRepository) Create(facility *entities.Facility) error {
-	if err := r.db.Create(facility).Error; err != nil {
+func (r *ProvinceRepository) Create(province *entities.Province) error {
+	if err := r.db.Create(province).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *FacilityRepository) FindAll() ([]entities.Facility, error) {
-	var facilities []entities.Facility
-	if err := r.db.Find(&facilities).Error; err != nil {
+func (r *ProvinceRepository) FindAll() ([]entities.Province, error) {
+	var provinces []entities.Province
+	if err := r.db.Find(&provinces).Error; err != nil {
 		return nil, err
 	}
-	return facilities, nil
+	return provinces, nil
 }
 
-func (r *FacilityRepository) FindById(id uuid.UUID) (*entities.Facility, error) {
-	var facility *entities.Facility
-	if err := r.db.Where("id = ?", id).First(&facility).Error; err != nil {
+func (r *ProvinceRepository) FindById(id uuid.UUID) (*entities.Province, error) {
+	var province *entities.Province
+	if err := r.db.Where("id = ?", id).First(&province).Error; err != nil {
 		return nil, err
 	}
-	return facility, nil
+	return province, nil
 }
 
-func (r *FacilityRepository) Update(facility *entities.Facility) error {
-	if err := r.db.Save(facility).Error; err != nil {
+func (r *ProvinceRepository) Update(province *entities.Province) error {
+	if err := r.db.Save(province).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *FacilityRepository) Delete(facility *entities.Facility) error {
-	if err := r.db.Delete(facility).Error; err != nil {
+func (r *ProvinceRepository) Delete(province *entities.Province) error {
+	if err := r.db.Delete(province).Error; err != nil {
 		return err
 	}
 	return nil
