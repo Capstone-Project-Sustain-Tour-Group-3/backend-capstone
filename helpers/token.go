@@ -94,7 +94,7 @@ func GenerateRefreshToken(user interface{}) (string, error) {
 		Username: username,
 		Role:     role,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(24 * time.Hour).Unix(),
+			ExpiresAt: time.Now().Add(10 * time.Minute).Unix(),
 			NotBefore: time.Now().Unix(),
 			IssuedAt:  time.Now().Unix(),
 		},
