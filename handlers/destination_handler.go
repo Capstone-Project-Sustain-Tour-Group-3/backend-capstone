@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"encoding/json"
+	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -81,4 +83,37 @@ func (h *DestinationHandler) DetailDestination(ctx echo.Context) error {
 		Data:       destination,
 	})
 	return ctx.JSON(http.StatusOK, response)
+}
+
+func (h *DestinationHandler) CreateDestination(ctx echo.Context) error {
+	var req dto.CreateDestinationRequest
+
+	if err := ctx.Bind(&req); err != nil {
+		fmt.Println("masuk siniii")
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	reqJSON, _ := json.MarshalIndent(req, "", "  ")
+
+	fmt.Println(string(reqJSON))
+
+	if err := helpers.ValidateRequest(req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "failed",
+			Message: "permintaan tidak valid. silakan periksa kembali data yang anda masukkan.",
+			Errors:  err,
+		})
+	}
+
+	err := h.usecase.CreateDestination(&req)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusCreated,
+		Message:    "data destinasi berhasil ditambah",
+	})
+
+	return ctx.JSON(http.StatusCreated, response)
 }

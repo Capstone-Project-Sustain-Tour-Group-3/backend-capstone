@@ -1,6 +1,8 @@
 package dto
 
 import (
+	"mime/multipart"
+
 	"capstone/entities"
 
 	"github.com/google/uuid"
@@ -172,17 +174,63 @@ func ToDetailDestinationResponse(destination *entities.Destination, similarDesti
 	}
 }
 
+func ToDestinationFacilities(destinationId uuid.UUID, facilityIds []uuid.UUID) *[]entities.DestinationFacility {
+	var destinationFacilities []entities.DestinationFacility
+	for _, facilityId := range facilityIds {
+		destinationFacilities = append(destinationFacilities, entities.DestinationFacility{
+			DestinationId: destinationId,
+			FacilityId:    facilityId,
+		})
+	}
+	return &destinationFacilities
+}
+
+func ToDestinationMedia(destinationId uuid.UUID, mediaType string, mediaUrl string, title string) *entities.DestinationMedia {
+	return &entities.DestinationMedia{
+		Id:            uuid.New(),
+		DestinationId: destinationId,
+		Type:          mediaType,
+		Url:           mediaUrl,
+		Title:         title,
+	}
+}
+
+func ToDestinationAddress(destinationId uuid.UUID, request CreateDestinationAddressRequest) *entities.DestinationAddress {
+	return &entities.DestinationAddress{
+		ProvinceId:    request.ProvinceId,
+		CityId:        request.CityId,
+		SubdistrictId: request.SubdistrictId,
+		StreetName:    request.StreetName,
+		PostalCode:    request.PostalCode,
+		DestinationId: destinationId,
+	}
+}
+
+type CreateDestinationImageRequest struct {
+	File  multipart.File `json:"file" form:"file" validate:"required"`
+	Title string         `json:"judul" form:"judul" validate:"required"`
+}
+
+type CreateDestinationAddressRequest struct {
+	ProvinceId    string `json:"id_provinsi" form:"id_provinsi" validate:"required"`
+	CityId        string `json:"id_kota" form:"id_kota" validate:"required"`
+	SubdistrictId string `json:"id_kecamatan" form:"id_kecamatan" validate:"required"`
+	StreetName    string `json:"jalan" form:"jalan"`
+	PostalCode    string `json:"kode_pos" form:"kode_pos" validate:"required"`
+}
+
 type CreateDestinationRequest struct {
-	Name        string  `json:"nama_destinasi"`
-	Description string  `json:"deskripsi"`
-	OpenTime    string  `json:"jam_buka"`
-	CloseTime   string  `json:"jam_tutup"`
-	EntryPrice  float64 `json:"harga_masuk"`
-	// DestinationAddress *DestinationAddress  `json:"alamat_destinasi"`
-	// UrlImages          *[]UrlImage          `json:"url_gambar"`
-	// UrlVideos          *[]UrlVideo          `json:"url_video"`
-	// Categories         *[]Category          `json:"kategori"`
-	// Facilities         *[]Facility          `json:"fasilitas"`
+	Name               string                          `json:"nama_destinasi" form:"nama_destinasi" validate:"required"`
+	Description        string                          `json:"deskripsi" form:"deskripsi" validate:"required"`
+	OpenTime           string                          `json:"jam_buka" form:"jam_buka" validate:"required"`
+	CloseTime          string                          `json:"jam_tutup" form:"jam_tutup" validate:"required"`
+	EntryPrice         float64                         `json:"harga_masuk" form:"harga_masuk" validate:"required"`
+	CategoryId         uuid.UUID                       `json:"id_kategori" form:"id_kategori" validate:"required"`
+	Latitude           float64                         `json:"latitude" form:"latitude" validate:"required"`
+	Longitude          float64                         `json:"longitude" form:"longitude" validate:"required"`
+	FacilityIds        []uuid.UUID                     `json:"fasilitas" form:"fasilitas" validate:"required"`
+	DestinationImages  []CreateDestinationImageRequest `json:"gambar" form:"gambar"`
+	DestinationAddress CreateDestinationAddressRequest `json:"alamat_destinasi" form:"alamat_destinasi" validate:"required"`
 }
 
 type CreateDestinationResponse struct {
