@@ -8,7 +8,7 @@ import (
 )
 
 type IDestinationFacilityRepository interface {
-	Create(destinationFacility *entities.DestinationFacility) error
+	Create(destinationFacilities *[]entities.DestinationFacility) error
 	FindAll() ([]entities.DestinationFacility, error)
 	FindById(id uuid.UUID) (*entities.DestinationFacility, error)
 	Update(destinationFacility *entities.DestinationFacility) error
@@ -23,8 +23,8 @@ func NewDestinationFacilityRepository(db *gorm.DB) *DestinationFacilityRepositor
 	return &DestinationFacilityRepository{db}
 }
 
-func (r *DestinationFacilityRepository) Create(destinationFacility *entities.DestinationFacility) error {
-	if err := r.db.Create(destinationFacility).Error; err != nil {
+func (r *DestinationFacilityRepository) Create(destinationFacilities *[]entities.DestinationFacility) error {
+	if err := r.db.Create(destinationFacilities).Error; err != nil {
 		return err
 	}
 	return nil

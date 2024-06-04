@@ -6,10 +6,11 @@ import (
 	"gorm.io/gorm"
 )
 
-type Province struct {
+type Subdistrict struct {
 	Id        string
+	CityId    string
+	City      City
 	Name      string
-	Url       string
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt

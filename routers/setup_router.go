@@ -30,5 +30,8 @@ func SetupRouter(e *echo.Echo) {
 
 		user := v1Admin.Group("/users")
 		admin.UserRouter(user)
+
+		destination := v1Admin.Group("/destinations")
+		admin.DestinationRouter(destination)
 	}
 }

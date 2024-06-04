@@ -1,4 +1,4 @@
-package routers
+package admin
 
 import (
 	"capstone/config"
@@ -30,6 +30,5 @@ func DestinationRouter(r *echo.Group) {
 	)
 
 	handler := handlers.NewDestinationHandler(usecase)
-	r.GET("", handler.SearchDestinations)
-	r.GET("/:id", handler.DetailDestination)
+	r.POST("", handler.CreateDestination)
 }

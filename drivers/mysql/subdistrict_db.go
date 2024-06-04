@@ -3,14 +3,14 @@ package mysql
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-type Category struct {
-	Id        uuid.UUID      `gorm:"primaryKey;not null" json:"id"`
+type Subdistrict struct {
+	Id        string         `gorm:"primaryKey;type:char(6);not null" json:"id"`
+	City      City           `gorm:"foreignKey:CityId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"city"` //nolint:lll
+	CityId    string         `gorm:"type:char(4);index;not null" json:"city_id"`
 	Name      string         `gorm:"type:varchar(255);not null" json:"name"`
-	Url       string         `gorm:"type:varchar(255);not null" json:"url"`
 	CreatedAt time.Time      `gorm:"type:timestamp;default:current_timestamp"`
 	UpdatedAt time.Time      `gorm:"type:timestamp;default:current_timestamp on update current_timestamp"`
 	DeletedAt gorm.DeletedAt `json:"deleted_at"`
