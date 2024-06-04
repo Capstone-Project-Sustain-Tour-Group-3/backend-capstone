@@ -5,9 +5,9 @@ import (
 )
 
 type ProvinceResponse struct {
-	Id   uuid.UUID `json:"id"`
-	Name string    `json:"nama"`
-	Url  string    `json:"url"`
+	Id   string `json:"id"`
+	Name string `json:"nama"`
+	Url  string `json:"url"`
 }
 
 type CategoryResponse struct {

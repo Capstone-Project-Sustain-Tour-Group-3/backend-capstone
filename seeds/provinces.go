@@ -197,7 +197,6 @@ func (s Seed) SeedProvinces() {
 
 	for _, province := range provinces {
 		if err := s.db.Where(entities.Province{Name: province.Name}).
-			Assign(entities.Province{Url: province.Url}).
 			FirstOrCreate(&province).Error; err != nil {
 			log.Fatalf("failed to create province: %v", err)
 		}

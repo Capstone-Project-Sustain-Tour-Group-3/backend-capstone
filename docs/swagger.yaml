@@ -979,6 +979,8 @@ paths:
       summary: Create a new destination
       tags:
         - Admin - Destinations
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:

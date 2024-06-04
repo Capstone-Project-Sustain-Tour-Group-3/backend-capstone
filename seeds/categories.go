@@ -17,7 +17,6 @@ func (s Seed) SeedCategories() {
 
 	for _, category := range categories {
 		if err := s.db.Where(entities.Category{Name: category.Name}).
-			Assign(entities.Category{Url: category.Url}).
 			FirstOrCreate(&category).Error; err != nil {
 			log.Fatalf("failed to create category: %v", err)
 		}
