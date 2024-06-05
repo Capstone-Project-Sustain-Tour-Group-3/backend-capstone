@@ -128,7 +128,6 @@ func (h *DestinationHandler) GetDestinationById(ctx echo.Context) error {
 		return errorHandlers.HandleError(ctx, err)
 	}
 	destination, err := h.usecase.GetDestinationById(destinationId)
-
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
@@ -199,7 +198,6 @@ func (h *DestinationHandler) CreateDestination(ctx echo.Context) error {
 	}
 
 	err := h.usecase.CreateDestination(&req)
-
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}

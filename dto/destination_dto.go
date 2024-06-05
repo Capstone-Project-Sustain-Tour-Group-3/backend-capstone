@@ -199,7 +199,6 @@ func ToFacilities(destination *entities.Destination) *[]Facility {
 }
 
 func ToDetailDestinationResponse(destination *entities.Destination, similarDestinations *[]entities.Destination) *DetailDestinationResponse {
-
 	return &DetailDestinationResponse{
 		Id:          destination.Id,
 		Name:        destination.Name,
@@ -223,7 +222,6 @@ func ToDetailDestinationResponse(destination *entities.Destination, similarDesti
 }
 
 func ToGetByIdDestinationResponse(destination *entities.Destination) *GetByIdDestinationResponse {
-
 	return &GetByIdDestinationResponse{
 		Id:          destination.Id,
 		Name:        destination.Name,

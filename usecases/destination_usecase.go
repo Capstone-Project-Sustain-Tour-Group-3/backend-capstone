@@ -131,7 +131,6 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 
 func (uc *DestinationUsecase) GetAllDestinations(page, limit int, searchQuery string) (*int64, *[]dto.GetAllDestination, error) {
 	_, total, destinations, err := uc.destinationRepo.FindAll(page, limit, searchQuery, "", "")
-
 	if err != nil {
 		return nil, nil, err
 	}
