@@ -5,12 +5,15 @@ import (
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/repositories"
+
+	"github.com/devfeel/mapper"
 )
 
 type AdminUsecase interface {
 	Login(request *dto.LoginAdminRequest) (*dto.LoginAdminResponse, error)
 	Logout(token string) error
 	GetNewAccessToken(refreshToken string) (*dto.NewToken, error)
+	GetAllAdmins(page, limit int, search string) (*[]dto.GetAllAdminResponse, *int64, error)
 }
 
 type adminUsecase struct {
@@ -81,4 +84,19 @@ func (uc *adminUsecase) GetNewAccessToken(refreshToken string) (*dto.NewToken, e
 		AccessToken: accessToken,
 	}
 	return token, nil
+}
+
+func (uc *adminUsecase) GetAllAdmins(page, limit int, search string) (*[]dto.GetAllAdminResponse, *int64, error) {
+	admins, total, err := uc.repository.FindAll((page-1)*limit, limit, search)
+	if err != nil {
+		return nil, nil, &errorHandlers.InternalServerError{Message: "Gagal mendapatkan data admin"}
+	}
+
+	res := new([]dto.GetAllAdminResponse)
+	err = mapper.MapperSlice(admins, res)
+	if err != nil {
+		return nil, nil, &errorHandlers.InternalServerError{Message: "Gagal mendapatkan data admin"}
+	}
+
+	return res, total, nil
 }

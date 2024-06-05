@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"math"
 	"net/http"
+	"strconv"
 
 	"capstone/dto"
 	"capstone/errorHandlers"
@@ -93,5 +95,41 @@ func (h *adminHandler) GetNewAccessToken(ctx echo.Context) error {
 		Message:    "Token berhasil diperbarui!",
 		Data:       result,
 	})
+	return ctx.JSON(http.StatusOK, response)
+}
+
+func (h *adminHandler) GetAllAdmins(ctx echo.Context) error {
+	page, err := strconv.Atoi(ctx.QueryParam("page"))
+	if page == 0 || err != nil {
+		page = 1
+	}
+	limit, err := strconv.Atoi(ctx.QueryParam("limit"))
+	if limit == 0 || err != nil {
+		limit = 10
+	}
+	searchQuery := ctx.QueryParam("search")
+
+	res, totalPtr, err := h.usecase.GetAllAdmins(page, limit, searchQuery)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	total := *totalPtr
+	lastPage := int(math.Ceil(float64(total) / float64(limit)))
+	if page > lastPage {
+		page = lastPage
+	}
+
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode:  http.StatusOK,
+		Message:     "Berhasil mendapatkan data admin",
+		Data:        res,
+		IsPaginate:  true,
+		Total:       total,
+		PerPage:     len(*res),
+		CurrentPage: page,
+		LastPage:    lastPage,
+	})
+
 	return ctx.JSON(http.StatusOK, response)
 }
