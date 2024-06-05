@@ -107,7 +107,7 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 	}
 
 	for _, image := range destinationReq.DestinationImages {
-		urlMedia, errFile := uc.cloudinaryClient.UploadImage(image.File)
+		urlMedia, errFile := uc.cloudinaryClient.UploadImage(image.File, "destinations")
 
 		if errFile != nil {
 			return fmt.Errorf("error when upload image to cloud: %w", errFile)
