@@ -71,8 +71,10 @@ type UserDetailRequest struct {
 	Provinsi     string                `form:"provinsi" validate:"required"`
 }
 
-type ChangeEmailRequest struct {
-	Email string `json:"email" validate:"required,email"`
+type ChangePasswordRequest struct {
+	PasswordLama       string `json:"password_lama" validate:"required"`
+	PasswordBaru       string `json:"password_baru" validate:"required,min=8"`
+	KonfirmasiPassword string `json:"konfirmasi_password" validate:"required,min=8"`
 }
 
 func ToFindAllUserResponse(user *[]entities.User) *[]findAllUserResponse {

@@ -16,6 +16,7 @@ import (
 type ProfileUsecase interface {
 	GetDetailUser(id uuid.UUID) (*entities.User, error)
 	InsertUserDetail(request *dto.UserDetailRequest, id uuid.UUID) error
+	ChangePassword(request *dto.ChangePasswordRequest, id uuid.UUID) error
 }
 
 type profileUsecase struct {
@@ -40,6 +41,12 @@ func (uc *profileUsecase) InsertUserDetail(request *dto.UserDetailRequest, id uu
 	if user == nil {
 		return &errorHandlers.ConflictError{Message: "User tidak ditemukan"}
 	}
+	if request.Email != user.Email {
+		existEmail, _ := uc.userRepo.FindByEmail(request.Email)
+		if existEmail != nil {
+			return &errorHandlers.ConflictError{Message: "Email sudah digunakan"}
+		}
+	}
 
 	user.Username = request.Username
 	user.Fullname = request.NamaLengkap
@@ -49,13 +56,6 @@ func (uc *profileUsecase) InsertUserDetail(request *dto.UserDetailRequest, id uu
 	user.City = request.Kota
 	user.Province = request.Provinsi
 	user.Email = request.Email
-
-	if user.Email != request.Email {
-		isExist, _ := uc.userRepo.FindByEmail(request.Email)
-		if isExist != nil {
-			return &errorHandlers.ConflictError{Message: "Email sudah terdaftar"}
-		}
-	}
 
 	if err := uc.handleProfilePictureUpdate(request, user); err != nil {
 		return err
@@ -96,5 +96,31 @@ func (uc *profileUsecase) handleProfilePictureUpdate(request *dto.UserDetailRequ
 	}
 	user.ProfileImageUrl = &urlMedia
 
+	return nil
+}
+
+func (uc *profileUsecase) ChangePassword(request *dto.ChangePasswordRequest, id uuid.UUID) error {
+	user, _ := uc.userRepo.FindById(id)
+	if user == nil {
+		return &errorHandlers.ConflictError{Message: "User tidak ditemukan"}
+	}
+
+	if err := helpers.VerifyPassword(user.Password, request.PasswordLama); err != nil {
+		return &errorHandlers.ConflictError{Message: "Password lama tidak valid"}
+	}
+
+	if request.PasswordBaru != request.KonfirmasiPassword {
+		return &errorHandlers.BadRequestError{Message: "Password dan konfirmasi password tidak cocok"}
+	}
+
+	hashPassword, err := helpers.HashPassword(request.PasswordBaru)
+	if err != nil {
+		return &errorHandlers.InternalServerError{Message: "Gagal hashing password"}
+	}
+	user.Password = hashPassword
+
+	if err = uc.userRepo.Update(user); err != nil {
+		return &errorHandlers.InternalServerError{Message: "Gagal untuk memperbarui password"}
+	}
 	return nil
 }
