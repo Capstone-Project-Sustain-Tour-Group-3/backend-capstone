@@ -1,6 +1,8 @@
 package usecases
 
 import (
+	"errors"
+
 	"capstone/dto"
 	"capstone/entities"
 	"capstone/errorHandlers"
@@ -8,6 +10,7 @@ import (
 
 	"github.com/devfeel/mapper"
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type PersonalizationUsecase interface {
@@ -67,20 +70,46 @@ func (r *personalizationUsecase) GetCategories() (*[]dto.CategoryResponse, error
 }
 
 func (r *personalizationUsecase) CreatePersonalization(request *dto.PersonalizationRequest, userID uuid.UUID) error {
-	var userPersonalizations []*entities.UserPersonalization
+	id := uuid.New()
 
-	for _, v := range request.ProvinceIds {
-		userPersonalizations = append(userPersonalizations, &entities.UserPersonalization{
-			Id:         uuid.New(),
-			UserId:     userID,
-			ProvinceId: v,
-			CategoryId: request.CategoryId,
-		})
+	var persCategories []entities.PersonalizationCategory
+	var persProvinces []entities.PersonalizationProvince
+
+	for _, category := range request.CategoryIds {
+		persCategories = append(
+			persCategories,
+			entities.PersonalizationCategory{
+				Id:         uuid.New(),
+				CategoryId: category,
+			},
+		)
 	}
 
-	err := r.userPersonalizationRepo.Create(userPersonalizations)
+	for _, province := range request.ProvinceIds {
+		persProvinces = append(
+			persProvinces,
+			entities.PersonalizationProvince{
+				Id:         uuid.New(),
+				ProvinceId: province,
+			},
+		)
+	}
+
+	userPersonalization := &entities.UserPersonalization{
+		Id:                        id,
+		UserId:                    userID,
+		PersonalizationCategories: persCategories,
+		PersonalizationProvinces:  persProvinces,
+	}
+
+	err := r.userPersonalizationRepo.Create(userPersonalization)
 	if err != nil {
-		return &errorHandlers.InternalServerError{Message: "Gagal untuk membuat personalisasi"}
+		switch {
+		case errors.Is(err, gorm.ErrDuplicatedKey):
+			return &errorHandlers.ConflictError{Message: "Personalisasi sudah dibuat"}
+		default:
+			return &errorHandlers.InternalServerError{Message: "Gagal untuk membuat personalisasi"}
+		}
 	}
 
 	return nil
