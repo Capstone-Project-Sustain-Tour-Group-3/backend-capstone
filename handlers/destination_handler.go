@@ -158,12 +158,6 @@ func (h *DestinationHandler) CreateDestination(ctx echo.Context) error {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid fasilitas"})
 	}
 
-	if gambar := ctx.FormValue("gambar"); gambar != "" && gambar != "null" {
-		if err := json.Unmarshal([]byte(gambar), &req.DestinationImages); err != nil {
-			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid gambar"})
-		}
-	}
-
 	if err := json.Unmarshal([]byte(ctx.FormValue("alamat_destinasi")), &req.DestinationAddress); err != nil {
 		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid alamat_destinasi"})
 	}
@@ -179,9 +173,14 @@ func (h *DestinationHandler) CreateDestination(ctx echo.Context) error {
 		}
 		defer file.Close()
 
+		var judul []string
+		if err = json.Unmarshal([]byte(ctx.FormValue("judul")), &judul); err != nil {
+			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid judul"})
+		}
+
 		req.DestinationImages = append(req.DestinationImages, dto.CreateDestinationImageRequest{
 			File:  file, // atau simpan dalam format yang diperlukan
-			Title: ctx.FormValue(fmt.Sprintf("judul[%d]", i)),
+			Title: judul[i],
 		})
 	}
 

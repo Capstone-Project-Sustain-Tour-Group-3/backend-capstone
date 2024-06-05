@@ -246,6 +246,7 @@ func ToDestinationFacilities(destinationId uuid.UUID, facilityIds []uuid.UUID) *
 	var destinationFacilities []entities.DestinationFacility
 	for _, facilityId := range facilityIds {
 		destinationFacilities = append(destinationFacilities, entities.DestinationFacility{
+			Id:            uuid.New(),
 			DestinationId: destinationId,
 			FacilityId:    facilityId,
 		})
@@ -265,6 +266,7 @@ func ToDestinationMedia(destinationId uuid.UUID, mediaType string, mediaUrl stri
 
 func ToDestinationAddress(destinationId uuid.UUID, request CreateDestinationAddressRequest) *entities.DestinationAddress {
 	return &entities.DestinationAddress{
+		Id:            uuid.New(),
 		ProvinceId:    request.ProvinceId,
 		CityId:        request.CityId,
 		SubdistrictId: request.SubdistrictId,

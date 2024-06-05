@@ -27,6 +27,10 @@ type DestinationUsecase struct {
 	destinationMediaRepo    repositories.IDestinationMediaRepository
 	destinationAddressRepo  repositories.IDestinationAddressRepository
 	categoryRepo            repositories.ICategoryRepository
+	facilityRepo            repositories.IFacilityRepository
+	provinceRepo            repositories.IProvinceRepository
+	cityRepo                repositories.ICityRepository
+	subdistrictRepo         repositories.ISubdistrictRepository
 	cloudinaryClient        cloudinary.ICloudinaryClient
 }
 
@@ -36,6 +40,10 @@ func NewDestinationUsecase(
 	destinationMediaRepo repositories.IDestinationMediaRepository,
 	destinationAddressRepo repositories.IDestinationAddressRepository,
 	categoryRepo repositories.ICategoryRepository,
+	facilityRepo repositories.IFacilityRepository,
+	provinceRepo repositories.IProvinceRepository,
+	cityRepo repositories.ICityRepository,
+	subdistrictRepo repositories.ISubdistrictRepository,
 	cloudinaryClient cloudinary.ICloudinaryClient,
 ) *DestinationUsecase {
 	return &DestinationUsecase{
@@ -44,6 +52,10 @@ func NewDestinationUsecase(
 		destinationMediaRepo,
 		destinationAddressRepo,
 		categoryRepo,
+		facilityRepo,
+		provinceRepo,
+		cityRepo,
+		subdistrictRepo,
 		cloudinaryClient,
 	}
 }
@@ -75,11 +87,7 @@ func (uc *DestinationUsecase) DetailDestination(id uuid.UUID) (*dto.DetailDestin
 
 func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestinationRequest) error {
 	category, err := uc.categoryRepo.FindById(destinationReq.CategoryId)
-	if err != nil {
-		return errors.New("category not found")
-	}
-
-	if category == nil {
+	if err != nil || category == nil {
 		return errors.New("category not found")
 	}
 
@@ -121,6 +129,27 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 	}
 
 	destinationAddress := dto.ToDestinationAddress(destination.Id, destinationReq.DestinationAddress)
+
+	// check province
+	province, err := uc.provinceRepo.FindById(destinationAddress.ProvinceId)
+
+	if err != nil || province == nil {
+		return errors.New("province not found")
+	}
+
+	// check city
+	city, err := uc.cityRepo.FindById(destinationAddress.CityId)
+
+	if err != nil || city == nil {
+		return errors.New("city not found")
+	}
+
+	// check subdistrict
+	subdistrict, err := uc.subdistrictRepo.FindById(destinationAddress.SubdistrictId)
+
+	if err != nil || subdistrict == nil {
+		return errors.New("subdistrict not found")
+	}
 
 	if err = uc.destinationAddressRepo.Create(destinationAddress); err != nil {
 		return fmt.Errorf("error when create destination address: %w", err)
