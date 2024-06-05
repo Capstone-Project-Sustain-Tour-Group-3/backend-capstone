@@ -376,21 +376,11 @@ paths:
                     example: 'Logout berhasil!'
 
   /admin/auth/token:
-    post:
+    get:
       tags:
         - Admin - Auth
       summary: Mendapatkan Token Baru
       description: API untuk mendapatkan token baru.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                refresh_token:
-                  type: string
-                  example: token
       responses:
         '200':
           description: Berhasil Mendapatkan Token Baru
