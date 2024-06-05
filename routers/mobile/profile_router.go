@@ -2,6 +2,7 @@ package routers
 
 import (
 	"capstone/config"
+	"capstone/externals/cloudinary"
 	"capstone/handlers"
 	"capstone/middlewares"
 	"capstone/repositories"
@@ -13,8 +14,8 @@ import (
 func ProfileRouter(r *echo.Group) {
 	r.Use(middlewares.JWTMiddleware)
 	repository := repositories.NewUserRepository(config.DB)
-	cacheRepo := repositories.NewCacheRepository()
-	usecase := usecases.NewProfileUsecase(repository, cacheRepo)
+	cloudinaryClient := cloudinary.NewCloudinaryClient(config.ENV.CLOUDINARY_URL)
+	usecase := usecases.NewProfileUsecase(repository, cloudinaryClient)
 	handler := handlers.NewProfileHandler(usecase)
 	r.GET("", handler.GetDetailUser)
 	r.PUT("", handler.InsertUserDetail)

@@ -15,7 +15,7 @@ type User struct {
 	Fullname        string
 	Bio             string
 	PhoneNumber     string
-	ProfileImageUrl string
+	ProfileImageUrl *string
 	Gender          string
 	City            string
 	Province        string

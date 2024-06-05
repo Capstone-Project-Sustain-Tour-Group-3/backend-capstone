@@ -52,7 +52,7 @@ func ToFindByIdResponse(user *entities.User) *findByIdResponse {
 		Bio:          user.Bio,
 		Email:        user.Email,
 		NoTelepon:    user.PhoneNumber,
-		FotoProfil:   user.ProfileImageUrl,
+		FotoProfil:   *user.ProfileImageUrl,
 		JenisKelamin: user.Gender,
 		Kota:         user.City,
 		Provinsi:     user.Province,
@@ -69,6 +69,10 @@ type UserDetailRequest struct {
 	JenisKelamin string                `form:"jenis_kelamin" validate:"required"`
 	Kota         string                `form:"kota" validate:"required"`
 	Provinsi     string                `form:"provinsi" validate:"required"`
+}
+
+type ChangeEmailRequest struct {
+	Email string `json:"email" validate:"required,email"`
 }
 
 func ToFindAllUserResponse(user *[]entities.User) *[]findAllUserResponse {

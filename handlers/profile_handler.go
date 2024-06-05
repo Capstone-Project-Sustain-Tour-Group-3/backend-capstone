@@ -66,8 +66,7 @@ func (h *profileHandler) InsertUserDetail(ctx echo.Context) error {
 
 	fmt.Println(req)
 
-	_, err = h.usecase.InsertUserDetail(&req, *uid)
-	if err != nil {
+	if err = h.usecase.InsertUserDetail(&req, *uid); err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
 
