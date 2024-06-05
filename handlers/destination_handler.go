@@ -85,6 +85,62 @@ func (h *DestinationHandler) DetailDestination(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response)
 }
 
+func (h *DestinationHandler) GetAllDestinations(ctx echo.Context) error {
+	page, _ := strconv.Atoi(ctx.QueryParam("page"))
+	if page == 0 {
+		page = 1
+	}
+	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
+	if limit == 0 {
+		limit = 10
+	}
+	searchQuery := ctx.QueryParam("search")
+
+	totalPtr, destinations, err := h.usecase.GetAllDestinations(page, limit, searchQuery)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	total := *totalPtr
+	lastPage := int(math.Ceil(float64(total) / float64(limit)))
+	if page > lastPage {
+		page = lastPage
+	}
+
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode:  http.StatusOK,
+		Message:     "berhasil menampilkan destinasi",
+		Data:        destinations,
+		IsPaginate:  true,
+		Total:       total,
+		PerPage:     limit,
+		CurrentPage: page,
+		LastPage:    lastPage,
+	})
+
+	return ctx.JSON(http.StatusOK, response)
+}
+
+func (h *DestinationHandler) GetDestinationById(ctx echo.Context) error {
+	id := ctx.Param("id")
+	destinationId, err := uuid.Parse(id)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	destination, err := h.usecase.GetDestinationById(destinationId)
+
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "berhasil menampilkan destinasi",
+		Data:       destination,
+	})
+	return ctx.JSON(http.StatusOK, response)
+}
+
 func (h *DestinationHandler) CreateDestination(ctx echo.Context) error {
 	var req dto.CreateDestinationRequest
 

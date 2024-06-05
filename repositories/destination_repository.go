@@ -37,6 +37,7 @@ func (r *DestinationRepository) FindById(id uuid.UUID) (*entities.Destination, e
 		Preload("DestinationAddress").
 		Preload("DestinationAddress.Province").
 		Preload("DestinationAddress.City").
+		Preload("DestinationAddress.Subdistrict").
 		First(&destination).Error; err != nil {
 		return nil, err
 	}
@@ -88,6 +89,7 @@ func (r *DestinationRepository) FindAll(page, limit int, searchQuery, sortQuery,
 		Preload("DestinationAddress").
 		Preload("DestinationAddress.Province").
 		Preload("DestinationAddress.City").
+		Preload("DestinationAddress.Subdistrict").
 		Preload("Category").
 		Find(&destinations).
 		Error; err != nil {
