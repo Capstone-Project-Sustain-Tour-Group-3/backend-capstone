@@ -13,7 +13,7 @@ import (
 )
 
 type ICloudinaryClient interface {
-	UploadImage(file multipart.File) (string, error)
+	UploadImage(file multipart.File, folder string) (string, error)
 	DeleteImage(mediaUrl string) error
 }
 
@@ -30,10 +30,10 @@ func NewCloudinaryClient(apiUrl string) *CloudinaryClient {
 	return &CloudinaryClient{client: client}
 }
 
-func (c *CloudinaryClient) UploadImage(file multipart.File) (string, error) {
+func (c *CloudinaryClient) UploadImage(file multipart.File, folder string) (string, error) {
 	ctx := context.Background()
 
-	result, err := c.client.Upload.Upload(ctx, file, uploader.UploadParams{Folder: "tourease"})
+	result, err := c.client.Upload.Upload(ctx, file, uploader.UploadParams{Folder: fmt.Sprintf("tourease/%s", folder)})
 	if err != nil {
 		return "", err
 	}

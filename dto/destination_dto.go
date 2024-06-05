@@ -17,6 +17,16 @@ type SearchDestination struct {
 	Category Category  `json:"kategori"`
 }
 
+type GetAllDestination struct {
+	Id                 uuid.UUID           `json:"id"`
+	Name               string              `json:"nama"`
+	OpenTime           string              `json:"jam_buka"`
+	CloseTime          string              `json:"jam_tutup"`
+	EntryPrice         float64             `json:"harga_masuk"`
+	Category           Category            `json:"kategori"`
+	DestinationAddress *DestinationAddress `json:"alamat"`
+}
+
 func ToSearchDestinationsResponse(destinations *[]entities.Destination) *[]SearchDestination {
 	responses := make([]SearchDestination, len(*destinations))
 
@@ -34,6 +44,30 @@ func ToSearchDestinationsResponse(destinations *[]entities.Destination) *[]Searc
 			Province: destination.DestinationAddress.Province.Name,
 			City:     destination.DestinationAddress.City.Name,
 			Category: *ToCategory(&destination),
+		}
+	}
+
+	return &responses
+}
+
+func ToGetAllDestinationsResponse(destinations *[]entities.Destination) *[]GetAllDestination {
+	responses := make([]GetAllDestination, len(*destinations))
+
+	for idx, destination := range *destinations {
+		responses[idx] = GetAllDestination{
+			Id:         destination.Id,
+			Name:       destination.Name,
+			OpenTime:   destination.OpenTime,
+			CloseTime:  destination.CloseTime,
+			EntryPrice: destination.EntryPrice,
+			Category:   *ToCategory(&destination),
+			DestinationAddress: &DestinationAddress{
+				Province:    destination.DestinationAddress.Province.Name,
+				City:        destination.DestinationAddress.City.Name,
+				Subdistrict: destination.DestinationAddress.Subdistrict.Name,
+				StreetName:  destination.DestinationAddress.StreetName,
+				PostalCode:  destination.DestinationAddress.PostalCode,
+			},
 		}
 	}
 
@@ -101,6 +135,19 @@ type DetailDestinationResponse struct {
 	Categories         *Category            `json:"kategori"`
 	Facilities         *[]Facility          `json:"fasilitas"`
 	SimilarDestination *[]SearchDestination `json:"destinasi_serupa"`
+}
+
+type GetByIdDestinationResponse struct {
+	Id                 uuid.UUID           `json:"id_destinasi"`
+	Name               string              `json:"nama_destinasi"`
+	OpenTime           string              `json:"jam_buka"`
+	CloseTime          string              `json:"jam_tutup"`
+	EntryPrice         float64             `json:"harga_masuk"`
+	Description        string              `json:"deskripsi"`
+	DestinationAddress *DestinationAddress `json:"alamat_destinasi"`
+	UrlImages          *[]UrlImage         `json:"url_gambar"`
+	Categories         *Category           `json:"kategori"`
+	Facilities         *[]Facility         `json:"fasilitas"`
 }
 
 func ToUrlImages(destination *entities.Destination) *[]UrlImage {
@@ -174,6 +221,27 @@ func ToDetailDestinationResponse(destination *entities.Destination, similarDesti
 	}
 }
 
+func ToGetByIdDestinationResponse(destination *entities.Destination) *GetByIdDestinationResponse {
+	return &GetByIdDestinationResponse{
+		Id:          destination.Id,
+		Name:        destination.Name,
+		OpenTime:    destination.OpenTime,
+		CloseTime:   destination.CloseTime,
+		EntryPrice:  destination.EntryPrice,
+		Description: destination.Description,
+		DestinationAddress: &DestinationAddress{
+			Province:    destination.DestinationAddress.Province.Name,
+			City:        destination.DestinationAddress.City.Name,
+			Subdistrict: destination.DestinationAddress.Subdistrict.Name,
+			StreetName:  destination.DestinationAddress.StreetName,
+			PostalCode:  destination.DestinationAddress.PostalCode,
+		},
+		UrlImages:  ToUrlImages(destination),
+		Categories: ToCategory(destination),
+		Facilities: ToFacilities(destination),
+	}
+}
+
 func ToDestinationFacilities(destinationId uuid.UUID, facilityIds []uuid.UUID) *[]entities.DestinationFacility {
 	var destinationFacilities []entities.DestinationFacility
 	for _, facilityId := range facilityIds {
@@ -230,7 +298,7 @@ type CreateDestinationRequest struct {
 	Longitude          float64                         `json:"longitude" form:"longitude" validate:"required"`
 	FacilityIds        []uuid.UUID                     `json:"fasilitas" form:"fasilitas" validate:"required"`
 	DestinationImages  []CreateDestinationImageRequest `json:"gambar" form:"gambar"`
-	DestinationAddress CreateDestinationAddressRequest `json:"alamat_destinasi" form:"alamat_destinasi" validate:"required"`
+	DestinationAddress CreateDestinationAddressRequest `json:"alamat_destinasi" form:"alamat_destinasi"`
 }
 
 type CreateDestinationResponse struct {

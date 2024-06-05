@@ -85,12 +85,104 @@ func (h *DestinationHandler) DetailDestination(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response)
 }
 
+func (h *DestinationHandler) GetAllDestinations(ctx echo.Context) error {
+	page, _ := strconv.Atoi(ctx.QueryParam("page"))
+	if page == 0 {
+		page = 1
+	}
+	limit, _ := strconv.Atoi(ctx.QueryParam("limit"))
+	if limit == 0 {
+		limit = 10
+	}
+	searchQuery := ctx.QueryParam("search")
+
+	totalPtr, destinations, err := h.usecase.GetAllDestinations(page, limit, searchQuery)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	total := *totalPtr
+	lastPage := int(math.Ceil(float64(total) / float64(limit)))
+	if page > lastPage {
+		page = lastPage
+	}
+
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode:  http.StatusOK,
+		Message:     "berhasil menampilkan destinasi",
+		Data:        destinations,
+		IsPaginate:  true,
+		Total:       total,
+		PerPage:     limit,
+		CurrentPage: page,
+		LastPage:    lastPage,
+	})
+
+	return ctx.JSON(http.StatusOK, response)
+}
+
+func (h *DestinationHandler) GetDestinationById(ctx echo.Context) error {
+	id := ctx.Param("id")
+	destinationId, err := uuid.Parse(id)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	destination, err := h.usecase.GetDestinationById(destinationId)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "berhasil menampilkan destinasi",
+		Data:       destination,
+	})
+	return ctx.JSON(http.StatusOK, response)
+}
+
 func (h *DestinationHandler) CreateDestination(ctx echo.Context) error {
 	var req dto.CreateDestinationRequest
 
-	if err := ctx.Bind(&req); err != nil {
-		fmt.Println("masuk siniii")
-		return errorHandlers.HandleError(ctx, err)
+	// Bind basic fields
+	req.Name = ctx.FormValue("nama_destinasi")
+	req.Description = ctx.FormValue("deskripsi")
+	req.OpenTime = ctx.FormValue("jam_buka")
+	req.CloseTime = ctx.FormValue("jam_tutup")
+	req.EntryPrice, _ = strconv.ParseFloat(ctx.FormValue("harga_masuk"), 64)
+	req.CategoryId, _ = uuid.Parse(ctx.FormValue("id_kategori"))
+	req.Latitude, _ = strconv.ParseFloat(ctx.FormValue("latitude"), 64)
+	req.Longitude, _ = strconv.ParseFloat(ctx.FormValue("longitude"), 64)
+
+	// Unmarshal nested JSON fields
+	if err := json.Unmarshal([]byte(ctx.FormValue("fasilitas")), &req.FacilityIds); err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid fasilitas"})
+	}
+
+	if gambar := ctx.FormValue("gambar"); gambar != "" && gambar != "null" {
+		if err := json.Unmarshal([]byte(gambar), &req.DestinationImages); err != nil {
+			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid gambar"})
+		}
+	}
+
+	if err := json.Unmarshal([]byte(ctx.FormValue("alamat_destinasi")), &req.DestinationAddress); err != nil {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid alamat_destinasi"})
+	}
+
+	files, _ := ctx.MultipartForm()
+
+	fileHeaders := files.File["files"]
+
+	for i, fileHeader := range fileHeaders {
+		file, err := fileHeader.Open()
+		if err != nil {
+			return errorHandlers.HandleError(ctx, err)
+		}
+		defer file.Close()
+
+		req.DestinationImages = append(req.DestinationImages, dto.CreateDestinationImageRequest{
+			File:  file, // atau simpan dalam format yang diperlukan
+			Title: ctx.FormValue(fmt.Sprintf("judul[%d]", i)),
+		})
 	}
 
 	reqJSON, _ := json.MarshalIndent(req, "", "  ")

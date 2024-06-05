@@ -10,7 +10,6 @@ servers:
 tags:
   - name: Mobile - Auth
   - name: Mobile - Destinations
-  - name: Mobile - Personalization
   - name: Admin - Destinations
   - name: Admin - Users
   - name: Admin - Auth
@@ -376,21 +375,11 @@ paths:
                     example: 'Logout berhasil!'
 
   /admin/auth/token:
-    post:
+    get:
       tags:
         - Admin - Auth
       summary: Mendapatkan Token Baru
       description: API untuk mendapatkan token baru.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                refresh_token:
-                  type: string
-                  example: token
       responses:
         '200':
           description: Berhasil Mendapatkan Token Baru
@@ -446,21 +435,11 @@ paths:
                     example: 'Logout berhasil!'
 
   /mobile/auth/token:
-    post:
+    get:
       tags:
         - Mobile - Auth
       summary: Mendapatkan Token Baru
       description: API untuk mendapatkan token baru.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                refresh_token:
-                  type: string
-                  example: token
       responses:
         '200':
           description: Berhasil Mendapatkan Token Baru
@@ -954,7 +933,7 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: Success
+                    example: 'Success'
                   message:
                     type: string
                     example: 'berhasil menampilkan destinasi'
@@ -969,7 +948,7 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: Failed
+                    example: 'Failed'
                   message:
                     type: string
                     example: 'Destinasi tidak ditemukan'
@@ -979,8 +958,6 @@ paths:
       summary: Create a new destination
       tags:
         - Admin - Destinations
-      security:
-        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -991,19 +968,19 @@ paths:
                 nama_destinasi:
                   type: string
                   description: Nama destinasi
-                  example: 'Tes Destinasi'
+                  example: "Tes Destinasi"
                 deskripsi:
                   type: string
                   description: Deskripsi dari destinasi
-                  example: 'Lorem ipsum dolor sit amet'
+                  example: "Lorem ipsum dolor sit amet"
                 jam_buka:
                   type: string
                   description: Jam buka destinasi
-                  example: '08:00'
+                  example: "08:00"
                 jam_tutup:
                   type: string
                   description: Jam tutup destinasi
-                  example: '17:00'
+                  example: "17:00"
                 harga_masuk:
                   type: number
                   description: Harga tiket masuk
@@ -1012,7 +989,7 @@ paths:
                   type: string
                   format: uuid
                   description: ID Kategori
-                  example: 'eb77b590-b255-4ea1-b11a-d445a259ac63'
+                  example: "eb77b590-b255-4ea1-b11a-d445a259ac63"
                 latitude:
                   type: number
                   description: Latitude dari destinasi
@@ -1027,8 +1004,7 @@ paths:
                     type: string
                     format: uuid
                   description: Array ID fasilitas
-                  example:
-                    ['515cb2da-3361-48b8-99fd-bd894828efa1', '515cb2da-3361-48b8-99fd-bd894828efa2']
+                  example: [ "515cb2da-3361-48b8-99fd-bd894828efa1", "515cb2da-3361-48b8-99fd-bd894828efa2" ]
                 gambar:
                   type: array
                   items:
@@ -1041,35 +1017,35 @@ paths:
                       judul:
                         type: string
                         description: Judul gambar
-                        example: 'Gambar 1'
-                #                reports:
-                #                  type: array
-                #                  items:
-                #                    type: string
-                #                    format: binary
+                        example: "Gambar 1"
+#                reports:
+#                  type: array
+#                  items:
+#                    type: string
+#                    format: binary
                 alamat_destinasi:
                   type: object
                   properties:
                     id_provinsi:
                       type: string
                       description: ID Provinsi
-                      example: '12'
+                      example: "12"
                     id_kota:
                       type: string
                       description: ID Kota
-                      example: '4456'
+                      example: "4456"
                     id_kecamatan:
                       type: string
                       description: ID Kecamatan
-                      example: '326546'
+                      example: "326546"
                     jalan:
                       type: string
                       description: Nama jalan
-                      example: 'Jl. Raya Bandung'
+                      example: "Jl. Raya Bandung"
                     kode_pos:
                       type: string
                       description: Kode pos
-                      example: '113322'
+                      example: "113322"
       responses:
         '200':
           description: Destination created successfully
@@ -1080,10 +1056,10 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: 'Success'
+                    example: "Success"
                   message:
                     type: string
-                    example: 'Destination created successfully'
+                    example: "Destination created successfully"
         '400':
           description: Bad request
           content:
@@ -1093,170 +1069,10 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: 'Failed'
+                    example: "Failed"
                   message:
                     type: string
-                    example: 'Invalid input'
-
-  /mobile/personalization:
-    post:
-      tags:
-        - Mobile - Personalization
-      summary: Membuat personalisasi rekomendasi
-      description: API untuk membuat personalisasi rekomendasi
-      security:
-        - BearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                id_kategori:
-                  type: string
-                  example: 'eb77b590-b255-4ea1-b11a-d445a259ac41'
-                id_provinsi:
-                  type: array
-                  items:
-                    type: string
-                  example: ['11', '12', '13']
-      responses:
-        '201':
-          description: Created
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: Success
-                  message:
-                    type: string
-                    example: Personalisasi berhasil di buat
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                  message:
-                    type: string
-                  errors:
-                    type: array
-                    items:
-                      type: object
-                      properties:
-                        field:
-                          type: string
-                        message:
-                          type: string
-              examples:
-                token tidak valid:
-                  value:
-                    message: Format token tidak valid, gunakan bearer token
-                request data tidak valid:
-                  value:
-                    status: Failed
-                    message: Permintaan tidak valid. Silakan periksa kembali data yang anda masukkan.
-                    errors:
-                      - field: id_kategori
-                        message: id_kategori harus diisi
-
-        '401':
-          $ref: '#/components/responses/UnauthorizedResponse'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: Failed
-                  message:
-                    type: string
-                    example: Gagal untuk membuat personalisasi
-
-  /mobile/personalization/categories:
-    get:
-      tags:
-        - Mobile - Personalization
-      summary: Mendapatkan kategori destinasi
-      description: API untuk mendapatkan kategori destinasi
-      security:
-        - BearerAuth: []
-      responses:
-        '200':
-          $ref: '#/components/responses/CategoriesResponseSuccess'
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Format token tidak valid, gunakan bearer token
-        '401':
-          $ref: '#/components/responses/UnauthorizedResponse'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: 'Failed'
-                  message:
-                    type: string
-                    example: 'Invalid input'
-
-  /mobile/personalization/provinces:
-    get:
-      tags:
-        - Mobile - Personalization
-      summary: Mendapatkan provinsi
-      description: API untuk mendapatkan rekomendasi provinsi
-      security:
-        - BearerAuth: []
-      responses:
-        '200':
-          $ref: '#/components/responses/ProvinceResponseSuccess'
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Format token tidak valid, gunakan bearer token
-        '401':
-          $ref: '#/components/responses/UnauthorizedResponse'
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: 'Failed'
-                  message:
-                    type: string
-                    example: Gagal untuk mendapatkan provinsi
-
+                    example: "Invalid input"
 components:
   schemas:
     Pagination:
@@ -1412,66 +1228,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SimilarDestination'
-
-  responses:
-    UnauthorizedResponse:
-      description: Unauthorized
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              message:
-                type: string
-                example: Token tidak terisi
-    CategoriesResponseSuccess:
-      description: OK
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              status:
-                type: string
-                example: 'Success'
-              message:
-                type: string
-                example: 'Berhasil mendapatkan kategori destinasi'
-              data:
-                type: array
-                example:
-                  - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
-                    nama: Alam
-                    url: https://picsum.photos/300/200
-                  - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
-                    nama: Seni dan Budaya
-                    url: https://picsum.photos/300/200
-                  - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
-                    nama: Sejarah
-                    url: https://picsum.photos/300/200
-    ProvinceResponseSuccess:
-      description: OK
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              status:
-                type: string
-                example: 'Success'
-              message:
-                type: string
-                example: 'Berhasil mendapatkan provinsi'
-              data:
-                type: array
-                example:
-                  - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
-                    nama: Jawa Timur
-                    url: https://picsum.photos/300/200
-                  - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
-                    nama: Jawa Barat
-                    url: https://picsum.photos/300/200
-
   securitySchemes:
     BearerAuth:
       type: http
