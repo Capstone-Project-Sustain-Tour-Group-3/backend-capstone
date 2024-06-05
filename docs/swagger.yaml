@@ -961,7 +961,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/x-www-form-urlencoded:
+          multipart/form-data:
             schema:
               type: object
               properties:
@@ -1073,127 +1073,6 @@ paths:
                   message:
                     type: string
                     example: "Invalid input"
-
-    get:
-      tags:
-        - Admin - Destinations
-      summary: Mendapatkan list destinasi wisata
-      description: API untuk menampilkan daftar destinasi wisata.
-      parameters:
-        - name: search
-          in: query
-          required: false
-          schema:
-            type: string
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-        - name: page
-          in: query
-          required: false
-          schema:
-            type: integer
-      security:
-        - BearerAuth: [ ]
-      responses:
-        500:
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: 'Failed'
-                  message:
-                    type: string
-                    example: 'gagal untuk mendapatkan destinasi'
-        '200':
-          description: Successful response
-          content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    status:
-                      type: string
-                      example: Success
-                    message:
-                      type: string
-                      example: berhasil menampilkan destinasi
-                    data:
-                      type: array
-                      items:
-                        type: object
-                        properties:
-                          id:
-                            type: string
-                            example: 306d305e-3359-4884-8d38-89c04e8adea6
-                          nama:
-                            type: string
-                            example: Kawah Ijen
-                          jam_buka:
-                            type: string
-                            example: 08:00
-                          jam_tutup:
-                            type: string
-                            example: 17:00
-                          harga_masuk:
-                            type: integer
-                            example: 100000
-                          kategori:
-                            $ref: '#/components/schemas/Category'
-                          alamat:
-                            $ref: '#/components/schemas/DestinationAddress'
-                    pagination:
-                      $ref: '#/components/schemas/Pagination'
-  /admin/destinations/{id}:
-    get:
-      summary: Mendapatkan destinasi berdasarkan ID
-      tags:
-        - Mobile - Destinations
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-          description: ID dari destinasi
-      security:
-        - BearerAuth: [ ]
-      responses:
-        '200':
-          description: Berhasil mendapatkan destinasi
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: 'Success'
-                  message:
-                    type: string
-                    example: 'berhasil menampilkan destinasi'
-                  data:
-                    $ref: '#/components/schemas/DestinationResponse'
-        '404':
-          description: Destinasi tidak ditemukan
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: 'Failed'
-                  message:
-                    type: string
-                    example: 'Destinasi tidak ditemukan'
-
 components:
   schemas:
     Pagination:
@@ -1221,9 +1100,9 @@ components:
         kota:
           type: string
           example: 'Jakarta'
-        kecamatan:
+        kabupaten:
           type: string
-          example: 'Jonggol'
+          example: 'Jakarta Pusat'
         nama_jalan:
           type: string
           example: 'Jalan MH Thamrin'

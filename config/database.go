@@ -34,6 +34,7 @@ func LoadDb() {
 		mysql2.City{},
 		mysql2.Subdistrict{},
 		mysql2.Admin{},
+		mysql2.UserPersonalization{},
 	); err != nil {
 		log.Fatal(err)
 	}

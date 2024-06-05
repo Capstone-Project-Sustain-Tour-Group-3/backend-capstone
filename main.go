@@ -9,6 +9,7 @@ import (
 	"capstone/routers"
 	"capstone/seeds"
 
+	"github.com/devfeel/mapper"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -16,6 +17,8 @@ import (
 func main() {
 	config.LoadConfig()
 	config.LoadDb()
+	mapper.SetEnabledJsonTag(false)
+
 	e := echo.New()
 	e.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(10)))
 	middlewares.LogMiddleware(e)

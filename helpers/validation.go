@@ -30,6 +30,10 @@ func errorMessage(fieldError validator.FieldError) string {
 		return fmt.Sprintf("Kolom %s harus memiliki panjang %s karakter", fieldError.Field(), fieldError.Param())
 	case "email":
 		return fmt.Sprintf("Kolom %s harus sebuah email yang valid", fieldError.Field())
+	case "gte":
+		return fmt.Sprintf("Kolom %s harus terisi dengan jumlah lebih dari sama dengan %s", fieldError.Field(), fieldError.Param())
+	case "lte":
+		return fmt.Sprintf("Kolom %s harus terisi dengan jumlah kurang dari sama dengan %s", fieldError.Field(), fieldError.Param())
 	}
 
 	return fieldError.Error()
