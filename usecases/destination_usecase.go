@@ -17,6 +17,8 @@ type IDestinationUsecase interface {
 	SearchDestinations(page, limit int, searchQuery, sortQuery, filterQuery string) (string, *int64, *[]dto.SearchDestination, error)
 	DetailDestination(id uuid.UUID) (*dto.DetailDestinationResponse, error)
 	CreateDestination(destinationReq *dto.CreateDestinationRequest) error
+	GetAllDestinations(page, limit int, searchQuery string) (*int64, *[]dto.GetAllDestination, error)
+	GetDestinationById(id uuid.UUID) (*dto.GetByIdDestinationResponse, error)
 }
 
 type DestinationUsecase struct {
@@ -105,7 +107,7 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 	}
 
 	for _, image := range destinationReq.DestinationImages {
-		urlMedia, errFile := uc.cloudinaryClient.UploadImage(image.File)
+		urlMedia, errFile := uc.cloudinaryClient.UploadImage(image.File, "destinations")
 
 		if errFile != nil {
 			return fmt.Errorf("error when upload image to cloud: %w", errFile)
@@ -125,4 +127,26 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 	}
 
 	return nil
+}
+
+func (uc *DestinationUsecase) GetAllDestinations(page, limit int, searchQuery string) (*int64, *[]dto.GetAllDestination, error) {
+	_, total, destinations, err := uc.destinationRepo.FindAll(page, limit, searchQuery, "", "")
+	if err != nil {
+		return nil, nil, err
+	}
+
+	response := dto.ToGetAllDestinationsResponse(&destinations)
+
+	return total, response, nil
+}
+
+func (uc *DestinationUsecase) GetDestinationById(id uuid.UUID) (*dto.GetByIdDestinationResponse, error) {
+	destination, err := uc.destinationRepo.FindById(id)
+	if err != nil {
+		return nil, err
+	}
+
+	response := dto.ToGetByIdDestinationResponse(destination)
+
+	return response, nil
 }
