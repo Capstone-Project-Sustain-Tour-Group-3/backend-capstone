@@ -13,7 +13,9 @@ import (
 func ProfileRouter(r *echo.Group) {
 	r.Use(middlewares.JWTMiddleware)
 	repository := repositories.NewUserRepository(config.DB)
-	usecase := usecases.NewProfileUsecase(repository)
+	cacheRepo := repositories.NewCacheRepository()
+	usecase := usecases.NewProfileUsecase(repository, cacheRepo)
 	handler := handlers.NewProfileHandler(usecase)
 	r.GET("", handler.GetDetailUser)
+	r.PUT("", handler.InsertUserDetail)
 }

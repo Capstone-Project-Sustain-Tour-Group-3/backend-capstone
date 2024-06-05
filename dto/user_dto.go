@@ -1,6 +1,8 @@
 package dto
 
 import (
+	"mime/multipart"
+
 	"capstone/entities"
 
 	"github.com/google/uuid"
@@ -57,7 +59,17 @@ func ToFindByIdResponse(user *entities.User) *findByIdResponse {
 	}
 }
 
-type UserDetailRequest struct{}
+type UserDetailRequest struct {
+	Username     string                `form:"username" validate:"required"`
+	NamaLengkap  string                `form:"nama_lengkap" validate:"required"`
+	FotoProfil   *multipart.FileHeader `form:"foto_profil"`
+	Email        string                `form:"email" validate:"required,email"`
+	NoTelepon    string                `form:"no_telepon" validate:"required,number,startswith=08,min=11,max=13"`
+	Bio          string                `form:"bio" validate:"required"`
+	JenisKelamin string                `form:"jenis_kelamin" validate:"required"`
+	Kota         string                `form:"kota" validate:"required"`
+	Provinsi     string                `form:"provinsi" validate:"required"`
+}
 
 func ToFindAllUserResponse(user *[]entities.User) *[]findAllUserResponse {
 	var users []findAllUserResponse
