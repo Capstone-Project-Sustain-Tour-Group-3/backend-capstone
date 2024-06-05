@@ -88,10 +88,37 @@ func (h *DestinationHandler) DetailDestination(ctx echo.Context) error {
 func (h *DestinationHandler) CreateDestination(ctx echo.Context) error {
 	var req dto.CreateDestinationRequest
 
-	if err := ctx.Bind(&req); err != nil {
-		fmt.Println("masuk siniii")
+	form, _ := ctx.MultipartForm()
+
+	err := json.Unmarshal([]byte(form.Value["info"][0]), &req.DestinationInfo)
+	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
+
+	err = json.Unmarshal([]byte(form.Value["alamat_destinasi"][0]), &req.DestinationAddress)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	for i, fileHeader := range form.File["files"] {
+		file, err := fileHeader.Open()
+		if err != nil {
+			return errorHandlers.HandleError(ctx, err)
+		}
+		defer file.Close()
+
+		req.DestinationImages = append(req.DestinationImages, dto.CreateDestinationImageRequest{
+			File:  file,
+			Title: form.Value["judul"][i],
+		})
+	}
+
+	// fmt.Println(ctx.FormValue("alamat_destinasi"))
+
+	// if err := ctx.Bind(&req); err != nil {
+	// 	fmt.Println("masuk siniii")
+	// 	return errorHandlers.HandleError(ctx, err)
+	// }
 
 	reqJSON, _ := json.MarshalIndent(req, "", "  ")
 
@@ -105,7 +132,7 @@ func (h *DestinationHandler) CreateDestination(ctx echo.Context) error {
 		})
 	}
 
-	err := h.usecase.CreateDestination(&req)
+	err = h.usecase.CreateDestination(&req)
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}

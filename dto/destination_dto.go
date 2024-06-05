@@ -219,16 +219,20 @@ type CreateDestinationAddressRequest struct {
 	PostalCode    string `json:"kode_pos" form:"kode_pos" validate:"required"`
 }
 
+type CreateDestinationInfoRequest struct {
+	Name        string      `json:"nama_destinasi" form:"nama_destinasi" validate:"required"`
+	Description string      `json:"deskripsi" form:"deskripsi" validate:"required"`
+	OpenTime    string      `json:"jam_buka" form:"jam_buka" validate:"required"`
+	CloseTime   string      `json:"jam_tutup" form:"jam_tutup" validate:"required"`
+	EntryPrice  float64     `json:"harga_masuk" form:"harga_masuk" validate:"required"`
+	CategoryId  uuid.UUID   `json:"id_kategori" form:"id_kategori" validate:"required"`
+	Latitude    float64     `json:"latitude" form:"latitude" validate:"required"`
+	Longitude   float64     `json:"longitude" form:"longitude" validate:"required"`
+	FacilityIds []uuid.UUID `json:"fasilitas" form:"fasilitas" validate:"required"`
+}
+
 type CreateDestinationRequest struct {
-	Name               string                          `json:"nama_destinasi" form:"nama_destinasi" validate:"required"`
-	Description        string                          `json:"deskripsi" form:"deskripsi" validate:"required"`
-	OpenTime           string                          `json:"jam_buka" form:"jam_buka" validate:"required"`
-	CloseTime          string                          `json:"jam_tutup" form:"jam_tutup" validate:"required"`
-	EntryPrice         float64                         `json:"harga_masuk" form:"harga_masuk" validate:"required"`
-	CategoryId         uuid.UUID                       `json:"id_kategori" form:"id_kategori" validate:"required"`
-	Latitude           float64                         `json:"latitude" form:"latitude" validate:"required"`
-	Longitude          float64                         `json:"longitude" form:"longitude" validate:"required"`
-	FacilityIds        []uuid.UUID                     `json:"fasilitas" form:"fasilitas" validate:"required"`
+	DestinationInfo    CreateDestinationInfoRequest    `json:"info" form:"info" validate:"required"`
 	DestinationImages  []CreateDestinationImageRequest `json:"gambar" form:"gambar"`
 	DestinationAddress CreateDestinationAddressRequest `json:"alamat_destinasi" form:"alamat_destinasi" validate:"required"`
 }

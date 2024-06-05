@@ -72,7 +72,7 @@ func (uc *DestinationUsecase) DetailDestination(id uuid.UUID) (*dto.DetailDestin
 }
 
 func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestinationRequest) error {
-	category, err := uc.categoryRepo.FindById(destinationReq.CategoryId)
+	category, err := uc.categoryRepo.FindById(destinationReq.DestinationInfo.CategoryId)
 	if err != nil {
 		return errors.New("category not found")
 	}
@@ -83,14 +83,14 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 
 	destination := &entities.Destination{
 		Id:          uuid.New(),
-		CategoryId:  destinationReq.CategoryId,
-		Name:        destinationReq.Name,
-		Description: destinationReq.Description,
-		OpenTime:    destinationReq.OpenTime,
-		CloseTime:   destinationReq.CloseTime,
-		EntryPrice:  destinationReq.EntryPrice,
-		Latitude:    destinationReq.Latitude,
-		Longitude:   destinationReq.Longitude,
+		CategoryId:  destinationReq.DestinationInfo.CategoryId,
+		Name:        destinationReq.DestinationInfo.Name,
+		Description: destinationReq.DestinationInfo.Description,
+		OpenTime:    destinationReq.DestinationInfo.OpenTime,
+		CloseTime:   destinationReq.DestinationInfo.CloseTime,
+		EntryPrice:  destinationReq.DestinationInfo.EntryPrice,
+		Latitude:    destinationReq.DestinationInfo.Latitude,
+		Longitude:   destinationReq.DestinationInfo.Longitude,
 		VisitCount:  0,
 	}
 
@@ -98,7 +98,7 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 		return fmt.Errorf("error when create destination: %w", err)
 	}
 
-	destinationFacilities := dto.ToDestinationFacilities(destination.Id, destinationReq.FacilityIds)
+	destinationFacilities := dto.ToDestinationFacilities(destination.Id, destinationReq.DestinationInfo.FacilityIds)
 
 	if err = uc.destinationFacilityRepo.Create(destinationFacilities); err != nil {
 		return fmt.Errorf("error when create destination facility: %w", err)
