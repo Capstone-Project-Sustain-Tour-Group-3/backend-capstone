@@ -17,6 +17,6 @@ type CategoryResponse struct {
 }
 
 type PersonalizationRequest struct {
-	CategoryId  uuid.UUID `json:"id_kategori" validate:"required"`
-	ProvinceIds []string  `json:"id_provinsi" validate:"gte=1,lte=3,dive,required,len=2"`
+	CategoryIds []uuid.UUID `json:"id_kategori" validate:"gte=1,lte=3,dive,required"`
+	ProvinceIds []string    `json:"id_provinsi" validate:"gte=1,lte=3,dive,required,len=2"`
 }
