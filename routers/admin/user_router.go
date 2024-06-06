@@ -2,6 +2,7 @@ package admin
 
 import (
 	"capstone/config"
+	"capstone/externals/cloudinary"
 	"capstone/handlers"
 	"capstone/middlewares"
 	"capstone/repositories"
@@ -12,7 +13,8 @@ import (
 
 func UserRouter(r *echo.Group) {
 	repository := repositories.NewUserRepository(config.DB)
-	usecase := usecases.NewUserUsecase(repository)
+	cloudinaryClient := cloudinary.NewCloudinaryClient(config.ENV.CLOUDINARY_URL)
+	usecase := usecases.NewUserUsecase(repository, cloudinaryClient)
 	handler := handlers.NewUserHandler(usecase)
 	r.Use(middlewares.JWTMiddleware)
 	r.Use(middlewares.RoleMiddleware("admin"))

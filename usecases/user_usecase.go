@@ -1,9 +1,12 @@
 package usecases
 
 import (
+	"fmt"
+
 	"capstone/dto"
 	"capstone/entities"
 	"capstone/errorHandlers"
+	"capstone/externals/cloudinary"
 	"capstone/helpers"
 	"capstone/repositories"
 
@@ -19,11 +22,12 @@ type UserUsecase interface {
 }
 
 type userUsecase struct {
-	repository repositories.UserRepository
+	repository       repositories.UserRepository
+	cloudinaryClient cloudinary.ICloudinaryClient
 }
 
-func NewUserUsecase(repository repositories.UserRepository) *userUsecase {
-	return &userUsecase{repository}
+func NewUserUsecase(repository repositories.UserRepository, client cloudinary.ICloudinaryClient) *userUsecase {
+	return &userUsecase{repository: repository, cloudinaryClient: client}
 }
 
 func (uc *userUsecase) FindById(id uuid.UUID) (*entities.User, error) {
@@ -65,12 +69,16 @@ func (uc *userUsecase) Create(request *dto.UserRequest) error {
 		Fullname:        request.NamaLengkap,
 		Bio:             request.Bio,
 		PhoneNumber:     request.NoTelepon,
-		ProfileImageUrl: &request.FotoProfil,
 		Gender:          request.JenisKelamin,
 		City:            request.Kota,
 		Province:        request.Provinsi,
 		EmailVerifiedAt: nil,
 	}
+
+	if err = uc.handleProfilePictureUpdate(request, user); err != nil {
+		return err
+	}
+
 	if err = uc.repository.Create(user); err != nil {
 		return &errorHandlers.InternalServerError{Message: "Gagal untuk menambah data user"}
 	}
@@ -108,10 +116,13 @@ func (uc *userUsecase) Update(id uuid.UUID, request *dto.UserRequest) error {
 	user.Fullname = request.NamaLengkap
 	user.Bio = request.Bio
 	user.PhoneNumber = request.NoTelepon
-	user.ProfileImageUrl = &request.FotoProfil
 	user.Gender = request.JenisKelamin
 	user.City = request.Kota
 	user.Province = request.Provinsi
+
+	if err = uc.handleProfilePictureUpdate(request, user); err != nil {
+		return err
+	}
 
 	if err = uc.repository.Update(user); err != nil {
 		return &errorHandlers.InternalServerError{Message: "Gagal untuk memperbarui data user"}
@@ -125,8 +136,48 @@ func (uc *userUsecase) Delete(id uuid.UUID) error {
 		return &errorHandlers.ConflictError{Message: "User tidak ditemukan"}
 	}
 
+	if user.ProfileImageUrl != nil {
+		if err := uc.cloudinaryClient.DeleteImage(*user.ProfileImageUrl); err != nil {
+			return &errorHandlers.InternalServerError{Message: "Gagal menghapus foto profil"}
+		}
+	}
+
 	if err := uc.repository.Delete(user); err != nil {
 		return &errorHandlers.InternalServerError{Message: "Gagal untuk menghapus data user"}
 	}
+	return nil
+}
+
+func (uc *userUsecase) handleProfilePictureUpdate(request *dto.UserRequest, user *entities.User) error {
+	if request.FotoProfil == nil {
+		return nil
+	}
+
+	if !helpers.IsValidImageType(request.FotoProfil) {
+		return &errorHandlers.BadRequestError{Message: "Tipe foto profil tidak valid"}
+	}
+	if !helpers.IsValidImageSize(request.FotoProfil) {
+		return &errorHandlers.BadRequestError{Message: "Ukuran foto profil tidak valid"}
+	}
+
+	file, err := request.FotoProfil.Open()
+	if err != nil {
+		return &errorHandlers.InternalServerError{Message: "Gagal membuka file foto profil"}
+	}
+	defer file.Close()
+
+	fmt.Println(user.ProfileImageUrl)
+	if user.ProfileImageUrl != nil {
+		if err = uc.cloudinaryClient.DeleteImage(*user.ProfileImageUrl); err != nil {
+			return &errorHandlers.InternalServerError{Message: "Gagal menghapus foto profil"}
+		}
+	}
+
+	urlMedia, err := uc.cloudinaryClient.UploadImage(file, "users")
+	if err != nil {
+		return &errorHandlers.InternalServerError{Message: "Gagal upload foto profil"}
+	}
+	user.ProfileImageUrl = &urlMedia
+
 	return nil
 }

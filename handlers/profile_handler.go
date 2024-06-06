@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -49,11 +50,15 @@ func (h *profileHandler) InsertUserDetail(ctx echo.Context) error {
 	var req dto.UserDetailRequest
 	img, err := ctx.FormFile("foto_profil")
 	if err != nil {
-		return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "data yang dimasukkan tidak valid"})
+		if !errors.Is(err, http.ErrMissingFile) {
+			return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "data yang dimasukkan tidak valid"})
+		}
+	} else {
+		req.FotoProfil = img
 	}
-	req.FotoProfil = img
+	fmt.Println(req)
 	if err = ctx.Bind(&req); err != nil {
-		return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "data yang dimasukkan tidak valid"})
+		return errorHandlers.HandleError(ctx, err)
 	}
 
 	if err := helpers.ValidateRequest(req); err != nil {

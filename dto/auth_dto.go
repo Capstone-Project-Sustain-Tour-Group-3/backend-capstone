@@ -18,10 +18,10 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Username     string `json:"username"`
-	ProfileImage string `json:"profile_image"`
-	AccessToken  string `json:"access_token"`
-	RefreshToken string `json:"refresh_token,omitempty"`
+	Username     string  `json:"username"`
+	ProfileImage *string `json:"profile_image"`
+	AccessToken  string  `json:"access_token"`
+	RefreshToken string  `json:"refresh_token,omitempty"`
 }
 
 type VerifyEmailRequest struct {
