@@ -38,9 +38,12 @@ func LoadDb() {
 		mysql2.UserPersonalization{},
 		mysql2.PersonalizationCategory{},
 		mysql2.PersonalizationProvince{},
+		mysql2.Route{},
+		mysql2.RouteDetail{},
 	); err != nil {
 		log.Fatal(err)
 	}
 
+	mysql2.ModifyColumnRoutesDetail(db)
 	DB = db
 }
