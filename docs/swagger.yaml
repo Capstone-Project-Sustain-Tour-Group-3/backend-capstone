@@ -518,7 +518,7 @@ paths:
       summary: Mendapatkan Profil Pengguna
       description: API untuk mengambil data profil pengguna yang sedang login.
       security:
-        - bearerAuth: [ ]
+        - BearerAuth: []
       responses:
         '200':
           description: Profil Berhasil Didapatkan
@@ -581,6 +581,8 @@ paths:
         - Mobile - Profile
       summary: Memperbarui Profil Pengguna
       description: API untuk memperbarui data profil pengguna yang sedang login.
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -681,6 +683,8 @@ paths:
         - Mobile - Profile
       summary: Mengubah Password Pengguna
       description: API untuk mengubah password pengguna yang sedang login.
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -1401,6 +1405,8 @@ paths:
       summary: Create a new destination
       tags:
         - Admin - Destinations
+      security:
+        - BearerAuth: []
       requestBody:
         required: true
         content:
