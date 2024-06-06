@@ -3,11 +3,13 @@ package repositories
 import (
 	"capstone/entities"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type AdminRepository interface {
 	FindAll(offset, limit int, search string) (*[]entities.Admin, *int64, error)
+	FindById(id uuid.UUID) (*entities.Admin, error)
 	FindByUsername(username string) (*entities.Admin, error)
 	GetUserByRefreshToken(refreshToken string) (*entities.Admin, error)
 	Update(admin *entities.Admin) error
@@ -43,6 +45,14 @@ func (r *adminRepository) FindAll(offset, limit int, search string) (*[]entities
 	}
 
 	return admins, count, nil
+}
+
+func (r *adminRepository) FindById(id uuid.UUID) (*entities.Admin, error) {
+	admin := new(entities.Admin)
+	if err := r.db.First(&admin, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return admin, nil
 }
 
 func (r *adminRepository) FindByUsername(username string) (*entities.Admin, error) {

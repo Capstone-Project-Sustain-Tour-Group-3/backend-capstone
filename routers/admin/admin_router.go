@@ -19,4 +19,5 @@ func ManageAdminRouter(r *echo.Group) {
 	handler := handlers.NewAdminHandler(usecase)
 
 	r.GET("", handler.GetAllAdmins)
+	r.GET("/:id", handler.GetAdminDetail)
 }

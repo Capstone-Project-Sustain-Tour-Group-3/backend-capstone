@@ -10,6 +10,7 @@ import (
 	"capstone/helpers"
 	"capstone/usecases"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -131,5 +132,29 @@ func (h *adminHandler) GetAllAdmins(ctx echo.Context) error {
 		LastPage:    lastPage,
 	})
 
+	return ctx.JSON(http.StatusOK, response)
+}
+
+func (h *adminHandler) GetAdminDetail(ctx echo.Context) error {
+	id, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		return errorHandlers.HandleError(
+			ctx,
+			&errorHandlers.BadRequestError{
+				Message: "Id admin tidak valid",
+			},
+		)
+	}
+
+	result, err := h.usecase.GetAdminDetail(id)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "Berhasil mendapatkan detail admin",
+		Data:       result,
+	})
 	return ctx.JSON(http.StatusOK, response)
 }

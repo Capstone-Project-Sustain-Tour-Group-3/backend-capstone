@@ -1,12 +1,15 @@
 package usecases
 
 import (
+	"errors"
+
 	"capstone/dto"
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/repositories"
 
-	"github.com/devfeel/mapper"
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type AdminUsecase interface {
@@ -14,6 +17,7 @@ type AdminUsecase interface {
 	Logout(token string) error
 	GetNewAccessToken(refreshToken string) (*dto.NewToken, error)
 	GetAllAdmins(page, limit int, search string) (*[]dto.GetAllAdminResponse, *int64, error)
+	GetAdminDetail(id uuid.UUID) (*dto.GetDetailAdminResponse, error)
 }
 
 type adminUsecase struct {
@@ -92,11 +96,23 @@ func (uc *adminUsecase) GetAllAdmins(page, limit int, search string) (*[]dto.Get
 		return nil, nil, &errorHandlers.InternalServerError{Message: "Gagal mendapatkan data admin"}
 	}
 
-	res := new([]dto.GetAllAdminResponse)
-	err = mapper.MapperSlice(admins, res)
-	if err != nil {
-		return nil, nil, &errorHandlers.InternalServerError{Message: "Gagal mendapatkan data admin"}
-	}
+	res := dto.ToGetAllAdminResponse(admins)
 
 	return res, total, nil
+}
+
+func (uc *adminUsecase) GetAdminDetail(id uuid.UUID) (*dto.GetDetailAdminResponse, error) {
+	admin, err := uc.repository.FindById(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			return nil, &errorHandlers.NotFoundError{Message: "Data admin tidak ditemukan"}
+		default:
+			return nil, &errorHandlers.InternalServerError{Message: "Gagal mendapatkan detail admin"}
+		}
+	}
+
+	res := dto.ToGetDetailAdminResponse(admin)
+
+	return res, nil
 }
