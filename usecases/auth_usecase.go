@@ -142,7 +142,7 @@ func (uc *authUsecase) Login(request *dto.LoginRequest) (*dto.LoginResponse, err
 	}
 	response := &dto.LoginResponse{
 		Username:     user.Username,
-		ProfileImage: *user.ProfileImageUrl,
+		ProfileImage: user.ProfileImageUrl,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}

@@ -829,11 +829,11 @@ paths:
       summary: Menambah data user
       description: API untuk menambah pengguna baru.
       security:
-        - BearerAuth: []
+        - BearerAuth: [ ]
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
@@ -857,6 +857,7 @@ paths:
                   example: '081234567890'
                 foto_profil:
                   type: string
+                  format: binary
                   example: 'img.jpg'
                 jenis_kelamin:
                   type: string
@@ -884,7 +885,7 @@ paths:
         '409':
           description: Conflict
           content:
-            application/json:
+            application/js  on:
               schema:
                 type: object
                 properties:
@@ -974,7 +975,7 @@ paths:
       summary: Data user diperbarui
       description: API untuk memperbarui data pengguna.
       security:
-        - BearerAuth: []
+        - BearerAuth: [ ]
       parameters:
         - name: id
           in: path
@@ -984,7 +985,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
@@ -1008,6 +1009,7 @@ paths:
                   example: '081234567890'
                 foto_profil:
                   type: string
+                  format: binary
                   example: 'img.jpg'
                 jenis_kelamin:
                   type: string
