@@ -33,19 +33,31 @@ type GetDetailAdminResponse struct {
 	CreatedAt       string  `json:"tanggal_pembuatan"`
 }
 
-type CreateAdminRequest struct {
+type AdminRequest struct {
 	Username     string `form:"username" validate:"required,max=16"`
 	Password     string `form:"password" validate:"required,min=8"`
 	ProfileImage multipart.File
 }
 
-func ToCreateAdminRequest(request *CreateAdminRequest, imageURL *string) *entities.Admin {
+func ToCreateAdminRequest(request *AdminRequest, imageURL *string) *entities.Admin {
 	return &entities.Admin{
 		Id:              uuid.New(),
 		Username:        request.Username,
 		Password:        request.Password,
 		ProfileImageURL: imageURL,
 		Role:            "admin",
+	}
+}
+
+func ToUpdateAdminRequest(request *AdminRequest, admin *entities.Admin, imageURL *string) *entities.Admin {
+	return &entities.Admin{
+		Id:              admin.Id,
+		Username:        request.Username,
+		Password:        request.Password,
+		ProfileImageURL: imageURL,
+		Role:            admin.Role,
+		RefreshToken:    admin.RefreshToken,
+		CreatedAt:       admin.CreatedAt,
 	}
 }
 

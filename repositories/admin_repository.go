@@ -73,10 +73,7 @@ func (r *adminRepository) GetUserByRefreshToken(refreshToken string) (*entities.
 }
 
 func (r *adminRepository) Update(admin *entities.Admin) error {
-	if err := r.db.Save(admin).Error; err != nil {
-		return err
-	}
-	return nil
+	return r.db.Save(admin).Error
 }
 
 func (r *adminRepository) Create(admin *entities.Admin) error {
