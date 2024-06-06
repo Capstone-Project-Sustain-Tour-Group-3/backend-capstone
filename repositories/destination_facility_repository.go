@@ -13,6 +13,7 @@ type IDestinationFacilityRepository interface {
 	FindById(id uuid.UUID) (*entities.DestinationFacility, error)
 	Update(destinationFacility *entities.DestinationFacility) error
 	Delete(destinationFacility *entities.DestinationFacility) error
+	DeleteMany(destinationFacilities *[]entities.DestinationFacility) error
 }
 
 type DestinationFacilityRepository struct {
@@ -57,5 +58,22 @@ func (r *DestinationFacilityRepository) Delete(destinationFacility *entities.Des
 	if err := r.db.Delete(destinationFacility).Error; err != nil {
 		return err
 	}
+	return nil
+}
+
+func (r *DestinationFacilityRepository) DeleteMany(destinationFacilities *[]entities.DestinationFacility) error {
+	if len(*destinationFacilities) == 0 {
+		return nil
+	}
+
+	var ids []uuid.UUID
+	for _, destinationFacility := range *destinationFacilities {
+		ids = append(ids, destinationFacility.Id)
+	}
+
+	if err := r.db.Where("id IN ?", ids).Delete(&entities.DestinationFacility{}).Error; err != nil {
+		return err
+	}
+
 	return nil
 }

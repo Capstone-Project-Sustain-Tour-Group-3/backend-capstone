@@ -155,11 +155,19 @@ func (h *DestinationHandler) CreateDestination(ctx echo.Context) error {
 
 	// Unmarshal nested JSON fields
 	if err := json.Unmarshal([]byte(ctx.FormValue("fasilitas")), &req.FacilityIds); err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid fasilitas"})
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "error",
+			Message: "Invalid fasilitas",
+			Errors:  err.Error(),
+		})
 	}
 
 	if err := json.Unmarshal([]byte(ctx.FormValue("alamat_destinasi")), &req.DestinationAddress); err != nil {
-		return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid alamat_destinasi"})
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "error",
+			Message: "Invalid alamat destinasi",
+			Errors:  err.Error(),
+		})
 	}
 
 	files, _ := ctx.MultipartForm()
@@ -175,12 +183,77 @@ func (h *DestinationHandler) CreateDestination(ctx echo.Context) error {
 
 		var judul []string
 		if err = json.Unmarshal([]byte(ctx.FormValue("judul")), &judul); err != nil {
-			return ctx.JSON(http.StatusBadRequest, map[string]string{"message": "Invalid judul"})
+			return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+				Status:  "error",
+				Message: "Invalid judul",
+				Errors:  err.Error(),
+			})
 		}
 
 		req.DestinationImages = append(req.DestinationImages, dto.CreateDestinationImageRequest{
 			File:  file, // atau simpan dalam format yang diperlukan
 			Title: judul[i],
+		})
+	}
+
+	if err := helpers.ValidateRequest(req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "failed",
+			Message: "permintaan tidak valid. silakan periksa kembali data yang anda masukkan.",
+			Errors:  err,
+		})
+	}
+
+	reqJSON, _ := json.MarshalIndent(req, "", "  ")
+
+	fmt.Println(string(reqJSON))
+
+	err := h.usecase.CreateDestination(&req)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusCreated,
+		Message:    "data destinasi berhasil ditambah",
+	})
+
+	return ctx.JSON(http.StatusCreated, response)
+}
+
+func (h *DestinationHandler) UpdateDestination(ctx echo.Context) error {
+	var req dto.UpdateDestinationRequest
+
+	id := ctx.Param("id")
+	destinationId, err := uuid.Parse(id)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	// Bind basic fields
+	req.Name = ctx.FormValue("nama_destinasi")
+	req.Description = ctx.FormValue("deskripsi")
+	req.OpenTime = ctx.FormValue("jam_buka")
+	req.CloseTime = ctx.FormValue("jam_tutup")
+	req.EntryPrice, _ = strconv.ParseFloat(ctx.FormValue("harga_masuk"), 64)
+	req.CategoryId, _ = uuid.Parse(ctx.FormValue("id_kategori"))
+	req.Latitude, _ = strconv.ParseFloat(ctx.FormValue("latitude"), 64)
+	req.Longitude, _ = strconv.ParseFloat(ctx.FormValue("longitude"), 64)
+
+	// Unmarshal nested JSON fields
+	if err = json.Unmarshal([]byte(ctx.FormValue("fasilitas")), &req.FacilityIds); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "error",
+			Message: "Invalid fasilitas",
+			Errors:  err.Error(),
+		})
+	}
+
+	if err = json.Unmarshal([]byte(ctx.FormValue("alamat_destinasi")), &req.DestinationAddress); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "error",
+			Message: "Invalid alamat destinasi",
+			Errors:  err.Error(),
 		})
 	}
 
@@ -196,15 +269,35 @@ func (h *DestinationHandler) CreateDestination(ctx echo.Context) error {
 		})
 	}
 
-	err := h.usecase.CreateDestination(&req)
+	err = h.usecase.UpdateDestination(destinationId, &req)
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
 
 	response := helpers.Response(dto.ResponseParams{
-		StatusCode: http.StatusCreated,
-		Message:    "data destinasi berhasil ditambah",
+		StatusCode: http.StatusOK,
+		Message:    "data destinasi berhasil diubah",
 	})
 
-	return ctx.JSON(http.StatusCreated, response)
+	return ctx.JSON(http.StatusOK, response)
+}
+
+func (h *DestinationHandler) DeleteDestination(ctx echo.Context) error {
+	id := ctx.Param("id")
+	destinationId, err := uuid.Parse(id)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	err = h.usecase.DeleteDestination(destinationId)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "data destinasi berhasil dihapus",
+	})
+
+	return ctx.JSON(http.StatusOK, response)
 }

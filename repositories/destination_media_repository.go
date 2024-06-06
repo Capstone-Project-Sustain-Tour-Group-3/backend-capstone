@@ -13,6 +13,7 @@ type IDestinationMediaRepository interface {
 	FindById(id uuid.UUID) (*entities.DestinationMedia, error)
 	Update(destinationMedia *entities.DestinationMedia) error
 	Delete(destinationMedia *entities.DestinationMedia) error
+	DeleteMany(destinationMedias *[]entities.DestinationMedia) error
 }
 
 type DestinationMediaRepository struct {
@@ -55,6 +56,23 @@ func (r *DestinationMediaRepository) Update(destinationMedia *entities.Destinati
 
 func (r *DestinationMediaRepository) Delete(destinationMedia *entities.DestinationMedia) error {
 	if err := r.db.Delete(destinationMedia).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
+func (r *DestinationMediaRepository) DeleteMany(destinationMedias *[]entities.DestinationMedia) error {
+	if len(*destinationMedias) == 0 {
+		return nil
+	}
+
+	var ids []uuid.UUID
+
+	for _, destinationMedia := range *destinationMedias {
+		ids = append(ids, destinationMedia.Id)
+	}
+
+	if err := r.db.Where("id IN ?", ids).Delete(&entities.DestinationMedia{}).Error; err != nil {
 		return err
 	}
 	return nil

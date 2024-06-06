@@ -285,7 +285,7 @@ type CreateDestinationAddressRequest struct {
 	ProvinceId    string `json:"id_provinsi" form:"id_provinsi" validate:"required"`
 	CityId        string `json:"id_kota" form:"id_kota" validate:"required"`
 	SubdistrictId string `json:"id_kecamatan" form:"id_kecamatan" validate:"required"`
-	StreetName    string `json:"jalan" form:"jalan"`
+	StreetName    string `json:"jalan" form:"jalan" validate:"required"`
 	PostalCode    string `json:"kode_pos" form:"kode_pos" validate:"required"`
 }
 
@@ -300,7 +300,20 @@ type CreateDestinationRequest struct {
 	Longitude          float64                         `json:"longitude" form:"longitude" validate:"required"`
 	FacilityIds        []uuid.UUID                     `json:"fasilitas" form:"fasilitas" validate:"required"`
 	DestinationImages  []CreateDestinationImageRequest `json:"gambar" form:"gambar"`
-	DestinationAddress CreateDestinationAddressRequest `json:"alamat_destinasi" form:"alamat_destinasi"`
+	DestinationAddress CreateDestinationAddressRequest `json:"alamat_destinasi" form:"alamat_destinasi" validate:"required"`
+}
+
+type UpdateDestinationRequest struct {
+	Name               string                          `json:"nama_destinasi" form:"nama_destinasi" validate:"required"`
+	Description        string                          `json:"deskripsi" form:"deskripsi" validate:"required"`
+	OpenTime           string                          `json:"jam_buka" form:"jam_buka" validate:"required"`
+	CloseTime          string                          `json:"jam_tutup" form:"jam_tutup" validate:"required"`
+	EntryPrice         float64                         `json:"harga_masuk" form:"harga_masuk" validate:"required"`
+	CategoryId         uuid.UUID                       `json:"id_kategori" form:"id_kategori" validate:"required"`
+	Latitude           float64                         `json:"latitude" form:"latitude" validate:"required"`
+	Longitude          float64                         `json:"longitude" form:"longitude" validate:"required"`
+	FacilityIds        []uuid.UUID                     `json:"fasilitas" form:"fasilitas" validate:"required"`
+	DestinationAddress CreateDestinationAddressRequest `json:"alamat_destinasi" form:"alamat_destinasi" validate:"required"`
 }
 
 type CreateDestinationResponse struct {
