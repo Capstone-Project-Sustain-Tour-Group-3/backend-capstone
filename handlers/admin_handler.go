@@ -261,3 +261,26 @@ func (h *adminHandler) UpdateAdmin(ctx echo.Context) error {
 	})
 	return ctx.JSON(http.StatusOK, response)
 }
+
+func (h *adminHandler) DeleteAdmin(ctx echo.Context) error {
+	id, err := uuid.Parse(ctx.Param("id"))
+	if err != nil {
+		return errorHandlers.HandleError(
+			ctx,
+			&errorHandlers.BadRequestError{
+				Message: "Id admin tidak valid",
+			},
+		)
+	}
+
+	err = h.usecase.DeleteAdmin(id)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "Berhasil menghapus data admin",
+	})
+	return ctx.JSON(http.StatusOK, response)
+}

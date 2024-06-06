@@ -26,4 +26,5 @@ func ManageAdminRouter(r *echo.Group) {
 	r.POST("", handler.CreateAdmin)
 	r.GET("/:id", handler.GetAdminDetail)
 	r.PUT("/:id", handler.UpdateAdmin)
+	r.DELETE("/:id", handler.DeleteAdmin)
 }

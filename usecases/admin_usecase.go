@@ -21,6 +21,7 @@ type AdminUsecase interface {
 	GetAdminDetail(id uuid.UUID) (*dto.GetDetailAdminResponse, error)
 	CreateAdmin(request *dto.AdminRequest) error
 	UpdateAdmin(request *dto.AdminRequest, id uuid.UUID) error
+	DeleteAdmin(id uuid.UUID) error
 }
 
 type adminUsecase struct {
@@ -198,6 +199,30 @@ func (uc *adminUsecase) UpdateAdmin(request *dto.AdminRequest, id uuid.UUID) err
 		default:
 			return &errorHandlers.InternalServerError{Message: "Gagal mengubah data admin"}
 		}
+	}
+
+	return nil
+}
+
+func (uc *adminUsecase) DeleteAdmin(id uuid.UUID) error {
+	admin, err := uc.repository.FindById(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			return &errorHandlers.NotFoundError{Message: "Data admin tidak ditemukan"}
+		default:
+			return &errorHandlers.InternalServerError{Message: "Gagal menghapus data admin"}
+		}
+	}
+
+	if admin.ProfileImageURL != nil {
+		if err = uc.cloudinaryClient.DeleteImage(*admin.ProfileImageURL); err != nil {
+			return &errorHandlers.InternalServerError{Message: "Gagal menghapus data admin"}
+		}
+	}
+
+	if err = uc.repository.Delete(admin); err != nil {
+		return &errorHandlers.InternalServerError{Message: "Gagal menghapus data admin"}
 	}
 
 	return nil

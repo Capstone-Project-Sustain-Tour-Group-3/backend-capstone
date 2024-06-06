@@ -14,6 +14,7 @@ type AdminRepository interface {
 	GetUserByRefreshToken(refreshToken string) (*entities.Admin, error)
 	Create(admin *entities.Admin) error
 	Update(admin *entities.Admin) error
+	Delete(admin *entities.Admin) error
 }
 
 type adminRepository struct {
@@ -78,4 +79,8 @@ func (r *adminRepository) Update(admin *entities.Admin) error {
 
 func (r *adminRepository) Create(admin *entities.Admin) error {
 	return r.db.Create(admin).Error
+}
+
+func (r *adminRepository) Delete(admin *entities.Admin) error {
+	return r.db.Delete(admin).Error
 }
