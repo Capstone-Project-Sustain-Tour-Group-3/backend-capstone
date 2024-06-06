@@ -7,7 +7,7 @@ import (
 )
 
 type UserPersonalizationRepository interface {
-	Create(userPersonalization []*entities.UserPersonalization) error
+	Create(userPersonalization *entities.UserPersonalization) error
 }
 
 type userPersonalizationRepository struct {
@@ -18,6 +18,6 @@ func NewUserPersonalizationRepository(db *gorm.DB) *userPersonalizationRepositor
 	return &userPersonalizationRepository{db}
 }
 
-func (r *userPersonalizationRepository) Create(userPersonalization []*entities.UserPersonalization) error {
+func (r *userPersonalizationRepository) Create(userPersonalization *entities.UserPersonalization) error {
 	return r.db.Create(userPersonalization).Error
 }

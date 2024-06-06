@@ -48,8 +48,8 @@ func (c *CloudinaryClient) DeleteImage(mediaUrl string) error {
 
 	publicIDWithExtension := strings.Join(parts[len(parts)-3:], "/")
 	publicID := strings.TrimSuffix(publicIDWithExtension, filepath.Ext(publicIDWithExtension))
-	_, err := c.client.Upload.Destroy(ctx, uploader.DestroyParams{PublicID: publicID})
 	fmt.Println(publicID)
+	_, err := c.client.Upload.Destroy(ctx, uploader.DestroyParams{PublicID: publicID})
 	if err != nil {
 		return fmt.Errorf("gagal menghapus media dengan ID '%s': %w", publicID, err)
 	}
