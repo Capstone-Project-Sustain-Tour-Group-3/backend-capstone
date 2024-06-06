@@ -19,6 +19,8 @@ type IDestinationUsecase interface {
 	CreateDestination(destinationReq *dto.CreateDestinationRequest) error
 	GetAllDestinations(page, limit int, searchQuery string) (*int64, *[]dto.GetAllDestination, error)
 	GetDestinationById(id uuid.UUID) (*dto.GetByIdDestinationResponse, error)
+	UpdateDestination(id uuid.UUID, destinationReq *dto.UpdateDestinationRequest) error
+	DeleteDestination(id uuid.UUID) error
 }
 
 type DestinationUsecase struct {
@@ -27,6 +29,10 @@ type DestinationUsecase struct {
 	destinationMediaRepo    repositories.IDestinationMediaRepository
 	destinationAddressRepo  repositories.IDestinationAddressRepository
 	categoryRepo            repositories.ICategoryRepository
+	facilityRepo            repositories.IFacilityRepository
+	provinceRepo            repositories.IProvinceRepository
+	cityRepo                repositories.ICityRepository
+	subdistrictRepo         repositories.ISubdistrictRepository
 	cloudinaryClient        cloudinary.ICloudinaryClient
 }
 
@@ -36,6 +42,10 @@ func NewDestinationUsecase(
 	destinationMediaRepo repositories.IDestinationMediaRepository,
 	destinationAddressRepo repositories.IDestinationAddressRepository,
 	categoryRepo repositories.ICategoryRepository,
+	facilityRepo repositories.IFacilityRepository,
+	provinceRepo repositories.IProvinceRepository,
+	cityRepo repositories.ICityRepository,
+	subdistrictRepo repositories.ISubdistrictRepository,
 	cloudinaryClient cloudinary.ICloudinaryClient,
 ) *DestinationUsecase {
 	return &DestinationUsecase{
@@ -44,6 +54,10 @@ func NewDestinationUsecase(
 		destinationMediaRepo,
 		destinationAddressRepo,
 		categoryRepo,
+		facilityRepo,
+		provinceRepo,
+		cityRepo,
+		subdistrictRepo,
 		cloudinaryClient,
 	}
 }
@@ -75,11 +89,7 @@ func (uc *DestinationUsecase) DetailDestination(id uuid.UUID) (*dto.DetailDestin
 
 func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestinationRequest) error {
 	category, err := uc.categoryRepo.FindById(destinationReq.CategoryId)
-	if err != nil {
-		return errors.New("category not found")
-	}
-
-	if category == nil {
+	if err != nil || category == nil {
 		return errors.New("category not found")
 	}
 
@@ -122,8 +132,99 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 
 	destinationAddress := dto.ToDestinationAddress(destination.Id, destinationReq.DestinationAddress)
 
+	// check province
+	province, err := uc.provinceRepo.FindById(destinationAddress.ProvinceId)
+
+	if err != nil || province == nil {
+		return errors.New("province not found")
+	}
+
+	// check city
+	city, err := uc.cityRepo.FindById(destinationAddress.CityId)
+
+	if err != nil || city == nil {
+		return errors.New("city not found")
+	}
+
+	// check subdistrict
+	subdistrict, err := uc.subdistrictRepo.FindById(destinationAddress.SubdistrictId)
+
+	if err != nil || subdistrict == nil {
+		return errors.New("subdistrict not found")
+	}
+
 	if err = uc.destinationAddressRepo.Create(destinationAddress); err != nil {
 		return fmt.Errorf("error when create destination address: %w", err)
+	}
+
+	return nil
+}
+
+func (uc *DestinationUsecase) UpdateDestination(id uuid.UUID, destinationReq *dto.UpdateDestinationRequest) error {
+	destination, err := uc.destinationRepo.FindById(id)
+	if err != nil {
+		return err
+	}
+
+	destination.Name = destinationReq.Name
+	destination.Description = destinationReq.Description
+	destination.OpenTime = destinationReq.OpenTime
+	destination.CloseTime = destinationReq.CloseTime
+	destination.EntryPrice = destinationReq.EntryPrice
+	destination.Latitude = destinationReq.Latitude
+	destination.Longitude = destinationReq.Longitude
+
+	// update category
+	category, err := uc.categoryRepo.FindById(destinationReq.CategoryId)
+	if err != nil || category == nil {
+		return errors.New("category not found")
+	}
+	destination.CategoryId = destinationReq.CategoryId
+
+	// update facilities
+	if err = uc.destinationFacilityRepo.DeleteMany(destination.DestinationFacilities); err != nil {
+		return fmt.Errorf("error when delete destination facility: %w", err)
+	}
+
+	destinationFacilities := dto.ToDestinationFacilities(destination.Id, destinationReq.FacilityIds)
+
+	for _, facility := range *destinationFacilities {
+		if err = uc.destinationFacilityRepo.Update(&facility); err != nil {
+			return fmt.Errorf("error when update destination facility: %w", err)
+		}
+	}
+
+	if err = uc.destinationRepo.Update(destination); err != nil {
+		return fmt.Errorf("error when update destination: %w", err)
+	}
+
+	// update address
+	destinationAddress := dto.ToDestinationAddress(destination.Id, destinationReq.DestinationAddress)
+	destinationAddress.Id = destination.DestinationAddress.Id
+
+	// check province
+	province, err := uc.provinceRepo.FindById(destinationAddress.ProvinceId)
+
+	if err != nil || province == nil {
+		return errors.New("province not found")
+	}
+
+	// check city
+	city, err := uc.cityRepo.FindById(destinationAddress.CityId)
+
+	if err != nil || city == nil {
+		return errors.New("city not found")
+	}
+
+	// check subdistrict
+	subdistrict, err := uc.subdistrictRepo.FindById(destinationAddress.SubdistrictId)
+
+	if err != nil || subdistrict == nil {
+		return errors.New("subdistrict not found")
+	}
+
+	if err = uc.destinationAddressRepo.Update(destinationAddress); err != nil {
+		return fmt.Errorf("error when update destination address: %w", err)
 	}
 
 	return nil
@@ -149,4 +250,29 @@ func (uc *DestinationUsecase) GetDestinationById(id uuid.UUID) (*dto.GetByIdDest
 	response := dto.ToGetByIdDestinationResponse(destination)
 
 	return response, nil
+}
+
+func (uc *DestinationUsecase) DeleteDestination(id uuid.UUID) error {
+	destination, err := uc.destinationRepo.FindById(id)
+	if err != nil {
+		return err
+	}
+
+	if err = uc.destinationRepo.Delete(destination); err != nil {
+		return fmt.Errorf("error when delete destination: %w", err)
+	}
+
+	if err = uc.destinationAddressRepo.Delete(destination.DestinationAddress); err != nil {
+		return fmt.Errorf("error when delete destination address: %w", err)
+	}
+
+	if err = uc.destinationFacilityRepo.DeleteMany(destination.DestinationFacilities); err != nil {
+		return fmt.Errorf("error when delete destination facility: %w", err)
+	}
+
+	if err = uc.destinationMediaRepo.DeleteMany(&destination.DestinationMedias); err != nil {
+		return fmt.Errorf("error when delete destination media: %w", err)
+	}
+
+	return nil
 }
