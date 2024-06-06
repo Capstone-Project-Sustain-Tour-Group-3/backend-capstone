@@ -10,10 +10,15 @@ servers:
 tags:
   - name: Mobile - Auth
   - name: Mobile - Destinations
+<<<<<<< HEAD
+  - name: Mobile - Profile
+=======
   - name: Mobile - Personalization
+>>>>>>> development
   - name: Admin - Destinations
   - name: Admin - Users
   - name: Admin - Auth
+
 paths:
   /mobile/auth/register:
     post:
@@ -342,7 +347,7 @@ paths:
                         type: string
                         example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6ImFhNjJjZDA5LTU0YjUtNGViNC04MjNmLWMzNjI4ZWFlYmQ0MSIsIlVzZXJuYW1lIjoiYWRtaW50b3VyZWFzZSIsIlJvbGUiOiJhZG1pbiIsImV4cCI6MTcxNjkxMTIzMCwiaWF0IjoxNzE2OTA5NDMwLCJuYmYiOjE3MTY5MDk0MzB9.Iesz7CdqiA-5xyJa3I3w2rkZTjC7ZR27FMPz3HwhYOs'
         '409':
-          description: Account Not Found
+          description: Conflict
           content:
             application/json:
               schema:
@@ -419,7 +424,18 @@ paths:
       tags:
         - Mobile - Auth
       summary: Logout Pengguna
-      description: API untuk logout pengguna.
+      description: API untuk logout pengguna dengan membatalkan (invalidate) refresh token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  description: Refresh token yang ingin dibatalkan
+                  example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLWMzNmQ1OTgwZTI4NyIsIlVzZXJuYW1lIjoiYWt1bmNvYmEiLCJSb2xlIjoidXNlciIsImV4cCI6MTcxNzQ4NDkwOCwiaWF0IjoxNzE3Mzk4NTA4LCJuYmYiOjE3MTczOTg1MDh9.nEpwC8eBk4qWOjD3MucKfOh_PJL7xLPbnY8IXjpbJzM'
       responses:
         '200':
           description: Logout Berhasil
@@ -434,13 +450,26 @@ paths:
                   message:
                     type: string
                     example: 'Logout berhasil!'
+        '401':
+          description: Token Tidak Valid atau Kedaluwarsa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Token tidak valid'
 
   /mobile/auth/token:
     post:
       tags:
         - Mobile - Auth
-      summary: Mendapatkan Token Baru
-      description: API untuk mendapatkan token baru.
+      summary: Mendapatkan Token Baru (Refresh Token)
+      description: API untuk mendapatkan token akses baru dengan menggunakan refresh token yang valid.
       requestBody:
         required: true
         content:
@@ -450,7 +479,8 @@ paths:
               properties:
                 refresh_token:
                   type: string
-                  example: 'token'
+                  description: Refresh token yang valid
+                  example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLWMzNmQ1OTgwZTI4NyIsIlVzZXJuYW1lIjoiYWt1bmNvYmEiLCJSb2xlIjoidXNlciIsImV4cCI6MTcxNzM5MTI5MiwiaWF0IjoxNzE3MzA0ODkyLCJuYmYiOjE3MTczMDQ4OTJ9.062A35GzPol_3Xa5KkXo0ApQcCpHXvuazF0kouqA0Cg'
       responses:
         '200':
           description: Berhasil Mendapatkan Token Baru
@@ -471,8 +501,224 @@ paths:
                       access_token:
                         type: string
                         example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLWMzNmQ1OTgwZTI4NyIsIlVzZXJuYW1lIjoiYWt1bmNvYmEiLCJSb2xlIjoidXNlciIsImV4cCI6MTcxNzIyNjI2NCwiaWF0IjoxNzE3MjI1MDY0LCJuYmYiOjE3MTcyMjUwNjR9.Av2DF2H2HBcZsH2pXDEpmb9W1UKvkSDFq0T7-Y0OJ2k'
+        '401':
+          description: Token Tidak Valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Failed"
+                  message:
+                    type: string
+                    example: "Token tidak valid"
+  /mobile/profile:
+    get:
+      tags:
+        - Mobile - Profile
+      summary: Mendapatkan Profil Pengguna
+      description: API untuk mengambil data profil pengguna yang sedang login.
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: Profil Berhasil Didapatkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Data profil berhasil didapatkan'
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: ID unik pengguna
+                        example: '4a4e9723-ae4c-4d72-b361-c36d5980e287'
+                      username:
+                        type: string
+                        description: Nama pengguna (username)
+                        example: 'tes1'
+                      nama_lengkap:
+                        type: string
+                        description: Nama lengkap pengguna
+                        example: 'tes tes'
+                      bio:
+                        type: string
+                        description: Bio singkat pengguna (opsional)
+                        example: 'life'
+                      email:
+                        type: string
+                        description: Alamat email pengguna
+                        example: 'leafthe78@gmail.com'
+                      no_telepon:
+                        type: string
+                        description: Nomor telepon pengguna
+                        example: '081234567899'
+                      foto_profil:
+                        type: string
+                        description: URL foto profil pengguna (opsional)
+                        example: 'https://res.cloudinary.com/alta-minpro/image/upload/v1717582618/tourease/users/tusamyaghmynwe44rk2t.jpg'
+                      jenis_kelamin:
+                        type: string
+                        description: Jenis kelamin pengguna (Pria/Wanita)
+                        example: 'Pria'
+                      kota:
+                        type: string
+                        description: Kota tempat tinggal pengguna
+                        example: 'Medan'
+                      provinsi:
+                        type: string
+                        description: Provinsi tempat tinggal pengguna
+                        example: 'Sumatera Utara'
+    put:
+      tags:
+        - Mobile - Profile
+      summary: Memperbarui Profil Pengguna
+      description: API untuk memperbarui data profil pengguna yang sedang login.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: Nama pengguna (username)
+                  example: 'tes1'
+                nama_lengkap:
+                  type: string
+                  description: Nama lengkap pengguna
+                  example: 'tes tes'
+                bio:
+                  type: string
+                  description: Bio singkat pengguna (opsional)
+                  example: 'life'
+                email:
+                  type: string
+                  description: Alamat email pengguna
+                  example: 'leafthe78@gmail.com'
+                no_telepon:
+                  type: string
+                  description: Nomor telepon pengguna
+                  example: '081234567899'
+                jenis_kelamin:
+                  type: string
+                  description: Jenis kelamin pengguna (Pria/Wanita)
+                  example: 'Pria'
+                kota:
+                  type: string
+                  description: Kota tempat tinggal pengguna
+                  example: 'Medan'
+                provinsi:
+                  type: string
+                  description: Provinsi tempat tinggal pengguna
+                  example: 'Sumatera Utara'
+                foto_profil:
+                  type: string
+                  format: binary
+                  description: File gambar foto profil (opsional)
+      responses:
+        '200':
+          description: Profil Berhasil Diperbarui
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Data profil berhasil diperbarui'
+        '400':
+          description: Permintaan Tidak Valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'failed'
+                  message:
+                    type: string
+                    example: 'Permintaan tidak valid. Silakan periksa kembali data yang Anda masukkan.'
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          example: 'NoTelepon'
+                        message:
+                          type: string
+                          example: 'Kolom NoTelepon harus lebih dari 11 karakter'
         '409':
-          description: Token Tidak Ditemukan
+          description: Konflik Data (Email Sudah Digunakan)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Failed"
+                  message:
+                    type: string
+                    example: "Email sudah digunakan"
+  /mobile/profile/change-password:
+    put:
+      tags:
+        - Mobile - Profile
+      summary: Mengubah Password Pengguna
+      description: API untuk mengubah password pengguna yang sedang login.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password_lama:
+                  type: string
+                  description: Password lama pengguna
+                  example: 'user12345'
+                password_baru:
+                  type: string
+                  description: Password baru yang diinginkan
+                  example: '12345678'
+                konfirmasi_password:
+                  type: string
+                  description: Konfirmasi password baru
+                  example: '12345678'
+      responses:
+        '200':
+          description: Password Berhasil Diubah
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Password berhasil diperbarui'
+        '400':
+          description: Password dan Konfirmasi Password Tidak Cocok
           content:
             application/json:
               schema:
@@ -483,8 +729,20 @@ paths:
                     example: 'Failed'
                   message:
                     type: string
-                    example: 'Token tidak ditemukan'
-
+                    example: 'Password dan konfirmasi password tidak cocok'
+        '409':
+          description: Password Lama Tidak Valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Password lama tidak valid'
   /admin/users:
     get:
       tags:

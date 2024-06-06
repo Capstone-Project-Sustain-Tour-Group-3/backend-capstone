@@ -19,4 +19,5 @@ func ProfileRouter(r *echo.Group) {
 	handler := handlers.NewProfileHandler(usecase)
 	r.GET("", handler.GetDetailUser)
 	r.PUT("", handler.InsertUserDetail)
+	r.PUT("/change-password", handler.ChangePassword)
 }

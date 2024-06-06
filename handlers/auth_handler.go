@@ -121,7 +121,7 @@ func (h *authHandler) Pong(ctx echo.Context) error {
 }
 
 func (h *authHandler) ForgotPassword(ctx echo.Context) error {
-	var req dto.ChangePasswordRequest
+	var req dto.ForgotPasswordRequest
 	if err := ctx.Bind(&req); err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}

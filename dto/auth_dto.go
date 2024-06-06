@@ -33,7 +33,7 @@ type ResendOTPRequest struct {
 	Email string `json:"email"`
 }
 
-type ChangePasswordRequest struct {
+type ForgotPasswordRequest struct {
 	RefId              string `json:"ref_id"`
 	Password           string `json:"password" validate:"required,min=8"`
 	KonfirmasiPassword string `json:"konfirmasi_password" validate:"required,min=8"`
