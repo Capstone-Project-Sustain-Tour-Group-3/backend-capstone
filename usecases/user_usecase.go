@@ -65,7 +65,7 @@ func (uc *userUsecase) Create(request *dto.UserRequest) error {
 		Fullname:        request.NamaLengkap,
 		Bio:             request.Bio,
 		PhoneNumber:     request.NoTelepon,
-		ProfileImageUrl: request.FotoProfil,
+		ProfileImageUrl: &request.FotoProfil,
 		Gender:          request.JenisKelamin,
 		City:            request.Kota,
 		Province:        request.Provinsi,
@@ -108,7 +108,7 @@ func (uc *userUsecase) Update(id uuid.UUID, request *dto.UserRequest) error {
 	user.Fullname = request.NamaLengkap
 	user.Bio = request.Bio
 	user.PhoneNumber = request.NoTelepon
-	user.ProfileImageUrl = request.FotoProfil
+	user.ProfileImageUrl = &request.FotoProfil
 	user.Gender = request.JenisKelamin
 	user.City = request.Kota
 	user.Province = request.Provinsi

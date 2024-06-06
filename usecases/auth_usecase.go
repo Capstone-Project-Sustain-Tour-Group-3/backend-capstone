@@ -20,7 +20,7 @@ type AuthUsecase interface {
 	Login(request *dto.LoginRequest) (*dto.LoginResponse, error)
 	Logout(token string) error
 	GetNewAccessToken(refreshToken string) (*dto.NewToken, error)
-	ForgotPassword(request *dto.ChangePasswordRequest) error
+	ForgotPassword(request *dto.ForgotPasswordRequest) error
 }
 
 type authUsecase struct {
@@ -104,6 +104,7 @@ func (uc *authUsecase) VerifyEmail(request *dto.VerifyEmailRequest) error {
 
 	now := time.Now()
 	email, _ := uc.cacheRepo.Get(request.RefId + "_email")
+	uc.cacheRepo.Set(request.RefId+"_success", "success")
 	user, _ := uc.userRepo.FindByEmail(email)
 	if user == nil {
 		return &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
@@ -141,14 +142,14 @@ func (uc *authUsecase) Login(request *dto.LoginRequest) (*dto.LoginResponse, err
 	}
 	response := &dto.LoginResponse{
 		Username:     user.Username,
-		ProfileImage: user.ProfileImageUrl,
+		ProfileImage: *user.ProfileImageUrl,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}
 	return response, nil
 }
 
-func (uc *authUsecase) ForgotPassword(request *dto.ChangePasswordRequest) error {
+func (uc *authUsecase) ForgotPassword(request *dto.ForgotPasswordRequest) error {
 	email, _ := uc.cacheRepo.Get(request.RefId + "_email")
 
 	user, _ := uc.userRepo.FindByEmail(email)

@@ -14,7 +14,7 @@ import (
 type IDestinationRepository interface {
 	FindById(id uuid.UUID) (*entities.Destination, error)
 	FindAll(page, limit int, searchQuery, sortQuery, filterQuery string) (string, *int64, []entities.Destination, error)
-	FindByCategoryIds(ids []uuid.UUID) ([]entities.Destination, error)
+	FindByCategoryId(ids uuid.UUID) ([]entities.Destination, error)
 	Create(destination *entities.Destination) error
 	Update(destination *entities.Destination) error
 	Delete(destination *entities.Destination) error
@@ -33,9 +33,11 @@ func (r *DestinationRepository) FindById(id uuid.UUID) (*entities.Destination, e
 	if err := r.db.Where("id = ?", id).
 		Preload("DestinationMedias").
 		Preload("DestinationFacilities.Facility").
-		Preload("DestinationCategories.Category").
+		Preload("Category").
 		Preload("DestinationAddress").
 		Preload("DestinationAddress.Province").
+		Preload("DestinationAddress.City").
+		Preload("DestinationAddress.Subdistrict").
 		First(&destination).Error; err != nil {
 		return nil, err
 	}
@@ -67,8 +69,8 @@ func (r *DestinationRepository) FindAll(page, limit int, searchQuery, sortQuery,
 	var filterName string
 
 	if filterQuery != "" {
-		db = db.Joins("JOIN destination_categories ON destination_categories.destination_id = destinations.id").
-			Where("destination_categories.category_id = ?", filterQuery)
+		db = db.Joins("JOIN categories ON categories.id = destinations.category_id").
+			Where("categories.id = ?", filterQuery)
 		// Group("destinations.id")
 
 		if err := r.db.Model(&entities.Category{}).
@@ -86,7 +88,9 @@ func (r *DestinationRepository) FindAll(page, limit int, searchQuery, sortQuery,
 		Preload("DestinationMedias", "type = ?", "image").
 		Preload("DestinationAddress").
 		Preload("DestinationAddress.Province").
-		Preload("DestinationCategories.Category").
+		Preload("DestinationAddress.City").
+		Preload("DestinationAddress.Subdistrict").
+		Preload("Category").
 		Find(&destinations).
 		Error; err != nil {
 		return filterName, nil, nil, err
@@ -98,21 +102,24 @@ func (r *DestinationRepository) FindAll(page, limit int, searchQuery, sortQuery,
 	return filterName, &total, destinations, nil
 }
 
-func (r *DestinationRepository) FindByCategoryIds(ids []uuid.UUID) ([]entities.Destination, error) {
+func (r *DestinationRepository) FindByCategoryId(id uuid.UUID) ([]entities.Destination, error) {
 	var destinations []entities.Destination
 
 	if err := r.db.Model(&entities.Destination{}).
 		Limit(5).
-		Joins("JOIN destination_categories ON destination_categories.destination_id = destinations.id").
-		Where("destination_categories.category_id IN (?)", ids).
+		Joins("JOIN categories ON categories.id = destinations.category_id").
+		Where("categories.id = ?", id).
 		Preload("DestinationMedias", "type = ?", "image").
 		Preload("DestinationAddress").
 		Preload("DestinationAddress.Province").
-		Preload("DestinationCategories.Category").
+		Preload("DestinationAddress.City").
+		Preload("DestinationAddress.Subdistrict").
+		Preload("Category").
 		Find(&destinations).
 		Error; err != nil {
 		return nil, err
 	}
+
 	return destinations, nil
 }
 

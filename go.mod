@@ -4,6 +4,7 @@ go 1.22.2
 
 require (
 	github.com/cloudinary/cloudinary-go v1.7.0
+	github.com/devfeel/mapper v0.7.13
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/generative-ai-go v0.12.0

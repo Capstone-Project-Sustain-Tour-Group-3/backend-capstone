@@ -10,8 +10,15 @@ servers:
 tags:
   - name: Mobile - Auth
   - name: Mobile - Destinations
+<<<<<<< HEAD
+  - name: Mobile - Profile
+=======
+  - name: Mobile - Personalization
+>>>>>>> development
+  - name: Admin - Destinations
   - name: Admin - Users
   - name: Admin - Auth
+
 paths:
   /mobile/auth/register:
     post:
@@ -340,7 +347,7 @@ paths:
                         type: string
                         example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6ImFhNjJjZDA5LTU0YjUtNGViNC04MjNmLWMzNjI4ZWFlYmQ0MSIsIlVzZXJuYW1lIjoiYWRtaW50b3VyZWFzZSIsIlJvbGUiOiJhZG1pbiIsImV4cCI6MTcxNjkxMTIzMCwiaWF0IjoxNzE2OTA5NDMwLCJuYmYiOjE3MTY5MDk0MzB9.Iesz7CdqiA-5xyJa3I3w2rkZTjC7ZR27FMPz3HwhYOs'
         '409':
-          description: Account Not Found
+          description: Conflict
           content:
             application/json:
               schema:
@@ -417,7 +424,18 @@ paths:
       tags:
         - Mobile - Auth
       summary: Logout Pengguna
-      description: API untuk logout pengguna.
+      description: API untuk logout pengguna dengan membatalkan (invalidate) refresh token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  description: Refresh token yang ingin dibatalkan
+                  example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLWMzNmQ1OTgwZTI4NyIsIlVzZXJuYW1lIjoiYWt1bmNvYmEiLCJSb2xlIjoidXNlciIsImV4cCI6MTcxNzQ4NDkwOCwiaWF0IjoxNzE3Mzk4NTA4LCJuYmYiOjE3MTczOTg1MDh9.nEpwC8eBk4qWOjD3MucKfOh_PJL7xLPbnY8IXjpbJzM'
       responses:
         '200':
           description: Logout Berhasil
@@ -432,13 +450,37 @@ paths:
                   message:
                     type: string
                     example: 'Logout berhasil!'
+        '401':
+          description: Token Tidak Valid atau Kedaluwarsa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Token tidak valid'
 
   /mobile/auth/token:
-    get:
+    post:
       tags:
         - Mobile - Auth
-      summary: Mendapatkan Token Baru
-      description: API untuk mendapatkan token baru.
+      summary: Mendapatkan Token Baru (Refresh Token)
+      description: API untuk mendapatkan token akses baru dengan menggunakan refresh token yang valid.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  description: Refresh token yang valid
+                  example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLWMzNmQ1OTgwZTI4NyIsIlVzZXJuYW1lIjoiYWt1bmNvYmEiLCJSb2xlIjoidXNlciIsImV4cCI6MTcxNzM5MTI5MiwiaWF0IjoxNzE3MzA0ODkyLCJuYmYiOjE3MTczMDQ4OTJ9.062A35GzPol_3Xa5KkXo0ApQcCpHXvuazF0kouqA0Cg'
       responses:
         '200':
           description: Berhasil Mendapatkan Token Baru
@@ -459,8 +501,224 @@ paths:
                       access_token:
                         type: string
                         example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLWMzNmQ1OTgwZTI4NyIsIlVzZXJuYW1lIjoiYWt1bmNvYmEiLCJSb2xlIjoidXNlciIsImV4cCI6MTcxNzIyNjI2NCwiaWF0IjoxNzE3MjI1MDY0LCJuYmYiOjE3MTcyMjUwNjR9.Av2DF2H2HBcZsH2pXDEpmb9W1UKvkSDFq0T7-Y0OJ2k'
+        '401':
+          description: Token Tidak Valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Failed"
+                  message:
+                    type: string
+                    example: "Token tidak valid"
+  /mobile/profile:
+    get:
+      tags:
+        - Mobile - Profile
+      summary: Mendapatkan Profil Pengguna
+      description: API untuk mengambil data profil pengguna yang sedang login.
+      security:
+        - bearerAuth: [ ]
+      responses:
+        '200':
+          description: Profil Berhasil Didapatkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Data profil berhasil didapatkan'
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: ID unik pengguna
+                        example: '4a4e9723-ae4c-4d72-b361-c36d5980e287'
+                      username:
+                        type: string
+                        description: Nama pengguna (username)
+                        example: 'tes1'
+                      nama_lengkap:
+                        type: string
+                        description: Nama lengkap pengguna
+                        example: 'tes tes'
+                      bio:
+                        type: string
+                        description: Bio singkat pengguna (opsional)
+                        example: 'life'
+                      email:
+                        type: string
+                        description: Alamat email pengguna
+                        example: 'leafthe78@gmail.com'
+                      no_telepon:
+                        type: string
+                        description: Nomor telepon pengguna
+                        example: '081234567899'
+                      foto_profil:
+                        type: string
+                        description: URL foto profil pengguna (opsional)
+                        example: 'https://res.cloudinary.com/alta-minpro/image/upload/v1717582618/tourease/users/tusamyaghmynwe44rk2t.jpg'
+                      jenis_kelamin:
+                        type: string
+                        description: Jenis kelamin pengguna (Pria/Wanita)
+                        example: 'Pria'
+                      kota:
+                        type: string
+                        description: Kota tempat tinggal pengguna
+                        example: 'Medan'
+                      provinsi:
+                        type: string
+                        description: Provinsi tempat tinggal pengguna
+                        example: 'Sumatera Utara'
+    put:
+      tags:
+        - Mobile - Profile
+      summary: Memperbarui Profil Pengguna
+      description: API untuk memperbarui data profil pengguna yang sedang login.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: Nama pengguna (username)
+                  example: 'tes1'
+                nama_lengkap:
+                  type: string
+                  description: Nama lengkap pengguna
+                  example: 'tes tes'
+                bio:
+                  type: string
+                  description: Bio singkat pengguna (opsional)
+                  example: 'life'
+                email:
+                  type: string
+                  description: Alamat email pengguna
+                  example: 'leafthe78@gmail.com'
+                no_telepon:
+                  type: string
+                  description: Nomor telepon pengguna
+                  example: '081234567899'
+                jenis_kelamin:
+                  type: string
+                  description: Jenis kelamin pengguna (Pria/Wanita)
+                  example: 'Pria'
+                kota:
+                  type: string
+                  description: Kota tempat tinggal pengguna
+                  example: 'Medan'
+                provinsi:
+                  type: string
+                  description: Provinsi tempat tinggal pengguna
+                  example: 'Sumatera Utara'
+                foto_profil:
+                  type: string
+                  format: binary
+                  description: File gambar foto profil (opsional)
+      responses:
+        '200':
+          description: Profil Berhasil Diperbarui
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Data profil berhasil diperbarui'
+        '400':
+          description: Permintaan Tidak Valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'failed'
+                  message:
+                    type: string
+                    example: 'Permintaan tidak valid. Silakan periksa kembali data yang Anda masukkan.'
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          example: 'NoTelepon'
+                        message:
+                          type: string
+                          example: 'Kolom NoTelepon harus lebih dari 11 karakter'
         '409':
-          description: Token Tidak Ditemukan
+          description: Konflik Data (Email Sudah Digunakan)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Failed"
+                  message:
+                    type: string
+                    example: "Email sudah digunakan"
+  /mobile/profile/change-password:
+    put:
+      tags:
+        - Mobile - Profile
+      summary: Mengubah Password Pengguna
+      description: API untuk mengubah password pengguna yang sedang login.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password_lama:
+                  type: string
+                  description: Password lama pengguna
+                  example: 'user12345'
+                password_baru:
+                  type: string
+                  description: Password baru yang diinginkan
+                  example: '12345678'
+                konfirmasi_password:
+                  type: string
+                  description: Konfirmasi password baru
+                  example: '12345678'
+      responses:
+        '200':
+          description: Password Berhasil Diubah
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Password berhasil diperbarui'
+        '400':
+          description: Password dan Konfirmasi Password Tidak Cocok
           content:
             application/json:
               schema:
@@ -471,8 +729,20 @@ paths:
                     example: 'Failed'
                   message:
                     type: string
-                    example: 'Token tidak ditemukan'
-
+                    example: 'Password dan konfirmasi password tidak cocok'
+        '409':
+          description: Password Lama Tidak Valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Password lama tidak valid'
   /admin/users:
     get:
       tags:
@@ -951,6 +1221,305 @@ paths:
                   message:
                     type: string
                     example: 'Destinasi tidak ditemukan'
+  /mobile/personalization:
+    post:
+      tags:
+        - Mobile - Personalization
+      summary: Membuat personalisasi rekomendasi
+      description: API untuk membuat personalisasi rekomendasi
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id_kategori:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    [
+                      eb77b590-b255-4ea1-b11a-d445a259ac41,
+                      'eb77b590-b255-4ea1-b11a-d445a259ac41',
+                      'eb77b590-b255-4ea1-b11a-d445a259ac41',
+                    ]
+                id_provinsi:
+                  type: array
+                  items:
+                    type: string
+                  example: ['11', '12', '13']
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Success
+                  message:
+                    type: string
+                    example: Personalisasi berhasil di buat
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                        message:
+                          type: string
+              examples:
+                token tidak valid:
+                  value:
+                    message: Format token tidak valid, gunakan bearer token
+                request data tidak valid:
+                  value:
+                    status: Failed
+                    message: Permintaan tidak valid. Silakan periksa kembali data yang anda masukkan.
+                    errors:
+                      - field: id_kategori
+                        message: id_kategori harus diisi
+
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Personalisasi sudah dibuat
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Gagal untuk membuat personalisasi
+
+  /mobile/personalization/categories:
+    get:
+      tags:
+        - Mobile - Personalization
+      summary: Mendapatkan kategori destinasi
+      description: API untuk mendapatkan kategori destinasi
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/CategoriesResponseSuccess'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Format token tidak valid, gunakan bearer token
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Invalid input'
+
+  /mobile/personalization/provinces:
+    get:
+      tags:
+        - Mobile - Personalization
+      summary: Mendapatkan provinsi
+      description: API untuk mendapatkan rekomendasi provinsi
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          $ref: '#/components/responses/ProvinceResponseSuccess'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Format token tidak valid, gunakan bearer token
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: Gagal untuk mendapatkan provinsi
+  /admin/destinations:
+    post:
+      summary: Create a new destination
+      tags:
+        - Admin - Destinations
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                nama_destinasi:
+                  type: string
+                  description: Nama destinasi
+                  example: 'Tes Destinasi'
+                deskripsi:
+                  type: string
+                  description: Deskripsi dari destinasi
+                  example: 'Lorem ipsum dolor sit amet'
+                jam_buka:
+                  type: string
+                  description: Jam buka destinasi
+                  example: '08:00'
+                jam_tutup:
+                  type: string
+                  description: Jam tutup destinasi
+                  example: '17:00'
+                harga_masuk:
+                  type: number
+                  description: Harga tiket masuk
+                  example: 20000
+                id_kategori:
+                  type: string
+                  format: uuid
+                  description: ID Kategori
+                  example: 'eb77b590-b255-4ea1-b11a-d445a259ac63'
+                latitude:
+                  type: number
+                  description: Latitude dari destinasi
+                  example: 115.1675
+                longitude:
+                  type: number
+                  description: Longitude dari destinasi
+                  example: -54.5245
+                fasilitas:
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                  description: Array ID fasilitas
+                  example:
+                    ['515cb2da-3361-48b8-99fd-bd894828efa1', '515cb2da-3361-48b8-99fd-bd894828efa2']
+                gambar:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      file:
+                        type: string
+                        format: binary
+                        description: File gambar
+                      judul:
+                        type: string
+                        description: Judul gambar
+                        example: 'Gambar 1'
+                #                reports:
+                #                  type: array
+                #                  items:
+                #                    type: string
+                #                    format: binary
+                alamat_destinasi:
+                  type: object
+                  properties:
+                    id_provinsi:
+                      type: string
+                      description: ID Provinsi
+                      example: '12'
+                    id_kota:
+                      type: string
+                      description: ID Kota
+                      example: '4456'
+                    id_kecamatan:
+                      type: string
+                      description: ID Kecamatan
+                      example: '326546'
+                    jalan:
+                      type: string
+                      description: Nama jalan
+                      example: 'Jl. Raya Bandung'
+                    kode_pos:
+                      type: string
+                      description: Kode pos
+                      example: '113322'
+      responses:
+        '200':
+          description: Destination created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Destination created successfully'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Invalid input'
 components:
   schemas:
     Pagination:
@@ -1106,6 +1675,66 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SimilarDestination'
+
+  responses:
+    UnauthorizedResponse:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: Token tidak terisi
+    CategoriesResponseSuccess:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: 'Success'
+              message:
+                type: string
+                example: 'Berhasil mendapatkan kategori destinasi'
+              data:
+                type: array
+                example:
+                  - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                    nama: Alam
+                    url: https://picsum.photos/300/200
+                  - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                    nama: Seni dan Budaya
+                    url: https://picsum.photos/300/200
+                  - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                    nama: Sejarah
+                    url: https://picsum.photos/300/200
+    ProvinceResponseSuccess:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: 'Success'
+              message:
+                type: string
+                example: 'Berhasil mendapatkan provinsi'
+              data:
+                type: array
+                example:
+                  - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                    nama: Jawa Timur
+                    url: https://picsum.photos/300/200
+                  - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                    nama: Jawa Barat
+                    url: https://picsum.photos/300/200
+
   securitySchemes:
     BearerAuth:
       type: http

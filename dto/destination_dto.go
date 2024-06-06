@@ -1,18 +1,30 @@
 package dto
 
 import (
+	"mime/multipart"
+
 	"capstone/entities"
 
 	"github.com/google/uuid"
 )
 
 type SearchDestination struct {
-	Id       uuid.UUID  `json:"id"`
-	Name     string     `json:"nama"`
-	Url      *string    `json:"url_media"`
-	Province string     `json:"provinsi"`
-	City     string     `json:"kota"`
-	Category []Category `json:"kategori"`
+	Id       uuid.UUID `json:"id"`
+	Name     string    `json:"nama"`
+	Url      *string   `json:"url_media"`
+	Province string    `json:"provinsi"`
+	City     string    `json:"kota"`
+	Category Category  `json:"kategori"`
+}
+
+type GetAllDestination struct {
+	Id                 uuid.UUID           `json:"id"`
+	Name               string              `json:"nama"`
+	OpenTime           string              `json:"jam_buka"`
+	CloseTime          string              `json:"jam_tutup"`
+	EntryPrice         float64             `json:"harga_masuk"`
+	Category           Category            `json:"kategori"`
+	DestinationAddress *DestinationAddress `json:"alamat"`
 }
 
 func ToSearchDestinationsResponse(destinations *[]entities.Destination) *[]SearchDestination {
@@ -30,8 +42,32 @@ func ToSearchDestinationsResponse(destinations *[]entities.Destination) *[]Searc
 			Name:     destination.Name,
 			Url:      url,
 			Province: destination.DestinationAddress.Province.Name,
-			City:     destination.DestinationAddress.City,
-			Category: *ToCategories(&destination),
+			City:     destination.DestinationAddress.City.Name,
+			Category: *ToCategory(&destination),
+		}
+	}
+
+	return &responses
+}
+
+func ToGetAllDestinationsResponse(destinations *[]entities.Destination) *[]GetAllDestination {
+	responses := make([]GetAllDestination, len(*destinations))
+
+	for idx, destination := range *destinations {
+		responses[idx] = GetAllDestination{
+			Id:         destination.Id,
+			Name:       destination.Name,
+			OpenTime:   destination.OpenTime,
+			CloseTime:  destination.CloseTime,
+			EntryPrice: destination.EntryPrice,
+			Category:   *ToCategory(&destination),
+			DestinationAddress: &DestinationAddress{
+				Province:    destination.DestinationAddress.Province.Name,
+				City:        destination.DestinationAddress.City.Name,
+				Subdistrict: destination.DestinationAddress.Subdistrict.Name,
+				StreetName:  destination.DestinationAddress.StreetName,
+				PostalCode:  destination.DestinationAddress.PostalCode,
+			},
 		}
 	}
 
@@ -52,11 +88,11 @@ type UrlVideo struct {
 }
 
 type DestinationAddress struct {
-	Province   string `json:"provinsi"`
-	City       string `json:"kota"`
-	Regency    string `json:"kabupaten"`
-	StreetName string `json:"nama_jalan"`
-	PostalCode string `json:"kode_pos"`
+	Province    string `json:"provinsi"`
+	City        string `json:"kota"`
+	Subdistrict string `json:"kecamatan"`
+	StreetName  string `json:"nama_jalan"`
+	PostalCode  string `json:"kode_pos"`
 }
 
 type Category struct {
@@ -96,9 +132,22 @@ type DetailDestinationResponse struct {
 	DestinationAddress *DestinationAddress  `json:"alamat_destinasi"`
 	UrlImages          *[]UrlImage          `json:"url_gambar"`
 	UrlVideos          *[]UrlVideo          `json:"url_video"`
-	Categories         *[]Category          `json:"kategori"`
+	Categories         *Category            `json:"kategori"`
 	Facilities         *[]Facility          `json:"fasilitas"`
 	SimilarDestination *[]SearchDestination `json:"destinasi_serupa"`
+}
+
+type GetByIdDestinationResponse struct {
+	Id                 uuid.UUID           `json:"id_destinasi"`
+	Name               string              `json:"nama_destinasi"`
+	OpenTime           string              `json:"jam_buka"`
+	CloseTime          string              `json:"jam_tutup"`
+	EntryPrice         float64             `json:"harga_masuk"`
+	Description        string              `json:"deskripsi"`
+	DestinationAddress *DestinationAddress `json:"alamat_destinasi"`
+	UrlImages          *[]UrlImage         `json:"url_gambar"`
+	Categories         *Category           `json:"kategori"`
+	Facilities         *[]Facility         `json:"fasilitas"`
 }
 
 func ToUrlImages(destination *entities.Destination) *[]UrlImage {
@@ -130,15 +179,11 @@ func ToUrlVideos(destination *entities.Destination) *[]UrlVideo {
 	return &videos
 }
 
-func ToCategories(destination *entities.Destination) *[]Category {
-	var categories []Category
-	for _, destinationCategory := range *destination.DestinationCategories {
-		categories = append(categories, Category{
-			Id:   destinationCategory.CategoryId,
-			Name: destinationCategory.Category.Name,
-		})
+func ToCategory(destination *entities.Destination) *Category {
+	return &Category{
+		Id:   destination.CategoryId,
+		Name: destination.Category.Name,
 	}
-	return &categories
 }
 
 func ToFacilities(destination *entities.Destination) *[]Facility {
@@ -162,31 +207,113 @@ func ToDetailDestinationResponse(destination *entities.Destination, similarDesti
 		EntryPrice:  destination.EntryPrice,
 		Description: destination.Description,
 		DestinationAddress: &DestinationAddress{
-			Province:   destination.DestinationAddress.Province.Name,
-			City:       destination.DestinationAddress.City,
-			Regency:    destination.DestinationAddress.Regency,
-			StreetName: destination.DestinationAddress.StreetName,
-			PostalCode: destination.DestinationAddress.PostalCode,
+			Province:    destination.DestinationAddress.Province.Name,
+			City:        destination.DestinationAddress.City.Name,
+			Subdistrict: destination.DestinationAddress.Subdistrict.Name,
+			StreetName:  destination.DestinationAddress.StreetName,
+			PostalCode:  destination.DestinationAddress.PostalCode,
 		},
 		UrlImages:          ToUrlImages(destination),
 		UrlVideos:          ToUrlVideos(destination),
-		Categories:         ToCategories(destination),
+		Categories:         ToCategory(destination),
 		Facilities:         ToFacilities(destination),
 		SimilarDestination: ToSearchDestinationsResponse(similarDestinations),
 	}
 }
 
+func ToGetByIdDestinationResponse(destination *entities.Destination) *GetByIdDestinationResponse {
+	return &GetByIdDestinationResponse{
+		Id:          destination.Id,
+		Name:        destination.Name,
+		OpenTime:    destination.OpenTime,
+		CloseTime:   destination.CloseTime,
+		EntryPrice:  destination.EntryPrice,
+		Description: destination.Description,
+		DestinationAddress: &DestinationAddress{
+			Province:    destination.DestinationAddress.Province.Name,
+			City:        destination.DestinationAddress.City.Name,
+			Subdistrict: destination.DestinationAddress.Subdistrict.Name,
+			StreetName:  destination.DestinationAddress.StreetName,
+			PostalCode:  destination.DestinationAddress.PostalCode,
+		},
+		UrlImages:  ToUrlImages(destination),
+		Categories: ToCategory(destination),
+		Facilities: ToFacilities(destination),
+	}
+}
+
+func ToDestinationFacilities(destinationId uuid.UUID, facilityIds []uuid.UUID) *[]entities.DestinationFacility {
+	var destinationFacilities []entities.DestinationFacility
+	for _, facilityId := range facilityIds {
+		destinationFacilities = append(destinationFacilities, entities.DestinationFacility{
+			Id:            uuid.New(),
+			DestinationId: destinationId,
+			FacilityId:    facilityId,
+		})
+	}
+	return &destinationFacilities
+}
+
+func ToDestinationMedia(destinationId uuid.UUID, mediaType string, mediaUrl string, title string) *entities.DestinationMedia {
+	return &entities.DestinationMedia{
+		Id:            uuid.New(),
+		DestinationId: destinationId,
+		Type:          mediaType,
+		Url:           mediaUrl,
+		Title:         title,
+	}
+}
+
+func ToDestinationAddress(destinationId uuid.UUID, request CreateDestinationAddressRequest) *entities.DestinationAddress {
+	return &entities.DestinationAddress{
+		Id:            uuid.New(),
+		ProvinceId:    request.ProvinceId,
+		CityId:        request.CityId,
+		SubdistrictId: request.SubdistrictId,
+		StreetName:    request.StreetName,
+		PostalCode:    request.PostalCode,
+		DestinationId: destinationId,
+	}
+}
+
+type CreateDestinationImageRequest struct {
+	File  multipart.File `json:"file" form:"file" validate:"required"`
+	Title string         `json:"judul" form:"judul" validate:"required"`
+}
+
+type CreateDestinationAddressRequest struct {
+	ProvinceId    string `json:"id_provinsi" form:"id_provinsi" validate:"required"`
+	CityId        string `json:"id_kota" form:"id_kota" validate:"required"`
+	SubdistrictId string `json:"id_kecamatan" form:"id_kecamatan" validate:"required"`
+	StreetName    string `json:"jalan" form:"jalan" validate:"required"`
+	PostalCode    string `json:"kode_pos" form:"kode_pos" validate:"required"`
+}
+
 type CreateDestinationRequest struct {
-	Name        string  `json:"nama_destinasi"`
-	OpenTime    string  `json:"jam_buka"`
-	CloseTime   string  `json:"jam_tutup"`
-	EntryPrice  float64 `json:"harga_masuk"`
-	Description string  `json:"deskripsi"`
-	// DestinationAddress *DestinationAddress  `json:"alamat_destinasi"`
-	// UrlImages          *[]UrlImage          `json:"url_gambar"`
-	// UrlVideos          *[]UrlVideo          `json:"url_video"`
-	// Categories         *[]Category          `json:"kategori"`
-	// Facilities         *[]Facility          `json:"fasilitas"`
+	Name               string                          `json:"nama_destinasi" form:"nama_destinasi" validate:"required"`
+	Description        string                          `json:"deskripsi" form:"deskripsi" validate:"required"`
+	OpenTime           string                          `json:"jam_buka" form:"jam_buka" validate:"required"`
+	CloseTime          string                          `json:"jam_tutup" form:"jam_tutup" validate:"required"`
+	EntryPrice         float64                         `json:"harga_masuk" form:"harga_masuk" validate:"required"`
+	CategoryId         uuid.UUID                       `json:"id_kategori" form:"id_kategori" validate:"required"`
+	Latitude           float64                         `json:"latitude" form:"latitude" validate:"required"`
+	Longitude          float64                         `json:"longitude" form:"longitude" validate:"required"`
+	FacilityIds        []uuid.UUID                     `json:"fasilitas" form:"fasilitas" validate:"required"`
+	DestinationImages  []CreateDestinationImageRequest `json:"gambar" form:"gambar"`
+	DestinationAddress CreateDestinationAddressRequest `json:"alamat_destinasi" form:"alamat_destinasi" validate:"required"`
+}
+
+type UpdateDestinationRequest struct {
+	Name               string                          `json:"nama_destinasi" form:"nama_destinasi" validate:"required"`
+	Description        string                          `json:"deskripsi" form:"deskripsi" validate:"required"`
+	OpenTime           string                          `json:"jam_buka" form:"jam_buka" validate:"required"`
+	CloseTime          string                          `json:"jam_tutup" form:"jam_tutup" validate:"required"`
+	EntryPrice         float64                         `json:"harga_masuk" form:"harga_masuk" validate:"required"`
+	CategoryId         uuid.UUID                       `json:"id_kategori" form:"id_kategori" validate:"required"`
+	Latitude           float64                         `json:"latitude" form:"latitude" validate:"required"`
+	Longitude          float64                         `json:"longitude" form:"longitude" validate:"required"`
+	FacilityIds        []uuid.UUID                     `json:"fasilitas" form:"fasilitas" validate:"required"`
+	DestinationAddress CreateDestinationAddressRequest `json:"alamat_destinasi" form:"alamat_destinasi" validate:"required"`
 }
 
 type CreateDestinationResponse struct {

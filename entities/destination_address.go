@@ -10,10 +10,12 @@ import (
 type DestinationAddress struct {
 	Id            uuid.UUID
 	DestinationId uuid.UUID
-	ProvinceId    uuid.UUID
+	ProvinceId    string
 	Province      Province
-	City          string
-	Regency       string
+	CityId        string
+	City          City
+	SubdistrictId string
+	Subdistrict   Subdistrict
 	StreetName    string
 	PostalCode    string
 	CreatedAt     time.Time

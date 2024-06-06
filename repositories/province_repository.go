@@ -3,14 +3,13 @@ package repositories
 import (
 	"capstone/entities"
 
-	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type IProvinceRepository interface {
 	Create(province *entities.Province) error
 	FindAll() ([]entities.Province, error)
-	FindById(id uuid.UUID) (*entities.Province, error)
+	FindById(id string) (*entities.Province, error)
 	Update(province *entities.Province) error
 	Delete(province *entities.Province) error
 }
@@ -38,7 +37,7 @@ func (r *ProvinceRepository) FindAll() ([]entities.Province, error) {
 	return provinces, nil
 }
 
-func (r *ProvinceRepository) FindById(id uuid.UUID) (*entities.Province, error) {
+func (r *ProvinceRepository) FindById(id string) (*entities.Province, error) {
 	var province *entities.Province
 	if err := r.db.Where("id = ?", id).First(&province).Error; err != nil {
 		return nil, err

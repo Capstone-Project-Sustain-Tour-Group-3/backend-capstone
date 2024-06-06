@@ -13,7 +13,7 @@ import (
 )
 
 type ICloudinaryClient interface {
-	UploadImage(file multipart.File) (string, error)
+	UploadImage(file multipart.File, folder string) (string, error)
 	DeleteImage(mediaUrl string) error
 }
 
@@ -30,10 +30,10 @@ func NewCloudinaryClient(apiUrl string) *CloudinaryClient {
 	return &CloudinaryClient{client: client}
 }
 
-func (c *CloudinaryClient) UploadImage(file multipart.File) (string, error) {
+func (c *CloudinaryClient) UploadImage(file multipart.File, folder string) (string, error) {
 	ctx := context.Background()
 
-	result, err := c.client.Upload.Upload(ctx, file, uploader.UploadParams{Folder: "tourease"})
+	result, err := c.client.Upload.Upload(ctx, file, uploader.UploadParams{Folder: fmt.Sprintf("tourease/%s", folder)})
 	if err != nil {
 		return "", err
 	}
@@ -45,13 +45,13 @@ func (c *CloudinaryClient) DeleteImage(mediaUrl string) error {
 	ctx := context.Background()
 
 	parts := strings.Split(mediaUrl, "/")
-	publicIDWithExtension := parts[len(parts)-2] + "/" + parts[len(parts)-1]
-	publicID := strings.TrimSuffix(publicIDWithExtension, filepath.Ext(publicIDWithExtension))
 
+	publicIDWithExtension := strings.Join(parts[len(parts)-3:], "/")
+	publicID := strings.TrimSuffix(publicIDWithExtension, filepath.Ext(publicIDWithExtension))
+	fmt.Println(publicID)
 	_, err := c.client.Upload.Destroy(ctx, uploader.DestroyParams{PublicID: publicID})
 	if err != nil {
 		return fmt.Errorf("gagal menghapus media dengan ID '%s': %w", publicID, err)
 	}
-
 	return nil
 }

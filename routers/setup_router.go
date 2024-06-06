@@ -21,6 +21,9 @@ func SetupRouter(e *echo.Echo) {
 
 		profile := v1Mobile.Group("/profile")
 		mobile.ProfileRouter(profile)
+
+		recommendation := v1Mobile.Group("/personalization")
+		mobile.PersonalizationRoute(recommendation)
 	}
 
 	v1Admin := e.Group("/v1/admin")
@@ -30,5 +33,8 @@ func SetupRouter(e *echo.Echo) {
 
 		user := v1Admin.Group("/users")
 		admin.UserRouter(user)
+
+		destination := v1Admin.Group("/destinations")
+		admin.DestinationRouter(destination)
 	}
 }
