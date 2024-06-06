@@ -2,6 +2,7 @@ package dto
 
 import (
 	"capstone/entities"
+	"mime/multipart"
 
 	"github.com/google/uuid"
 )
@@ -29,6 +30,22 @@ type GetDetailAdminResponse struct {
 	Username        string  `json:"username"`
 	ProfileImageURL *string `json:"foto_profil"`
 	CreatedAt       string  `json:"tanggal_pembuatan"`
+}
+
+type CreateAdminRequest struct {
+	Username     string `form:"username" validate:"required,max=16"`
+	Password     string `form:"password" validate:"required,min=8"`
+	ProfileImage multipart.File
+}
+
+func ToCreateAdminRequest(request *CreateAdminRequest, imageURL *string) *entities.Admin {
+	return &entities.Admin{
+		Id:              uuid.New(),
+		Username:        request.Username,
+		Password:        request.Password,
+		ProfileImageURL: imageURL,
+		Role:            "admin",
+	}
 }
 
 func ToLoginAdminResponse(response *LoginAdminResponse) *LoginAdminResponse {

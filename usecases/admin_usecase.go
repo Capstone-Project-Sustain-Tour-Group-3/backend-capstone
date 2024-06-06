@@ -5,6 +5,7 @@ import (
 
 	"capstone/dto"
 	"capstone/errorHandlers"
+	"capstone/externals/cloudinary"
 	"capstone/helpers"
 	"capstone/repositories"
 
@@ -18,14 +19,19 @@ type AdminUsecase interface {
 	GetNewAccessToken(refreshToken string) (*dto.NewToken, error)
 	GetAllAdmins(page, limit int, search string) (*[]dto.GetAllAdminResponse, *int64, error)
 	GetAdminDetail(id uuid.UUID) (*dto.GetDetailAdminResponse, error)
+	CreateAdmin(request *dto.CreateAdminRequest) error
 }
 
 type adminUsecase struct {
-	repository repositories.AdminRepository
+	repository       repositories.AdminRepository
+	cloudinaryClient cloudinary.ICloudinaryClient
 }
 
-func NewAdminUsecase(repository repositories.AdminRepository) *adminUsecase {
-	return &adminUsecase{repository}
+func NewAdminUsecase(repository repositories.AdminRepository, cloudinaryClient cloudinary.ICloudinaryClient) *adminUsecase {
+	return &adminUsecase{
+		repository:       repository,
+		cloudinaryClient: cloudinaryClient,
+	}
 }
 
 func (uc *adminUsecase) Login(request *dto.LoginAdminRequest) (*dto.LoginAdminResponse, error) {
@@ -115,4 +121,35 @@ func (uc *adminUsecase) GetAdminDetail(id uuid.UUID) (*dto.GetDetailAdminRespons
 	res := dto.ToGetDetailAdminResponse(admin)
 
 	return res, nil
+}
+
+func (uc *adminUsecase) CreateAdmin(request *dto.CreateAdminRequest) error {
+	var profileImageURL *string
+
+	if request.ProfileImage != nil {
+		url, err := uc.cloudinaryClient.UploadImage(request.ProfileImage, "admin")
+		if err != nil {
+			return &errorHandlers.InternalServerError{Message: "Gagal menambah data admin"}
+		}
+		profileImageURL = &url
+	}
+
+	hashedPassword, err := helpers.HashPassword(request.Password)
+	if err != nil {
+		return &errorHandlers.InternalServerError{Message: "Gagal menambah data admin"}
+	}
+
+	request.Password = hashedPassword
+	admin := dto.ToCreateAdminRequest(request, profileImageURL)
+
+	if err := uc.repository.Create(admin); err != nil {
+		switch {
+		case errors.Is(err, gorm.ErrDuplicatedKey):
+			return &errorHandlers.ConflictError{Message: "Username sudah digunakan"}
+		default:
+			return &errorHandlers.InternalServerError{Message: "Gagal menambah data admin"}
+		}
+	}
+
+	return nil
 }

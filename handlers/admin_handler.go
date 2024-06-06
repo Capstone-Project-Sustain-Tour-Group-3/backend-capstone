@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"math"
+	"mime/multipart"
 	"net/http"
 	"strconv"
 
@@ -157,4 +158,50 @@ func (h *adminHandler) GetAdminDetail(ctx echo.Context) error {
 		Data:       result,
 	})
 	return ctx.JSON(http.StatusOK, response)
+}
+
+func (h *adminHandler) CreateAdmin(ctx echo.Context) error {
+	var file multipart.File = nil
+	req := new(dto.CreateAdminRequest)
+
+	if err := ctx.Bind(req); err != nil {
+		return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "Permintaan tidak valid. Silakan periksa kembali data yang anda masukkan."})
+	}
+
+	if err := helpers.ValidateRequest(req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "failed",
+			Message: "Permintaan tidak valid. Silakan periksa kembali data yang anda masukkan.",
+			Errors:  err,
+		})
+	}
+
+	fileHeader, err := ctx.FormFile("foto")
+	if err != nil {
+		return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "File tidak dapat di baca"})
+	}
+
+	if fileHeader.Size != 0 {
+		if !helpers.IsValidImageType(fileHeader) || !helpers.IsValidImageSize(fileHeader) {
+			return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "File harus berupa gambar dan kurang dari 2 MB"})
+		}
+
+		file, err = fileHeader.Open()
+		if err != nil {
+			return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "File tidak dapat di baca"})
+		}
+		defer file.Close()
+	}
+
+	req.ProfileImage = file
+	err = h.usecase.CreateAdmin(req)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusCreated,
+		Message:    "Berhasil menambah data admin",
+	})
+	return ctx.JSON(http.StatusCreated, response)
 }

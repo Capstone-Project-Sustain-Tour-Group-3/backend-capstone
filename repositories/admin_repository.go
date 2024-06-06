@@ -12,6 +12,7 @@ type AdminRepository interface {
 	FindById(id uuid.UUID) (*entities.Admin, error)
 	FindByUsername(username string) (*entities.Admin, error)
 	GetUserByRefreshToken(refreshToken string) (*entities.Admin, error)
+	Create(admin *entities.Admin) error
 	Update(admin *entities.Admin) error
 }
 
@@ -76,4 +77,8 @@ func (r *adminRepository) Update(admin *entities.Admin) error {
 		return err
 	}
 	return nil
+}
+
+func (r *adminRepository) Create(admin *entities.Admin) error {
+	return r.db.Create(admin).Error
 }
