@@ -142,7 +142,7 @@ func (uc *adminUsecase) CreateAdmin(request *dto.CreateAdminRequest) error {
 	request.Password = hashedPassword
 	admin := dto.ToCreateAdminRequest(request, profileImageURL)
 
-	if err := uc.repository.Create(admin); err != nil {
+	if err = uc.repository.Create(admin); err != nil {
 		switch {
 		case errors.Is(err, gorm.ErrDuplicatedKey):
 			return &errorHandlers.ConflictError{Message: "Username sudah digunakan"}

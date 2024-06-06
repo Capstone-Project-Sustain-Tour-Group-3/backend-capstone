@@ -1,8 +1,9 @@
 package dto
 
 import (
-	"capstone/entities"
 	"mime/multipart"
+
+	"capstone/entities"
 
 	"github.com/google/uuid"
 )
