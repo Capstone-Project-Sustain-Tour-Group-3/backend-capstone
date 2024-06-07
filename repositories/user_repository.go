@@ -42,7 +42,7 @@ func (r *userRepository) FindAll(page, limit int, searchQuery string) (*[]entiti
 	offset := (page - 1) * limit
 	db := r.db.Model(&entities.User{})
 	if searchQuery != "" {
-		db = db.Where("LOWER(username) LIKE ? OR LOWER(email) LIKE ?",
+		db = db.Where("LOWER(username) LIKE ? OR LOWER(fullname) LIKE ?",
 			"%"+strings.ToLower(searchQuery)+"%", "%"+strings.ToLower(searchQuery)+"%")
 	}
 

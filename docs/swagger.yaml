@@ -12,9 +12,10 @@ tags:
   - name: Mobile - Destinations
   - name: Mobile - Profile
   - name: Mobile - Personalization
-  - name: Admin - Destinations
-  - name: Admin - Users
   - name: Admin - Auth
+  - name: Admin - Destinations
+  - name: Admin - Routes
+  - name: Admin - Users
 
 paths:
   /mobile/auth/register:
@@ -809,20 +810,7 @@ paths:
                           type: string
                           example: 'Jakarta'
                   pagination:
-                    type: object
-                    properties:
-                      total:
-                        type: integer
-                        example: 4
-                      per_page:
-                        type: integer
-                        example: 10
-                      current_page:
-                        type: integer
-                        example: 1
-                      last_page:
-                        type: integer
-                        example: 1
+                    $ref: '#/components/schemas/Pagination'
     post:
       tags:
         - Admin - Users
@@ -899,7 +887,7 @@ paths:
     get:
       tags:
         - Admin - Users
-      summary: Get User Detail
+      summary: Mendapatkan Detail User
       description: API untuk mendapatkan detail pengguna.
       parameters:
         - name: id
@@ -972,7 +960,7 @@ paths:
     put:
       tags:
         - Admin - Users
-      summary: Data user diperbarui
+      summary: Memperbarui Data User
       description: API untuk memperbarui data pengguna.
       security:
         - BearerAuth: [ ]
@@ -1050,7 +1038,7 @@ paths:
     delete:
       tags:
         - Admin - Users
-      summary: Delete User
+      summary: Menghapus Data User
       description: API untuk menghapus pengguna.
       security:
         - BearerAuth: []
@@ -1402,13 +1390,14 @@ paths:
                   message:
                     type: string
                     example: Gagal untuk mendapatkan provinsi
+
   /admin/destinations:
     post:
-      summary: Create a new destination
+      summary: Menambah data destinasi
       tags:
         - Admin - Destinations
       security:
-        - BearerAuth: []
+        - BearerAuth: [ ]
       requestBody:
         required: true
         content:
@@ -1456,7 +1445,7 @@ paths:
                     format: uuid
                   description: Array ID fasilitas
                   example:
-                    ['515cb2da-3361-48b8-99fd-bd894828efa1', '515cb2da-3361-48b8-99fd-bd894828efa2']
+                    [ '515cb2da-3361-48b8-99fd-bd894828efa1', '515cb2da-3361-48b8-99fd-bd894828efa2' ]
                 gambar:
                   type: array
                   items:
@@ -1470,11 +1459,6 @@ paths:
                         type: string
                         description: Judul gambar
                         example: 'Gambar 1'
-                #                reports:
-                #                  type: array
-                #                  items:
-                #                    type: string
-                #                    format: binary
                 alamat_destinasi:
                   type: object
                   properties:
@@ -1525,6 +1509,152 @@ paths:
                   message:
                     type: string
                     example: 'Invalid input'
+  /admin/routes:
+    get:
+      tags:
+        - Admin - Routes
+      summary: Mendapatkan semua rute
+      description: API untuk mendapatkan semua rute.
+      security:
+        - BearerAuth: [ ]
+      responses:
+        '200':
+          description: Data rute berhasil ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'data rute berhasil ditemukan'
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: 'b5112798-9f59-4da0-9132-2c717895102f'
+                        username:
+                          type: string
+                          example: 'tes2'
+                        kota:
+                          type: string
+                          example: 'KAB. ACEH SELATAN'
+                        destinasi:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                example: '306d305e-3359-4884-8d38-89c04e8adec7'
+                              nama_destinasi:
+                                type: string
+                                example: 'Pulau Komodo'
+                        estimasi_biaya:
+                          type: integer
+                          example: 250000
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+  /admin/routes/{id}:
+    get:
+      tags:
+        - Admin - Routes
+      summary: Mendapatkan detail rute
+      description: API untuk mendapatkan data rute spesifik berdasarkan ID.
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Data rute berhasil didapatkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'data rute berhasil didapatkan'
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: 'b5112798-9f59-4da0-9132-2c717895102f'
+                      username:
+                        type: string
+                        example: 'tes2'
+                      kota:
+                        type: string
+                        example: 'KAB. ACEH SELATAN'
+                      destinasi:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: '306d305e-3359-4884-8d38-89c04e8adec7'
+                            nama_destinasi:
+                              type: string
+                              example: 'Pulau Komodo'
+                      estimasi_biaya:
+                        type: integer
+                        example: 250000
+    delete:
+      tags:
+        - Admin - Routes
+      summary: Menghapus data rute
+      description: API untuk menghapus data rute berdasarkan ID.
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Data rute berhasil dihapus
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'data rute berhasil dihapus'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Rute tidak ditemukan'
 components:
   schemas:
     Pagination:
