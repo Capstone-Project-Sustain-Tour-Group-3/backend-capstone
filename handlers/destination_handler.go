@@ -216,6 +216,7 @@ func (h *DestinationHandler) CreateDestination(ctx echo.Context) error {
 	response := helpers.Response(dto.ResponseParams{
 		StatusCode: http.StatusCreated,
 		Message:    "data destinasi berhasil ditambah",
+		Data:       req,
 	})
 
 	return ctx.JSON(http.StatusCreated, response)
