@@ -1,15 +1,18 @@
 package repositories
 
 import (
+	"strings"
+
 	"capstone/entities"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"strings"
 )
 
 type RouteRepository interface {
 	FindAll(page, limit int, searchQuery string) (*[]entities.Route, *int64, error)
 	FindById(id uuid.UUID) (*entities.Route, error)
+	Delete(route *entities.Route) error
 }
 
 type routeRepository struct {
@@ -59,4 +62,11 @@ func (r *routeRepository) FindById(id uuid.UUID) (*entities.Route, error) {
 		return nil, err
 	}
 	return &route, nil
+}
+
+func (r *routeRepository) Delete(route *entities.Route) error {
+	if err := r.db.Delete(&route).Error; err != nil {
+		return err
+	}
+	return nil
 }

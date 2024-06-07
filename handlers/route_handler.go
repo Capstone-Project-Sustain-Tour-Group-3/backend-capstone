@@ -1,15 +1,17 @@
 package handlers
 
 import (
+	"math"
+	"net/http"
+	"strconv"
+
 	"capstone/dto"
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/usecases"
+
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"math"
-	"net/http"
-	"strconv"
 )
 
 type RouteHandler struct {
@@ -69,6 +71,23 @@ func (h *RouteHandler) FindById(ctx echo.Context) error {
 		StatusCode: http.StatusOK,
 		Message:    "data rute berhasil didapatkan",
 		Data:       findResponse,
+	})
+	return ctx.JSON(http.StatusOK, response)
+}
+
+func (h *RouteHandler) DeleteRoute(ctx echo.Context) error {
+	id := ctx.Param("id")
+	uid, err := uuid.Parse(id)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "id tidak valid"})
+	}
+	err = h.RouteUsecase.DeleteRoute(uid)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "data rute berhasil dihapus",
 	})
 	return ctx.JSON(http.StatusOK, response)
 }

@@ -2,68 +2,59 @@ package dto
 
 import (
 	"capstone/entities"
+
 	"github.com/google/uuid"
 )
 
 type findAllResponse struct {
-	Id            uuid.UUID     `json:"id"`
-	NamaPengguna  string        `json:"nama_pengguna"`
-	Kota          string        `json:"kota"`
-	EstimasiBiaya float64       `json:"estimasi_biaya"`
-	RouteDetail   []RouteDetail `json:"route_detail"`
+	Id            uuid.UUID   `json:"id"`
+	Username      string      `json:"username"`
+	Kota          string      `json:"kota"`
+	Destinasi     []Destinasi `json:"destinasi"`
+	EstimasiBiaya float64     `json:"estimasi_biaya"`
 }
 
-type Destinations struct {
+type Destinasi struct {
 	Id            uuid.UUID `json:"id"`
 	NamaDestinasi string    `json:"nama_destinasi"`
 }
 
-type RouteDetail struct {
-	Id        uuid.UUID    `json:"id"`
-	Destinasi Destinations `json:"destinasi"`
-}
-
 func ToFindAllRouteResponse(routes *[]entities.Route) *[]findAllResponse {
-	var response []findAllResponse
+	var responses []findAllResponse
 	for _, route := range *routes {
-		var routeDetails []RouteDetail
+		var destinasi []Destinasi
 		for _, routeDetail := range route.RouteDetail {
-			var destinations Destinations
-			destinations.Id = routeDetail.DestinationId
-			destinations.NamaDestinasi = routeDetail.Destination.Name
-			routeDetails = append(routeDetails, RouteDetail{
-				Id:        routeDetail.Id,
-				Destinasi: destinations,
+			destinasi = append(destinasi, Destinasi{
+				Id:            routeDetail.DestinationId,
+				NamaDestinasi: routeDetail.Destination.Name,
 			})
 		}
-		response = append(response, findAllResponse{
+		response := findAllResponse{
 			Id:            route.Id,
-			NamaPengguna:  route.User.Username,
+			Username:      route.User.Username,
 			Kota:          route.City.Name,
+			Destinasi:     destinasi,
 			EstimasiBiaya: route.Price,
-			RouteDetail:   routeDetails,
-		})
+		}
+		responses = append(responses, response)
 	}
-	return &response
+	return &responses
 }
 
 func ToFindByIdRouteResponse(route *entities.Route) *findAllResponse {
-	var routeDetails []RouteDetail
+	var destinasi []Destinasi
 	for _, routeDetail := range route.RouteDetail {
-		var destinations Destinations
-		destinations.Id = routeDetail.DestinationId
-		destinations.NamaDestinasi = routeDetail.Destination.Name
-		routeDetails = append(routeDetails, RouteDetail{
-			Id:        routeDetail.Id,
-			Destinasi: destinations,
+		destinasi = append(destinasi, Destinasi{
+			Id:            routeDetail.DestinationId,
+			NamaDestinasi: routeDetail.Destination.Name,
 		})
 	}
 	response := findAllResponse{
 		Id:            route.Id,
-		NamaPengguna:  route.User.Username,
+		Username:      route.User.Username,
 		Kota:          route.City.Name,
+		Destinasi:     destinasi,
 		EstimasiBiaya: route.Price,
-		RouteDetail:   routeDetails,
 	}
 	return &response
 }

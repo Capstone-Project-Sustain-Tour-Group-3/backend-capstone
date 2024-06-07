@@ -3,6 +3,8 @@ package entities
 import (
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/google/uuid"
 )
 
@@ -20,5 +22,5 @@ type RouteDetail struct {
 	VisitEnd      []uint8
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
-	DeletedAt     time.Time
+	DeletedAt     gorm.DeletedAt
 }
