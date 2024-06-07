@@ -1,6 +1,8 @@
 package repositories
 
 import (
+	"time"
+
 	"capstone/entities"
 
 	"github.com/google/uuid"
@@ -82,5 +84,19 @@ func (r *adminRepository) Create(admin *entities.Admin) error {
 }
 
 func (r *adminRepository) Delete(admin *entities.Admin) error {
-	return r.db.Delete(admin).Error
+	tx := r.db.Begin()
+
+	err := tx.Model(admin).Update("delete_milli", time.Now().UnixMilli()).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	err = tx.Model(admin).Update("deleted_at", time.Now()).Error
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	return tx.Commit().Error
 }

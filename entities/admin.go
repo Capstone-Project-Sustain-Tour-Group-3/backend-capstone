@@ -5,11 +5,11 @@ import (
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"gorm.io/plugin/soft_delete"
 )
 
 type Admin struct {
 	Id              uuid.UUID
-	Email           string
 	Username        string
 	Password        string
 	ProfileImageURL *string
@@ -18,4 +18,5 @@ type Admin struct {
 	CreatedAt       time.Time
 	UpdatedAt       time.Time
 	DeletedAt       gorm.DeletedAt
+	DeleteMilli     soft_delete.DeletedAt
 }
