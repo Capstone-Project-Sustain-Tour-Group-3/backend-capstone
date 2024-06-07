@@ -1441,36 +1441,34 @@ paths:
                     type: string
                     format: uuid
                   description: Array ID fasilitas
-                  example:
-                    [ '515cb2da-3361-48b8-99fd-bd894828efa1', '515cb2da-3361-48b8-99fd-bd894828efa2' ]
-                gambar:
+                  example: ["515cb2da-3361-48b8-99fd-bd894828efa1", "515cb2da-3361-48b8-99fd-bd894828efa2"]
+                files:
                   type: array
                   items:
-                    type: object
-                    properties:
-                      file:
-                        type: string
-                        format: binary
-                        description: File gambar
-                      judul:
-                        type: string
-                        description: Judul gambar
-                        example: 'Gambar 1'
+                    type: string
+                    format: binary
+                  description: Array of image files
+                judul:
+                  type: array
+                  items:
+                    type: string
+                  description: Array of image titles
+
                 alamat_destinasi:
                   type: object
                   properties:
                     id_provinsi:
                       type: string
                       description: ID Provinsi
-                      example: '12'
+                      example: '35'
                     id_kota:
                       type: string
                       description: ID Kota
-                      example: '4456'
+                      example: '3511'
                     id_kecamatan:
                       type: string
                       description: ID Kecamatan
-                      example: '326546'
+                      example: '351105'
                     jalan:
                       type: string
                       description: Nama jalan
@@ -1506,6 +1504,141 @@ paths:
                   message:
                     type: string
                     example: 'Invalid input'
+    get:
+      tags:
+        - Admin - Destinations
+      summary: Mendapatkan semua destinasi
+      description: API untuk mendapatkan semua destinasi.
+      security:
+        - BearerAuth: [ ]
+      responses:
+        '200':
+          description: Data destinasi berhasil ditemukan
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  properties:
+                    id:
+                      type: string
+                      example: 'eb77b590-b255-4ea1-b11a-d445a259ac63'
+                    nama_destinasi:
+                      type: string
+                      example: 'Tes Destinasi'
+                    jam_buka:
+                      type: string
+                      example: '08:00'
+                    jam_tutup:
+                      type: string
+                      example: '17:00'
+                    harga_masuk:
+                      type: number
+                      example: 20000
+                    kategori:
+                      $ref: "#/components/schemas/Category"
+                    alamat:
+                      $ref: "#/components/schemas/DestinationAddress"
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Format token tidak valid, gunakan bearer token
+
+
+  /admin/destinations/{id}:
+    delete:
+      tags:
+        - Admin - Destinations
+      summary: Menghapus destinasi
+      description: API untuk menghapus destinasi.
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ID destinasi
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Destinasi berhasil dihapus'
+    get:
+      tags:
+        - Admin - Destinations
+      summary: Mendapatkan detail destinasi
+      description: API untuk mendapatkan data destinasi spesifik berdasarkan ID.
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+            format: uuid
+          required: true
+          description: ID destinasi
+      responses:
+        '200':
+          description: Data destinasi berhasil ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id_destinasi:
+                    type: string
+                    example: '306d305e-3359-4884-8d38-89c04e8adea6'
+                  nama_destinasi:
+                    type: string
+                    example: 'Kawah Ijen'
+                  jam_buka:
+                    type: string
+                    example: '08:00'
+                  jam_tutup:
+                    type: string
+                    example: '17:00'
+                  harga_masuk:
+                    type: integer
+                    example: 100000
+                  deskripsi:
+                    type: string
+                    example: 'Kawah Ijen adalah sebuah kompleks gunung berapi di Banyuwangi, Jawa Timur, Indonesia.'
+                  alamat_destinasi:
+                    $ref: '#/components/schemas/DestinationAddress'
+                  url_gambar:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UrlImage'
+                  url_video:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UrlVideo'
+                  kategori:
+                    $ref: '#/components/schemas/Category'
+                  fasilitas:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Facility'
+
   /admin/routes:
     get:
       tags:
