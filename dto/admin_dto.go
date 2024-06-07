@@ -46,6 +46,7 @@ func ToCreateAdminRequest(request *AdminRequest, imageURL *string) *entities.Adm
 		Password:        request.Password,
 		ProfileImageURL: imageURL,
 		Role:            "admin",
+		DeleteMilli:     0,
 	}
 }
 
@@ -58,6 +59,8 @@ func ToUpdateAdminRequest(request *AdminRequest, admin *entities.Admin, imageURL
 		Role:            admin.Role,
 		RefreshToken:    admin.RefreshToken,
 		CreatedAt:       admin.CreatedAt,
+		DeletedAt:       admin.DeletedAt,
+		DeleteMilli:     admin.DeleteMilli,
 	}
 }
 
