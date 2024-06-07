@@ -261,15 +261,12 @@ paths:
                   data:
                     type: object
                     properties:
-                      username:
-                        type: string
-                        example: 'johndoe'
-                      profile_image:
-                        type: string
-                        example: 'john.jpg'
                       access_token:
                         type: string
-                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLWMzNmQ1OTgwZTI4NyIsIlVzZXJuYW1lIjoiYWt1bmNvYmEiLCJSb2xlIjoidXNlciIsImV4cCI6MTcxNzIyNjIxOCwiaWF0IjoxNzE3MjI1MDE4LCJuYmYiOjE3MTcyMjUwMTh9.Gn_fMMsXeSDaonB0oHDeZ-ug0fv7XTwoCwpXnh49oU4'
+                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLW'
+                      refresh_token:
+                        type: string
+                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLW'
         '409':
           description: Akun Tidak Ditemukan
           content:
