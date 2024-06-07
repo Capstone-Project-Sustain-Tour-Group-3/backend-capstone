@@ -2,6 +2,7 @@ package routers
 
 import (
 	"capstone/config"
+	"capstone/externals/cloudinary"
 	"capstone/handlers"
 	"capstone/middlewares"
 	"capstone/repositories"
@@ -31,7 +32,10 @@ func AuthUserRouter(r *echo.Group) {
 
 func AuthAdminRouter(r *echo.Group) {
 	repository := repositories.NewAdminRepository(config.DB)
-	usecase := usecases.NewAdminUsecase(repository)
+	cloudinaryClient := cloudinary.NewCloudinaryClient(config.ENV.CLOUDINARY_URL)
+
+	usecase := usecases.NewAdminUsecase(repository, cloudinaryClient)
+
 	handler := handlers.NewAdminHandler(usecase)
 
 	r.POST("/login", handler.Login)

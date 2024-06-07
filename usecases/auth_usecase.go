@@ -141,8 +141,6 @@ func (uc *authUsecase) Login(request *dto.LoginRequest) (*dto.LoginResponse, err
 		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
 	}
 	response := &dto.LoginResponse{
-		Username:     user.Username,
-		ProfileImage: *user.ProfileImageUrl,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}

@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"errors"
+	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -77,9 +79,19 @@ func (h *userHandler) FindAll(ctx echo.Context) error {
 
 func (h *userHandler) Create(ctx echo.Context) error {
 	var req dto.UserRequest
-	if err := ctx.Bind(&req); err != nil {
+	img, err := ctx.FormFile("foto_profil")
+	if err != nil {
+		if !errors.Is(err, http.ErrMissingFile) {
+			return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "data yang dimasukkan tidak valid"})
+		}
+	} else {
+		req.FotoProfil = img
+	}
+	// fmt.Println(req)
+	if err = ctx.Bind(&req); err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
+	fmt.Println(req)
 	if err := helpers.ValidateRequest(req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
 			Status:  "failed",
@@ -87,7 +99,7 @@ func (h *userHandler) Create(ctx echo.Context) error {
 			Errors:  err,
 		})
 	}
-	err := h.usecase.Create(&req)
+	err = h.usecase.Create(&req)
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
@@ -100,7 +112,20 @@ func (h *userHandler) Create(ctx echo.Context) error {
 
 func (h *userHandler) Update(ctx echo.Context) error {
 	var req dto.UserRequest
-	if err := ctx.Bind(&req); err != nil {
+	img, err := ctx.FormFile("foto_profil")
+	if err != nil {
+		if !errors.Is(err, http.ErrMissingFile) {
+			return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "data yang dimasukkan tidak valid"})
+		}
+	} else {
+		req.FotoProfil = img
+	}
+	// fmt.Println(req)
+	if err = ctx.Bind(&req); err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	fmt.Println(req)
+	if err = ctx.Bind(&req); err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
 	id := ctx.Param("id")
