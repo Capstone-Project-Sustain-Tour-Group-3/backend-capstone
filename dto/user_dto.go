@@ -9,16 +9,16 @@ import (
 )
 
 type UserRequest struct {
-	Username     string `json:"username" validate:"required,max=16"`
-	Password     string `json:"password" validate:"required,min=8"`
-	NamaLengkap  string `json:"nama_lengkap" validate:"required"`
-	Email        string `json:"email" validate:"required,email"`
-	Bio          string `json:"bio" validate:"required"`
-	NoTelepon    string `json:"no_telepon" validate:"required,number,startswith=08,min=11,max=13"`
-	FotoProfil   string `json:"foto_profil" validate:"required"`
-	JenisKelamin string `json:"jenis_kelamin" validate:"required"`
-	Kota         string `json:"kota" validate:"required"`
-	Provinsi     string `json:"provinsi" validate:"required"`
+	Username     string                `form:"username" validate:"required,max=16"`
+	Password     string                `form:"password" validate:"required,min=8"`
+	NamaLengkap  string                `form:"nama_lengkap" validate:"required"`
+	Email        string                `form:"email" validate:"required,email"`
+	Bio          string                `form:"bio" validate:"required"`
+	NoTelepon    string                `form:"no_telepon" validate:"required,number,startswith=08,min=11,max=13"`
+	FotoProfil   *multipart.FileHeader `form:"foto_profil"`
+	JenisKelamin string                `form:"jenis_kelamin" validate:"required"`
+	Kota         string                `form:"kota" validate:"required"`
+	Provinsi     string                `form:"provinsi" validate:"required"`
 }
 
 type findByIdResponse struct {
@@ -37,6 +37,7 @@ type findByIdResponse struct {
 type findAllUserResponse struct {
 	Id           uuid.UUID `json:"id"`
 	Username     string    `json:"username"`
+	NamaLengkap  string    `json:"nama_lengkap"`
 	Email        string    `json:"email"`
 	NoTelepon    string    `json:"no_telepon"`
 	JenisKelamin string    `json:"jenis_kelamin"`
@@ -71,8 +72,10 @@ type UserDetailRequest struct {
 	Provinsi     string                `form:"provinsi" validate:"required"`
 }
 
-type ChangeEmailRequest struct {
-	Email string `json:"email" validate:"required,email"`
+type ChangePasswordRequest struct {
+	PasswordLama       string `json:"password_lama" validate:"required"`
+	PasswordBaru       string `json:"password_baru" validate:"required,min=8"`
+	KonfirmasiPassword string `json:"konfirmasi_password" validate:"required,min=8"`
 }
 
 func ToFindAllUserResponse(user *[]entities.User) *[]findAllUserResponse {
@@ -81,6 +84,7 @@ func ToFindAllUserResponse(user *[]entities.User) *[]findAllUserResponse {
 		users = append(users, findAllUserResponse{
 			Id:           u.Id,
 			Username:     u.Username,
+			NamaLengkap:  u.Fullname,
 			Email:        u.Email,
 			NoTelepon:    u.PhoneNumber,
 			JenisKelamin: u.Gender,

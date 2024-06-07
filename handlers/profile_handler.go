@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -49,11 +50,15 @@ func (h *profileHandler) InsertUserDetail(ctx echo.Context) error {
 	var req dto.UserDetailRequest
 	img, err := ctx.FormFile("foto_profil")
 	if err != nil {
-		return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "data yang dimasukkan tidak valid"})
+		if !errors.Is(err, http.ErrMissingFile) {
+			return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "data yang dimasukkan tidak valid"})
+		}
+	} else {
+		req.FotoProfil = img
 	}
-	req.FotoProfil = img
+	fmt.Println(req)
 	if err = ctx.Bind(&req); err != nil {
-		return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "data yang dimasukkan tidak valid"})
+		return errorHandlers.HandleError(ctx, err)
 	}
 
 	if err := helpers.ValidateRequest(req); err != nil {
@@ -73,6 +78,36 @@ func (h *profileHandler) InsertUserDetail(ctx echo.Context) error {
 	response := helpers.Response(dto.ResponseParams{
 		StatusCode: http.StatusOK,
 		Message:    "data profil berhasil diperbarui",
+	})
+	return ctx.JSON(http.StatusOK, response)
+}
+
+func (h *profileHandler) ChangePassword(ctx echo.Context) error {
+	uid, ok := ctx.Get("userId").(*uuid.UUID)
+	if !ok {
+		return errorHandlers.HandleError(ctx, &errorHandlers.UnAuthorizedError{Message: "user tidak dikenali"})
+	}
+
+	var req dto.ChangePasswordRequest
+	if err := ctx.Bind(&req); err != nil {
+		return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "data yang dimasukkan tidak valid"})
+	}
+
+	if err := helpers.ValidateRequest(req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "failed",
+			Message: "permintaan tidak valid. silakan periksa kembali data yang anda masukkan.",
+			Errors:  err,
+		})
+	}
+
+	if err := h.usecase.ChangePassword(&req, *uid); err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "password berhasil diperbarui",
 	})
 	return ctx.JSON(http.StatusOK, response)
 }

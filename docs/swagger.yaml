@@ -10,10 +10,13 @@ servers:
 tags:
   - name: Mobile - Auth
   - name: Mobile - Destinations
+  - name: Mobile - Profile
   - name: Mobile - Personalization
-  - name: Admin - Destinations
-  - name: Admin - Users
   - name: Admin - Auth
+  - name: Admin - Destinations
+  - name: Admin - Routes
+  - name: Admin - Users
+
 paths:
   /mobile/auth/register:
     post:
@@ -258,15 +261,12 @@ paths:
                   data:
                     type: object
                     properties:
-                      username:
-                        type: string
-                        example: 'johndoe'
-                      profile_image:
-                        type: string
-                        example: 'john.jpg'
                       access_token:
                         type: string
-                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLWMzNmQ1OTgwZTI4NyIsIlVzZXJuYW1lIjoiYWt1bmNvYmEiLCJSb2xlIjoidXNlciIsImV4cCI6MTcxNzIyNjIxOCwiaWF0IjoxNzE3MjI1MDE4LCJuYmYiOjE3MTcyMjUwMTh9.Gn_fMMsXeSDaonB0oHDeZ-ug0fv7XTwoCwpXnh49oU4'
+                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLW'
+                      refresh_token:
+                        type: string
+                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLW'
         '409':
           description: Akun Tidak Ditemukan
           content:
@@ -342,7 +342,7 @@ paths:
                         type: string
                         example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6ImFhNjJjZDA5LTU0YjUtNGViNC04MjNmLWMzNjI4ZWFlYmQ0MSIsIlVzZXJuYW1lIjoiYWRtaW50b3VyZWFzZSIsIlJvbGUiOiJhZG1pbiIsImV4cCI6MTcxNjkxMTIzMCwiaWF0IjoxNzE2OTA5NDMwLCJuYmYiOjE3MTY5MDk0MzB9.Iesz7CdqiA-5xyJa3I3w2rkZTjC7ZR27FMPz3HwhYOs'
         '409':
-          description: Account Not Found
+          description: Conflict
           content:
             application/json:
               schema:
@@ -419,7 +419,18 @@ paths:
       tags:
         - Mobile - Auth
       summary: Logout Pengguna
-      description: API untuk logout pengguna.
+      description: API untuk logout pengguna dengan membatalkan (invalidate) refresh token.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+                  description: Refresh token yang ingin dibatalkan
+                  example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLWMzNmQ1OTgwZTI4NyIsIlVzZXJuYW1lIjoiYWt1bmNvYmEiLCJSb2xlIjoidXNlciIsImV4cCI6MTcxNzQ4NDkwOCwiaWF0IjoxNzE3Mzk4NTA4LCJuYmYiOjE3MTczOTg1MDh9.nEpwC8eBk4qWOjD3MucKfOh_PJL7xLPbnY8IXjpbJzM'
       responses:
         '200':
           description: Logout Berhasil
@@ -434,13 +445,26 @@ paths:
                   message:
                     type: string
                     example: 'Logout berhasil!'
+        '401':
+          description: Token Tidak Valid atau Kedaluwarsa
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Token tidak valid'
 
   /mobile/auth/token:
     post:
       tags:
         - Mobile - Auth
-      summary: Mendapatkan Token Baru
-      description: API untuk mendapatkan token baru.
+      summary: Mendapatkan Token Baru (Refresh Token)
+      description: API untuk mendapatkan token akses baru dengan menggunakan refresh token yang valid.
       requestBody:
         required: true
         content:
@@ -450,7 +474,8 @@ paths:
               properties:
                 refresh_token:
                   type: string
-                  example: 'token'
+                  description: Refresh token yang valid
+                  example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLWMzNmQ1OTgwZTI4NyIsIlVzZXJuYW1lIjoiYWt1bmNvYmEiLCJSb2xlIjoidXNlciIsImV4cCI6MTcxNzM5MTI5MiwiaWF0IjoxNzE3MzA0ODkyLCJuYmYiOjE3MTczMDQ4OTJ9.062A35GzPol_3Xa5KkXo0ApQcCpHXvuazF0kouqA0Cg'
       responses:
         '200':
           description: Berhasil Mendapatkan Token Baru
@@ -471,8 +496,228 @@ paths:
                       access_token:
                         type: string
                         example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjRhNGU5NzIzLWFlNGMtNGQ3Mi1iMzYxLWMzNmQ1OTgwZTI4NyIsIlVzZXJuYW1lIjoiYWt1bmNvYmEiLCJSb2xlIjoidXNlciIsImV4cCI6MTcxNzIyNjI2NCwiaWF0IjoxNzE3MjI1MDY0LCJuYmYiOjE3MTcyMjUwNjR9.Av2DF2H2HBcZsH2pXDEpmb9W1UKvkSDFq0T7-Y0OJ2k'
+        '401':
+          description: Token Tidak Valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Failed"
+                  message:
+                    type: string
+                    example: "Token tidak valid"
+  /mobile/profile:
+    get:
+      tags:
+        - Mobile - Profile
+      summary: Mendapatkan Profil Pengguna
+      description: API untuk mengambil data profil pengguna yang sedang login.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Profil Berhasil Didapatkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Data profil berhasil didapatkan'
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: ID unik pengguna
+                        example: '4a4e9723-ae4c-4d72-b361-c36d5980e287'
+                      username:
+                        type: string
+                        description: Nama pengguna (username)
+                        example: 'tes1'
+                      nama_lengkap:
+                        type: string
+                        description: Nama lengkap pengguna
+                        example: 'tes tes'
+                      bio:
+                        type: string
+                        description: Bio singkat pengguna (opsional)
+                        example: 'life'
+                      email:
+                        type: string
+                        description: Alamat email pengguna
+                        example: 'leafthe78@gmail.com'
+                      no_telepon:
+                        type: string
+                        description: Nomor telepon pengguna
+                        example: '081234567899'
+                      foto_profil:
+                        type: string
+                        description: URL foto profil pengguna (opsional)
+                        example: 'https://res.cloudinary.com/alta-minpro/image/upload/v1717582618/tourease/users/tusamyaghmynwe44rk2t.jpg'
+                      jenis_kelamin:
+                        type: string
+                        description: Jenis kelamin pengguna (Pria/Wanita)
+                        example: 'Pria'
+                      kota:
+                        type: string
+                        description: Kota tempat tinggal pengguna
+                        example: 'Medan'
+                      provinsi:
+                        type: string
+                        description: Provinsi tempat tinggal pengguna
+                        example: 'Sumatera Utara'
+    put:
+      tags:
+        - Mobile - Profile
+      summary: Memperbarui Profil Pengguna
+      description: API untuk memperbarui data profil pengguna yang sedang login.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: Nama pengguna (username)
+                  example: 'tes1'
+                nama_lengkap:
+                  type: string
+                  description: Nama lengkap pengguna
+                  example: 'tes tes'
+                bio:
+                  type: string
+                  description: Bio singkat pengguna (opsional)
+                  example: 'life'
+                email:
+                  type: string
+                  description: Alamat email pengguna
+                  example: 'leafthe78@gmail.com'
+                no_telepon:
+                  type: string
+                  description: Nomor telepon pengguna
+                  example: '081234567899'
+                jenis_kelamin:
+                  type: string
+                  description: Jenis kelamin pengguna (Pria/Wanita)
+                  example: 'Pria'
+                kota:
+                  type: string
+                  description: Kota tempat tinggal pengguna
+                  example: 'Medan'
+                provinsi:
+                  type: string
+                  description: Provinsi tempat tinggal pengguna
+                  example: 'Sumatera Utara'
+                foto_profil:
+                  type: string
+                  format: binary
+                  description: File gambar foto profil (opsional)
+      responses:
+        '200':
+          description: Profil Berhasil Diperbarui
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Data profil berhasil diperbarui'
+        '400':
+          description: Permintaan Tidak Valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'failed'
+                  message:
+                    type: string
+                    example: 'Permintaan tidak valid. Silakan periksa kembali data yang Anda masukkan.'
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          example: 'NoTelepon'
+                        message:
+                          type: string
+                          example: 'Kolom NoTelepon harus lebih dari 11 karakter'
         '409':
-          description: Token Tidak Ditemukan
+          description: Konflik Data (Email Sudah Digunakan)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Failed"
+                  message:
+                    type: string
+                    example: "Email sudah digunakan"
+  /mobile/profile/change-password:
+    put:
+      tags:
+        - Mobile - Profile
+      summary: Mengubah Password Pengguna
+      description: API untuk mengubah password pengguna yang sedang login.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password_lama:
+                  type: string
+                  description: Password lama pengguna
+                  example: 'user12345'
+                password_baru:
+                  type: string
+                  description: Password baru yang diinginkan
+                  example: '12345678'
+                konfirmasi_password:
+                  type: string
+                  description: Konfirmasi password baru
+                  example: '12345678'
+      responses:
+        '200':
+          description: Password Berhasil Diubah
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Password berhasil diperbarui'
+        '400':
+          description: Password dan Konfirmasi Password Tidak Cocok
           content:
             application/json:
               schema:
@@ -483,8 +728,20 @@ paths:
                     example: 'Failed'
                   message:
                     type: string
-                    example: 'Token tidak ditemukan'
-
+                    example: 'Password dan konfirmasi password tidak cocok'
+        '409':
+          description: Password Lama Tidak Valid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Password lama tidak valid'
   /admin/users:
     get:
       tags:
@@ -550,31 +807,18 @@ paths:
                           type: string
                           example: 'Jakarta'
                   pagination:
-                    type: object
-                    properties:
-                      total:
-                        type: integer
-                        example: 4
-                      per_page:
-                        type: integer
-                        example: 10
-                      current_page:
-                        type: integer
-                        example: 1
-                      last_page:
-                        type: integer
-                        example: 1
+                    $ref: '#/components/schemas/Pagination'
     post:
       tags:
         - Admin - Users
       summary: Menambah data user
       description: API untuk menambah pengguna baru.
       security:
-        - BearerAuth: []
+        - BearerAuth: [ ]
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
@@ -598,6 +842,7 @@ paths:
                   example: '081234567890'
                 foto_profil:
                   type: string
+                  format: binary
                   example: 'img.jpg'
                 jenis_kelamin:
                   type: string
@@ -625,7 +870,7 @@ paths:
         '409':
           description: Conflict
           content:
-            application/json:
+            application/js  on:
               schema:
                 type: object
                 properties:
@@ -639,7 +884,7 @@ paths:
     get:
       tags:
         - Admin - Users
-      summary: Get User Detail
+      summary: Mendapatkan Detail User
       description: API untuk mendapatkan detail pengguna.
       parameters:
         - name: id
@@ -712,10 +957,10 @@ paths:
     put:
       tags:
         - Admin - Users
-      summary: Data user diperbarui
+      summary: Memperbarui Data User
       description: API untuk memperbarui data pengguna.
       security:
-        - BearerAuth: []
+        - BearerAuth: [ ]
       parameters:
         - name: id
           in: path
@@ -725,7 +970,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               type: object
               properties:
@@ -749,6 +994,7 @@ paths:
                   example: '081234567890'
                 foto_profil:
                   type: string
+                  format: binary
                   example: 'img.jpg'
                 jenis_kelamin:
                   type: string
@@ -789,7 +1035,7 @@ paths:
     delete:
       tags:
         - Admin - Users
-      summary: Delete User
+      summary: Menghapus Data User
       description: API untuk menghapus pengguna.
       security:
         - BearerAuth: []
@@ -1141,11 +1387,14 @@ paths:
                   message:
                     type: string
                     example: Gagal untuk mendapatkan provinsi
+
   /admin/destinations:
     post:
-      summary: Create a new destination
+      summary: Menambah data destinasi
       tags:
         - Admin - Destinations
+      security:
+        - BearerAuth: [ ]
       requestBody:
         required: true
         content:
@@ -1193,7 +1442,7 @@ paths:
                     format: uuid
                   description: Array ID fasilitas
                   example:
-                    ['515cb2da-3361-48b8-99fd-bd894828efa1', '515cb2da-3361-48b8-99fd-bd894828efa2']
+                    [ '515cb2da-3361-48b8-99fd-bd894828efa1', '515cb2da-3361-48b8-99fd-bd894828efa2' ]
                 gambar:
                   type: array
                   items:
@@ -1207,11 +1456,6 @@ paths:
                         type: string
                         description: Judul gambar
                         example: 'Gambar 1'
-                #                reports:
-                #                  type: array
-                #                  items:
-                #                    type: string
-                #                    format: binary
                 alamat_destinasi:
                   type: object
                   properties:
@@ -1262,6 +1506,152 @@ paths:
                   message:
                     type: string
                     example: 'Invalid input'
+  /admin/routes:
+    get:
+      tags:
+        - Admin - Routes
+      summary: Mendapatkan semua rute
+      description: API untuk mendapatkan semua rute.
+      security:
+        - BearerAuth: [ ]
+      responses:
+        '200':
+          description: Data rute berhasil ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'data rute berhasil ditemukan'
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: 'b5112798-9f59-4da0-9132-2c717895102f'
+                        username:
+                          type: string
+                          example: 'tes2'
+                        kota:
+                          type: string
+                          example: 'KAB. ACEH SELATAN'
+                        destinasi:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: string
+                                example: '306d305e-3359-4884-8d38-89c04e8adec7'
+                              nama_destinasi:
+                                type: string
+                                example: 'Pulau Komodo'
+                        estimasi_biaya:
+                          type: integer
+                          example: 250000
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+  /admin/routes/{id}:
+    get:
+      tags:
+        - Admin - Routes
+      summary: Mendapatkan detail rute
+      description: API untuk mendapatkan data rute spesifik berdasarkan ID.
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Data rute berhasil didapatkan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'data rute berhasil didapatkan'
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: 'b5112798-9f59-4da0-9132-2c717895102f'
+                      username:
+                        type: string
+                        example: 'tes2'
+                      kota:
+                        type: string
+                        example: 'KAB. ACEH SELATAN'
+                      destinasi:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: '306d305e-3359-4884-8d38-89c04e8adec7'
+                            nama_destinasi:
+                              type: string
+                              example: 'Pulau Komodo'
+                      estimasi_biaya:
+                        type: integer
+                        example: 250000
+    delete:
+      tags:
+        - Admin - Routes
+      summary: Menghapus data rute
+      description: API untuk menghapus data rute berdasarkan ID.
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Data rute berhasil dihapus
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'data rute berhasil dihapus'
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Rute tidak ditemukan'
 components:
   schemas:
     Pagination:

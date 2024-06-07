@@ -18,8 +18,6 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Username     string `json:"username"`
-	ProfileImage string `json:"profile_image"`
 	AccessToken  string `json:"access_token"`
 	RefreshToken string `json:"refresh_token,omitempty"`
 }
@@ -33,7 +31,7 @@ type ResendOTPRequest struct {
 	Email string `json:"email"`
 }
 
-type ChangePasswordRequest struct {
+type ForgotPasswordRequest struct {
 	RefId              string `json:"ref_id"`
 	Password           string `json:"password" validate:"required,min=8"`
 	KonfirmasiPassword string `json:"konfirmasi_password" validate:"required,min=8"`

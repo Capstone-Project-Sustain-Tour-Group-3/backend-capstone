@@ -20,7 +20,7 @@ type AuthUsecase interface {
 	Login(request *dto.LoginRequest) (*dto.LoginResponse, error)
 	Logout(token string) error
 	GetNewAccessToken(refreshToken string) (*dto.NewToken, error)
-	ForgotPassword(request *dto.ChangePasswordRequest) error
+	ForgotPassword(request *dto.ForgotPasswordRequest) error
 }
 
 type authUsecase struct {
@@ -141,15 +141,13 @@ func (uc *authUsecase) Login(request *dto.LoginRequest) (*dto.LoginResponse, err
 		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
 	}
 	response := &dto.LoginResponse{
-		Username:     user.Username,
-		ProfileImage: *user.ProfileImageUrl,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
 	}
 	return response, nil
 }
 
-func (uc *authUsecase) ForgotPassword(request *dto.ChangePasswordRequest) error {
+func (uc *authUsecase) ForgotPassword(request *dto.ForgotPasswordRequest) error {
 	email, _ := uc.cacheRepo.Get(request.RefId + "_email")
 
 	user, _ := uc.userRepo.FindByEmail(email)
