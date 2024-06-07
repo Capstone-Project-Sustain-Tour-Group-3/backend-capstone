@@ -2,9 +2,10 @@ package mysql
 
 import (
 	"database/sql"
+	"time"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"time"
 )
 
 type RouteDetail struct {

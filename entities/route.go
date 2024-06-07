@@ -1,17 +1,19 @@
 package entities
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"time"
 )
 
 type Route struct {
 	Id             uuid.UUID
 	UserId         uuid.UUID
-	CityId         uuid.UUID
+	CityId         string
 	City           City
 	User           User
+	RouteDetail    []RouteDetail
 	Name           string
 	StartLongitude float64
 	StartLatitude  float64

@@ -1,8 +1,9 @@
 package entities
 
 import (
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type RouteDetail struct {
@@ -15,8 +16,8 @@ type RouteDetail struct {
 	Latitude      float64
 	Duration      int
 	Order         int
-	VisitStart    time.Time
-	VisitEnd      time.Time
+	VisitStart    []uint8
+	VisitEnd      []uint8
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
 	DeletedAt     time.Time

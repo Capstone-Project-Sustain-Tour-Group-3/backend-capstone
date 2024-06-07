@@ -37,6 +37,7 @@ type findByIdResponse struct {
 type findAllUserResponse struct {
 	Id           uuid.UUID `json:"id"`
 	Username     string    `json:"username"`
+	NamaLengkap  string    `json:"nama_lengkap"`
 	Email        string    `json:"email"`
 	NoTelepon    string    `json:"no_telepon"`
 	JenisKelamin string    `json:"jenis_kelamin"`
@@ -83,6 +84,7 @@ func ToFindAllUserResponse(user *[]entities.User) *[]findAllUserResponse {
 		users = append(users, findAllUserResponse{
 			Id:           u.Id,
 			Username:     u.Username,
+			NamaLengkap:  u.Fullname,
 			Email:        u.Email,
 			NoTelepon:    u.PhoneNumber,
 			JenisKelamin: u.Gender,
