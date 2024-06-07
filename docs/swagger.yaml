@@ -16,7 +16,7 @@ tags:
   - name: Admin - Destinations
   - name: Admin - Routes
   - name: Admin - Users
-
+  - name: Admin - Admins
 paths:
   /mobile/auth/register:
     post:
@@ -505,10 +505,10 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Failed"
+                    example: 'Failed'
                   message:
                     type: string
-                    example: "Token tidak valid"
+                    example: 'Token tidak valid'
   /mobile/profile:
     get:
       tags:
@@ -671,10 +671,10 @@ paths:
                 properties:
                   status:
                     type: string
-                    example: "Failed"
+                    example: 'Failed'
                   message:
                     type: string
-                    example: "Email sudah digunakan"
+                    example: 'Email sudah digunakan'
   /mobile/profile/change-password:
     put:
       tags:
@@ -814,7 +814,7 @@ paths:
       summary: Menambah data user
       description: API untuk menambah pengguna baru.
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -960,7 +960,7 @@ paths:
       summary: Memperbarui Data User
       description: API untuk memperbarui data pengguna.
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -1072,6 +1072,560 @@ paths:
                   message:
                     type: string
                     example: 'User tidak ditemukan'
+
+  /admin/admins:
+    get:
+      tags:
+        - Admin - Admins
+      summary: Mendapatkan data semua admin
+      description: API untuk mencari daftar admin.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: Berhasil mendapatkan data admin
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        username:
+                          type: string
+                        tanggal_pembuatan:
+                          type: string
+                          format: date
+                    example:
+                      - id: 803f6cc0-e598-4b59-a300-8b8603482d14
+                        username: username
+                        tanggal_pembuatan: 02-01-2006
+                      - id: 803f6cc0-e598-4b59-a300-8b8603482d14
+                        username: username
+                        tanggal_pembuatan: 02-01-2006
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Format token tidak valid, gunakan bearer token
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Token tidak terisi
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Anda tidak memiliki izin untuk mengakses
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: Gagal mendapatkan data admin
+    post:
+      tags:
+        - Admin - Admins
+      summary: Menambah data admin
+      description: API untuk menambah admin baru.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: username
+                password:
+                  type: string
+                  example: '12345678'
+                foto:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: Berhasil menambah data admin
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                        message:
+                          type: string
+                required:
+                  - message
+              examples:
+                token tidak valid:
+                  value:
+                    message: Format token tidak valid, gunakan bearer token
+                request tidak valid:
+                  value:
+                    status: Failed
+                    message: Permintaan tidak valid. Silakan periksa kembali data yang anda masukkan.
+                    errors:
+                      - field: username
+                        message: Username harus di isi
+                file tidak sesuai:
+                  value:
+                    status: Failed
+                    message: File harus berupa gambar dan kurang dari 2 MB
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Token tidak terisi
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Anda tidak memiliki izin untuk mengakses
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Username sudah digunakan
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: Gagal menambah data admin
+
+  /admin/admins/{id}:
+    get:
+      tags:
+        - Admin - Admins
+      summary: Mendapatkan detail admin
+      description: API untuk mendapatkan detail admin.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: '803f6cc0-e598-4b59-a300-8b8603482d14'
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Success
+                  message:
+                    type: string
+                    example: Berhasil mendapatkan detail admin
+                  data:
+                    type: object
+                    properties:
+                      username:
+                        type: string
+                        example: 'username'
+                      foto_profil:
+                        type: string
+                        example: 'https://fotoprofil.png'
+                      tanggal_pembuatan:
+                        type: string
+                        format: date
+                        example: 02-01-2006
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+              examples:
+                token tidak valid:
+                  value:
+                    message: Format token tidak valid, gunakan bearer token
+                id tidak valid:
+                  value:
+                    status: Failed
+                    message: Id admin tidak valid
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Token tidak terisi
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Anda tidak memiliki izin untuk mengakses
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Data admin tidak ditemukan
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Gagal mendapatkan detail admin
+    put:
+      tags:
+        - Admin - Admins
+      summary: Mengubah data admin
+      description: API untuk mengubah data admin.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: '803f6cc0-e598-4b59-a300-8b8603482d14'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: username
+                password:
+                  type: string
+                  example: '12345678'
+                foto:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: Berhasil mengubah data admin
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                        message:
+                          type: string
+                required:
+                  - message
+              examples:
+                token tidak valid:
+                  value:
+                    message: Format token tidak valid, gunakan bearer token
+                request tidak valid:
+                  value:
+                    status: Failed
+                    message: Permintaan tidak valid. Silakan periksa kembali data yang anda masukkan.
+                    errors:
+                      - field: username
+                        message: Username harus di isi
+                file tidak sesuai:
+                  value:
+                    status: Failed
+                    message: File harus berupa gambar dan kurang dari 2 MB
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Token tidak terisi
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Anda tidak memiliki izin untuk mengakses
+        '409':
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Username sudah digunakan
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: Gagal mengubah data admin
+    delete:
+      tags:
+        - Admin - Admins
+      summary: Menghapus data admin
+      description: API untuk menghapus data admin.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: '803f6cc0-e598-4b59-a300-8b8603482d14'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: Berhasil menghapus data admin
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+              examples:
+                token tidak valid:
+                  value:
+                    message: Format token tidak valid, gunakan bearer token
+                id tidak valid:
+                  value:
+                    status: Failed
+                    message: Id admin tidak valid
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Token tidak terisi
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Anda tidak memiliki izin untuk mengakses
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Data admin tidak ditemukan
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: Gagal menghapus data admin
 
   /mobile/destinations:
     get:
@@ -1394,7 +1948,7 @@ paths:
       tags:
         - Admin - Destinations
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -1441,7 +1995,8 @@ paths:
                     type: string
                     format: uuid
                   description: Array ID fasilitas
-                  example: ["515cb2da-3361-48b8-99fd-bd894828efa1", "515cb2da-3361-48b8-99fd-bd894828efa2"]
+                  example:
+                    ['515cb2da-3361-48b8-99fd-bd894828efa1', '515cb2da-3361-48b8-99fd-bd894828efa2']
                 files:
                   type: array
                   items:
@@ -1510,7 +2065,7 @@ paths:
       summary: Mendapatkan semua destinasi
       description: API untuk mendapatkan semua destinasi.
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       responses:
         '200':
           description: Data destinasi berhasil ditemukan
@@ -1536,9 +2091,9 @@ paths:
                       type: number
                       example: 20000
                     kategori:
-                      $ref: "#/components/schemas/Category"
+                      $ref: '#/components/schemas/Category'
                     alamat:
-                      $ref: "#/components/schemas/DestinationAddress"
+                      $ref: '#/components/schemas/DestinationAddress'
         '400':
           description: Bad Request
           content:
@@ -1550,7 +2105,6 @@ paths:
                     type: string
                     example: Format token tidak valid, gunakan bearer token
 
-
   /admin/destinations/{id}:
     delete:
       tags:
@@ -1558,7 +2112,7 @@ paths:
       summary: Menghapus destinasi
       description: API untuk menghapus destinasi.
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       parameters:
         - in: path
           name: id
@@ -1587,7 +2141,7 @@ paths:
       summary: Mendapatkan detail destinasi
       description: API untuk mendapatkan data destinasi spesifik berdasarkan ID.
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       parameters:
         - in: path
           name: id
@@ -1646,7 +2200,7 @@ paths:
       summary: Mendapatkan semua rute
       description: API untuk mendapatkan semua rute.
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       responses:
         '200':
           description: Data rute berhasil ditemukan
@@ -1698,7 +2252,7 @@ paths:
       summary: Mendapatkan detail rute
       description: API untuk mendapatkan data rute spesifik berdasarkan ID.
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -1751,7 +2305,7 @@ paths:
       summary: Menghapus data rute
       description: API untuk menghapus data rute berdasarkan ID.
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
