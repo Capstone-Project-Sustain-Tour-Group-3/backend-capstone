@@ -15,9 +15,10 @@ type IDestinationRepository interface {
 	FindById(id uuid.UUID) (*entities.Destination, error)
 	FindAll(page, limit int, searchQuery, sortQuery, filterQuery string) (string, *int64, []entities.Destination, error)
 	FindByCategoryId(ids uuid.UUID) ([]entities.Destination, error)
-	Create(destination *entities.Destination) error
+	Create(destination *entities.Destination, tx *gorm.DB) error
 	Update(destination *entities.Destination) error
 	Delete(destination *entities.Destination) error
+	BeginTx() *gorm.DB
 }
 
 type DestinationRepository struct {
@@ -26,6 +27,10 @@ type DestinationRepository struct {
 
 func NewDestinationRepository(db *gorm.DB) *DestinationRepository {
 	return &DestinationRepository{db}
+}
+
+func (r *DestinationRepository) BeginTx() *gorm.DB {
+	return r.db.Begin()
 }
 
 func (r *DestinationRepository) FindById(id uuid.UUID) (*entities.Destination, error) {
@@ -123,10 +128,11 @@ func (r *DestinationRepository) FindByCategoryId(id uuid.UUID) ([]entities.Desti
 	return destinations, nil
 }
 
-func (r *DestinationRepository) Create(destination *entities.Destination) error {
-	if err := r.db.Create(&destination).Error; err != nil {
+func (r *DestinationRepository) Create(destination *entities.Destination, tx *gorm.DB) error {
+	if err := tx.Create(&destination).Error; err != nil {
 		return err
 	}
+
 	return nil
 }
 

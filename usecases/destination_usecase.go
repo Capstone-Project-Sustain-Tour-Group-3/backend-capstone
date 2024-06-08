@@ -21,6 +21,7 @@ type IDestinationUsecase interface {
 	GetDestinationById(id uuid.UUID) (*dto.GetByIdDestinationResponse, error)
 	UpdateDestination(id uuid.UUID, destinationReq *dto.UpdateDestinationRequest) error
 	DeleteDestination(id uuid.UUID) error
+	IncrementVisitCount(id uuid.UUID) error
 }
 
 type DestinationUsecase struct {
@@ -106,13 +107,17 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 		VisitCount:  0,
 	}
 
-	if err = uc.destinationRepo.Create(destination); err != nil {
+	txDestination := uc.destinationRepo.BeginTx()
+
+	if err = uc.destinationRepo.Create(destination, txDestination); err != nil {
+		txDestination.Rollback()
 		return fmt.Errorf("error when create destination: %w", err)
 	}
 
 	destinationFacilities := dto.ToDestinationFacilities(destination.Id, destinationReq.FacilityIds)
 
-	if err = uc.destinationFacilityRepo.Create(destinationFacilities); err != nil {
+	if err = uc.destinationFacilityRepo.Create(destinationFacilities, txDestination); err != nil {
+		txDestination.Rollback()
 		return fmt.Errorf("error when create destination facility: %w", err)
 	}
 
@@ -120,12 +125,14 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 		urlMedia, errFile := uc.cloudinaryClient.UploadImage(image.File, "destinations")
 
 		if errFile != nil {
+			txDestination.Rollback()
 			return fmt.Errorf("error when upload image to cloud: %w", errFile)
 		}
 
 		destinationMedia := dto.ToDestinationMedia(destination.Id, "image", urlMedia, image.Title)
 
-		if err = uc.destinationMediaRepo.Create(destinationMedia); err != nil {
+		if err = uc.destinationMediaRepo.Create(destinationMedia, txDestination); err != nil {
+			txDestination.Rollback()
 			return fmt.Errorf("error when create destination media: %w", err)
 		}
 	}
@@ -136,6 +143,7 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 	province, err := uc.provinceRepo.FindById(destinationAddress.ProvinceId)
 
 	if err != nil || province == nil {
+		txDestination.Rollback()
 		return errors.New("province not found")
 	}
 
@@ -143,6 +151,7 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 	city, err := uc.cityRepo.FindById(destinationAddress.CityId)
 
 	if err != nil || city == nil {
+		txDestination.Rollback()
 		return errors.New("city not found")
 	}
 
@@ -150,12 +159,16 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 	subdistrict, err := uc.subdistrictRepo.FindById(destinationAddress.SubdistrictId)
 
 	if err != nil || subdistrict == nil {
+		txDestination.Rollback()
 		return errors.New("subdistrict not found")
 	}
 
-	if err = uc.destinationAddressRepo.Create(destinationAddress); err != nil {
+	if err = uc.destinationAddressRepo.Create(destinationAddress, txDestination); err != nil {
+		txDestination.Rollback()
 		return fmt.Errorf("error when create destination address: %w", err)
 	}
+
+	txDestination.Commit()
 
 	return nil
 }
@@ -275,4 +288,14 @@ func (uc *DestinationUsecase) DeleteDestination(id uuid.UUID) error {
 	}
 
 	return nil
+}
+
+// increment visit count
+func (uc *DestinationUsecase) IncrementVisitCount(id uuid.UUID) error {
+	destination, err := uc.destinationRepo.FindById(id)
+	if err != nil {
+		return err
+	}
+	destination.VisitCount++
+	return uc.destinationRepo.Update(destination)
 }

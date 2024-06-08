@@ -77,6 +77,12 @@ func (h *DestinationHandler) DetailDestination(ctx echo.Context) error {
 		return errorHandlers.HandleError(ctx, err)
 	}
 
+	if h.usecase.IncrementVisitCount(destinationId) != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	destination.VisitCount++
+
 	response := helpers.Response(dto.ResponseParams{
 		StatusCode: http.StatusOK,
 		Message:    "berhasil menampilkan destinasi",
@@ -97,6 +103,7 @@ func (h *DestinationHandler) GetAllDestinations(ctx echo.Context) error {
 	searchQuery := ctx.QueryParam("search")
 
 	totalPtr, destinations, err := h.usecase.GetAllDestinations(page, limit, searchQuery)
+
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
