@@ -77,6 +77,12 @@ func (h *DestinationHandler) DetailDestination(ctx echo.Context) error {
 		return errorHandlers.HandleError(ctx, err)
 	}
 
+	if h.usecase.IncrementVisitCount(destinationId) != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	destination.VisitCount++
+
 	response := helpers.Response(dto.ResponseParams{
 		StatusCode: http.StatusOK,
 		Message:    "berhasil menampilkan destinasi",

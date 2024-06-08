@@ -8,7 +8,7 @@ import (
 )
 
 type IDestinationAddressRepository interface {
-	Create(destinationAddress *entities.DestinationAddress) error
+	Create(destinationAddress *entities.DestinationAddress, tx *gorm.DB) error
 	FindAll() ([]entities.DestinationAddress, error)
 	FindById(id uuid.UUID) (*entities.DestinationAddress, error)
 	Update(destinationAddress *entities.DestinationAddress) error
@@ -23,8 +23,8 @@ func NewDestinationAddressRepository(db *gorm.DB) *DestinationAddressRepository 
 	return &DestinationAddressRepository{db}
 }
 
-func (r *DestinationAddressRepository) Create(destinationAddress *entities.DestinationAddress) error {
-	if err := r.db.Create(destinationAddress).Error; err != nil {
+func (r *DestinationAddressRepository) Create(destinationAddress *entities.DestinationAddress, tx *gorm.DB) error {
+	if err := tx.Create(destinationAddress).Error; err != nil {
 		return err
 	}
 	return nil
