@@ -39,6 +39,12 @@ type AdminRequest struct {
 	ProfileImage multipart.File
 }
 
+type UpdateAdminRequest struct {
+	Username     string `form:"username" validate:"required,max=16"`
+	Password     string `form:"password" validate:"omitempty,min=8"`
+	ProfileImage multipart.File
+}
+
 func ToCreateAdminRequest(request *AdminRequest, imageURL *string) *entities.Admin {
 	return &entities.Admin{
 		Id:              uuid.New(),
@@ -50,7 +56,7 @@ func ToCreateAdminRequest(request *AdminRequest, imageURL *string) *entities.Adm
 	}
 }
 
-func ToUpdateAdminRequest(request *AdminRequest, admin *entities.Admin, imageURL *string) *entities.Admin {
+func ToUpdateAdminRequest(request *UpdateAdminRequest, admin *entities.Admin, imageURL *string) *entities.Admin {
 	return &entities.Admin{
 		Id:              admin.Id,
 		Username:        request.Username,

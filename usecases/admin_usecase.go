@@ -20,7 +20,7 @@ type AdminUsecase interface {
 	GetAllAdmins(page, limit int, search string) (*[]dto.GetAllAdminResponse, *int64, error)
 	GetAdminDetail(id uuid.UUID) (*dto.GetDetailAdminResponse, error)
 	CreateAdmin(request *dto.AdminRequest) error
-	UpdateAdmin(request *dto.AdminRequest, id uuid.UUID) error
+	UpdateAdmin(request *dto.UpdateAdminRequest, id uuid.UUID) error
 	DeleteAdmin(id uuid.UUID) error
 }
 
@@ -156,7 +156,7 @@ func (uc *adminUsecase) CreateAdmin(request *dto.AdminRequest) error {
 	return nil
 }
 
-func (uc *adminUsecase) UpdateAdmin(request *dto.AdminRequest, id uuid.UUID) error {
+func (uc *adminUsecase) UpdateAdmin(request *dto.UpdateAdminRequest, id uuid.UUID) error {
 	var profileImageURL *string
 
 	admin, err := uc.repository.FindById(id)
@@ -167,6 +167,17 @@ func (uc *adminUsecase) UpdateAdmin(request *dto.AdminRequest, id uuid.UUID) err
 		default:
 			return &errorHandlers.InternalServerError{Message: "Gagal mengupdate data admin"}
 		}
+	}
+
+	if request.Password == "" {
+		request.Password = admin.Password
+	} else {
+		hashedPassword, hashErr := helpers.HashPassword(request.Password)
+		if hashErr != nil {
+			return &errorHandlers.InternalServerError{Message: "Gagal mengubah data admin"}
+		}
+
+		request.Password = hashedPassword
 	}
 
 	if admin.ProfileImageURL != nil {
@@ -184,12 +195,6 @@ func (uc *adminUsecase) UpdateAdmin(request *dto.AdminRequest, id uuid.UUID) err
 		profileImageURL = &url
 	}
 
-	hashedPassword, err := helpers.HashPassword(request.Password)
-	if err != nil {
-		return &errorHandlers.InternalServerError{Message: "Gagal mengubah data admin"}
-	}
-
-	request.Password = hashedPassword
 	adminReq := dto.ToUpdateAdminRequest(request, admin, profileImageURL)
 
 	if err = uc.repository.Update(adminReq); err != nil {
