@@ -36,6 +36,7 @@ func (r *adminRepository) FindAll(offset, limit int, search string) (*[]entities
 		Session(&gorm.Session{})
 
 	res := db.
+		Order("created_at ASC").
 		Limit(limit).
 		Offset(offset).
 		Find(admins)
