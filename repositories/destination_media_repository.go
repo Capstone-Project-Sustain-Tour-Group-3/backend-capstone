@@ -25,7 +25,15 @@ func NewDestinationMediaRepository(db *gorm.DB) *DestinationMediaRepository {
 }
 
 func (r *DestinationMediaRepository) Create(destinationMedia *entities.DestinationMedia, tx *gorm.DB) error {
-	if err := tx.Create(destinationMedia).Error; err != nil {
+	var db *gorm.DB
+
+	if tx != nil {
+		db = tx
+	} else {
+		db = r.db
+	}
+
+	if err := db.Create(destinationMedia).Error; err != nil {
 		return err
 	}
 	return nil

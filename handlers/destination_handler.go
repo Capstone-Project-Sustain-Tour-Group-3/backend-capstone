@@ -103,6 +103,7 @@ func (h *DestinationHandler) GetAllDestinations(ctx echo.Context) error {
 	searchQuery := ctx.QueryParam("search")
 
 	totalPtr, destinations, err := h.usecase.GetAllDestinations(page, limit, searchQuery)
+
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
