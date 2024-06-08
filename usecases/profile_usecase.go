@@ -86,7 +86,8 @@ func (uc *profileUsecase) handleProfilePictureUpdate(request *dto.UserDetailRequ
 	defer file.Close()
 
 	fmt.Println(user.ProfileImageUrl)
-	if user.ProfileImageUrl != nil {
+
+	if user.ProfileImageUrl != nil && *user.ProfileImageUrl != "" {
 		if err = uc.cloudinaryClient.DeleteImage(*user.ProfileImageUrl); err != nil {
 			return &errorHandlers.InternalServerError{Message: "Gagal menghapus foto profil"}
 		}

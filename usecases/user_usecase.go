@@ -88,7 +88,7 @@ func (uc *userUsecase) Create(request *dto.UserRequest) error {
 func (uc *userUsecase) Update(id uuid.UUID, request *dto.UserRequest) error {
 	user, _ := uc.repository.FindById(id)
 	if user == nil {
-		return &errorHandlers.ConflictError{Message: "User tidak ditemukan"}
+		return &errorHandlers.NotFoundError{Message: "User tidak ditemukan"}
 	}
 
 	if request.Username != user.Username {
@@ -133,10 +133,10 @@ func (uc *userUsecase) Update(id uuid.UUID, request *dto.UserRequest) error {
 func (uc *userUsecase) Delete(id uuid.UUID) error {
 	user, _ := uc.repository.FindById(id)
 	if user == nil {
-		return &errorHandlers.ConflictError{Message: "User tidak ditemukan"}
+		return &errorHandlers.NotFoundError{Message: "User tidak ditemukan"}
 	}
 
-	if user.ProfileImageUrl != nil {
+	if user.ProfileImageUrl != nil && *user.ProfileImageUrl != "" {
 		if err := uc.cloudinaryClient.DeleteImage(*user.ProfileImageUrl); err != nil {
 			return &errorHandlers.InternalServerError{Message: "Gagal menghapus foto profil"}
 		}
@@ -167,7 +167,7 @@ func (uc *userUsecase) handleProfilePictureUpdate(request *dto.UserRequest, user
 	defer file.Close()
 
 	fmt.Println(user.ProfileImageUrl)
-	if user.ProfileImageUrl != nil {
+	if user.ProfileImageUrl != nil && *user.ProfileImageUrl != "" {
 		if err = uc.cloudinaryClient.DeleteImage(*user.ProfileImageUrl); err != nil {
 			return &errorHandlers.InternalServerError{Message: "Gagal menghapus foto profil"}
 		}
