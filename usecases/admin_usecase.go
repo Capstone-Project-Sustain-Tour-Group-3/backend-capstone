@@ -1,24 +1,39 @@
 package usecases
 
 import (
+	"errors"
+
 	"capstone/dto"
 	"capstone/errorHandlers"
+	"capstone/externals/cloudinary"
 	"capstone/helpers"
 	"capstone/repositories"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type AdminUsecase interface {
 	Login(request *dto.LoginAdminRequest) (*dto.LoginAdminResponse, error)
 	Logout(token string) error
 	GetNewAccessToken(refreshToken string) (*dto.NewToken, error)
+	GetAllAdmins(page, limit int, search string) (*[]dto.GetAllAdminResponse, *int64, error)
+	GetAdminDetail(id uuid.UUID) (*dto.GetDetailAdminResponse, error)
+	CreateAdmin(request *dto.AdminRequest) error
+	UpdateAdmin(request *dto.AdminRequest, id uuid.UUID) error
+	DeleteAdmin(id uuid.UUID) error
 }
 
 type adminUsecase struct {
-	repository repositories.AdminRepository
+	repository       repositories.AdminRepository
+	cloudinaryClient cloudinary.ICloudinaryClient
 }
 
-func NewAdminUsecase(repository repositories.AdminRepository) *adminUsecase {
-	return &adminUsecase{repository}
+func NewAdminUsecase(repository repositories.AdminRepository, cloudinaryClient cloudinary.ICloudinaryClient) *adminUsecase {
+	return &adminUsecase{
+		repository:       repository,
+		cloudinaryClient: cloudinaryClient,
+	}
 }
 
 func (uc *adminUsecase) Login(request *dto.LoginAdminRequest) (*dto.LoginAdminResponse, error) {
@@ -81,4 +96,134 @@ func (uc *adminUsecase) GetNewAccessToken(refreshToken string) (*dto.NewToken, e
 		AccessToken: accessToken,
 	}
 	return token, nil
+}
+
+func (uc *adminUsecase) GetAllAdmins(page, limit int, search string) (*[]dto.GetAllAdminResponse, *int64, error) {
+	admins, total, err := uc.repository.FindAll((page-1)*limit, limit, search)
+	if err != nil {
+		return nil, nil, &errorHandlers.InternalServerError{Message: "Gagal mendapatkan data admin"}
+	}
+
+	res := dto.ToGetAllAdminResponse(admins)
+
+	return res, total, nil
+}
+
+func (uc *adminUsecase) GetAdminDetail(id uuid.UUID) (*dto.GetDetailAdminResponse, error) {
+	admin, err := uc.repository.FindById(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			return nil, &errorHandlers.NotFoundError{Message: "Data admin tidak ditemukan"}
+		default:
+			return nil, &errorHandlers.InternalServerError{Message: "Gagal mendapatkan detail admin"}
+		}
+	}
+
+	res := dto.ToGetDetailAdminResponse(admin)
+
+	return res, nil
+}
+
+func (uc *adminUsecase) CreateAdmin(request *dto.AdminRequest) error {
+	var profileImageURL *string
+
+	if request.ProfileImage != nil {
+		url, err := uc.cloudinaryClient.UploadImage(request.ProfileImage, "admin")
+		if err != nil {
+			return &errorHandlers.InternalServerError{Message: "Gagal menambah data admin"}
+		}
+		profileImageURL = &url
+	}
+
+	hashedPassword, err := helpers.HashPassword(request.Password)
+	if err != nil {
+		return &errorHandlers.InternalServerError{Message: "Gagal menambah data admin"}
+	}
+
+	request.Password = hashedPassword
+	admin := dto.ToCreateAdminRequest(request, profileImageURL)
+
+	if err = uc.repository.Create(admin); err != nil {
+		switch {
+		case errors.Is(err, gorm.ErrDuplicatedKey):
+			return &errorHandlers.ConflictError{Message: "Username sudah digunakan"}
+		default:
+			return &errorHandlers.InternalServerError{Message: "Gagal menambah data admin"}
+		}
+	}
+
+	return nil
+}
+
+func (uc *adminUsecase) UpdateAdmin(request *dto.AdminRequest, id uuid.UUID) error {
+	var profileImageURL *string
+
+	admin, err := uc.repository.FindById(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			return &errorHandlers.NotFoundError{Message: "Data admin tidak ditemukan"}
+		default:
+			return &errorHandlers.InternalServerError{Message: "Gagal mengupdate data admin"}
+		}
+	}
+
+	if admin.ProfileImageURL != nil {
+		if err = uc.cloudinaryClient.DeleteImage(*admin.ProfileImageURL); err != nil {
+			return &errorHandlers.InternalServerError{Message: "Gagal mengupdate data admin"}
+		}
+	}
+
+	if request.ProfileImage != nil {
+		var url string
+		url, err = uc.cloudinaryClient.UploadImage(request.ProfileImage, "admin")
+		if err != nil {
+			return &errorHandlers.InternalServerError{Message: "Gagal mengubah data admin"}
+		}
+		profileImageURL = &url
+	}
+
+	hashedPassword, err := helpers.HashPassword(request.Password)
+	if err != nil {
+		return &errorHandlers.InternalServerError{Message: "Gagal mengubah data admin"}
+	}
+
+	request.Password = hashedPassword
+	adminReq := dto.ToUpdateAdminRequest(request, admin, profileImageURL)
+
+	if err = uc.repository.Update(adminReq); err != nil {
+		switch {
+		case errors.Is(err, gorm.ErrDuplicatedKey):
+			return &errorHandlers.ConflictError{Message: "Username sudah digunakan"}
+		default:
+			return &errorHandlers.InternalServerError{Message: "Gagal mengubah data admin"}
+		}
+	}
+
+	return nil
+}
+
+func (uc *adminUsecase) DeleteAdmin(id uuid.UUID) error {
+	admin, err := uc.repository.FindById(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, gorm.ErrRecordNotFound):
+			return &errorHandlers.NotFoundError{Message: "Data admin tidak ditemukan"}
+		default:
+			return &errorHandlers.InternalServerError{Message: "Gagal menghapus data admin"}
+		}
+	}
+
+	if admin.ProfileImageURL != nil {
+		if err = uc.cloudinaryClient.DeleteImage(*admin.ProfileImageURL); err != nil {
+			return &errorHandlers.InternalServerError{Message: "Gagal menghapus data admin"}
+		}
+	}
+
+	if err = uc.repository.Delete(admin); err != nil {
+		return &errorHandlers.InternalServerError{Message: "Gagal menghapus data admin"}
+	}
+
+	return nil
 }
