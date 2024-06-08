@@ -8,7 +8,7 @@ import (
 )
 
 type IDestinationMediaRepository interface {
-	Create(destinationMedia *entities.DestinationMedia) error
+	Create(destinationMedia *entities.DestinationMedia, tx *gorm.DB) error
 	FindAll() ([]entities.DestinationMedia, error)
 	FindById(id uuid.UUID) (*entities.DestinationMedia, error)
 	Update(destinationMedia *entities.DestinationMedia) error
@@ -24,8 +24,16 @@ func NewDestinationMediaRepository(db *gorm.DB) *DestinationMediaRepository {
 	return &DestinationMediaRepository{db}
 }
 
-func (r *DestinationMediaRepository) Create(destinationMedia *entities.DestinationMedia) error {
-	if err := r.db.Create(destinationMedia).Error; err != nil {
+func (r *DestinationMediaRepository) Create(destinationMedia *entities.DestinationMedia, tx *gorm.DB) error {
+	var db *gorm.DB
+
+	if tx != nil {
+		db = tx
+	} else {
+		db = r.db
+	}
+
+	if err := db.Create(destinationMedia).Error; err != nil {
 		return err
 	}
 	return nil

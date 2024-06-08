@@ -9,12 +9,13 @@ import (
 )
 
 type SearchDestination struct {
-	Id       uuid.UUID `json:"id"`
-	Name     string    `json:"nama"`
-	Url      *string   `json:"url_media"`
-	Province string    `json:"provinsi"`
-	City     string    `json:"kota"`
-	Category Category  `json:"kategori"`
+	Id         uuid.UUID `json:"id"`
+	Name       string    `json:"nama"`
+	Url        *string   `json:"url_media"`
+	Province   string    `json:"provinsi"`
+	City       string    `json:"kota"`
+	VisitCount int       `json:"visit_count"`
+	Category   Category  `json:"kategori"`
 }
 
 type GetAllDestination struct {
@@ -23,6 +24,7 @@ type GetAllDestination struct {
 	OpenTime           string              `json:"jam_buka"`
 	CloseTime          string              `json:"jam_tutup"`
 	EntryPrice         float64             `json:"harga_masuk"`
+	VisitCount         int                 `json:"visit_count"`
 	Category           Category            `json:"kategori"`
 	DestinationAddress *DestinationAddress `json:"alamat"`
 }
@@ -38,12 +40,13 @@ func ToSearchDestinationsResponse(destinations *[]entities.Destination) *[]Searc
 		}
 
 		responses[idx] = SearchDestination{
-			Id:       destination.Id,
-			Name:     destination.Name,
-			Url:      url,
-			Province: destination.DestinationAddress.Province.Name,
-			City:     destination.DestinationAddress.City.Name,
-			Category: *ToCategory(&destination),
+			Id:         destination.Id,
+			Name:       destination.Name,
+			Url:        url,
+			Province:   destination.DestinationAddress.Province.Name,
+			City:       destination.DestinationAddress.City.Name,
+			VisitCount: destination.VisitCount,
+			Category:   *ToCategory(&destination),
 		}
 	}
 
@@ -59,6 +62,7 @@ func ToGetAllDestinationsResponse(destinations *[]entities.Destination) *[]GetAl
 			Name:       destination.Name,
 			OpenTime:   destination.OpenTime,
 			CloseTime:  destination.CloseTime,
+			VisitCount: destination.VisitCount,
 			EntryPrice: destination.EntryPrice,
 			Category:   *ToCategory(&destination),
 			DestinationAddress: &DestinationAddress{
@@ -128,6 +132,7 @@ type DetailDestinationResponse struct {
 	OpenTime           string               `json:"jam_buka"`
 	CloseTime          string               `json:"jam_tutup"`
 	EntryPrice         float64              `json:"harga_masuk"`
+	VisitCount         int                  `json:"visit_count"`
 	Description        string               `json:"deskripsi"`
 	DestinationAddress *DestinationAddress  `json:"alamat_destinasi"`
 	UrlImages          *[]UrlImage          `json:"url_gambar"`
@@ -143,6 +148,7 @@ type GetByIdDestinationResponse struct {
 	OpenTime           string              `json:"jam_buka"`
 	CloseTime          string              `json:"jam_tutup"`
 	EntryPrice         float64             `json:"harga_masuk"`
+	VisitCount         int                 `json:"visit_count"`
 	Description        string              `json:"deskripsi"`
 	DestinationAddress *DestinationAddress `json:"alamat_destinasi"`
 	UrlImages          *[]UrlImage         `json:"url_gambar"`
@@ -205,6 +211,7 @@ func ToDetailDestinationResponse(destination *entities.Destination, similarDesti
 		OpenTime:    destination.OpenTime,
 		CloseTime:   destination.CloseTime,
 		EntryPrice:  destination.EntryPrice,
+		VisitCount:  destination.VisitCount,
 		Description: destination.Description,
 		DestinationAddress: &DestinationAddress{
 			Province:    destination.DestinationAddress.Province.Name,
@@ -228,6 +235,7 @@ func ToGetByIdDestinationResponse(destination *entities.Destination) *GetByIdDes
 		OpenTime:    destination.OpenTime,
 		CloseTime:   destination.CloseTime,
 		EntryPrice:  destination.EntryPrice,
+		VisitCount:  destination.VisitCount,
 		Description: destination.Description,
 		DestinationAddress: &DestinationAddress{
 			Province:    destination.DestinationAddress.Province.Name,
