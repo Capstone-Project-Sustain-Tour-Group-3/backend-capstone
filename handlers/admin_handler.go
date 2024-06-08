@@ -218,7 +218,7 @@ func (h *adminHandler) UpdateAdmin(ctx echo.Context) error {
 	}
 
 	var file multipart.File = nil
-	req := new(dto.AdminRequest)
+	req := new(dto.UpdateAdminRequest)
 
 	if err = ctx.Bind(req); err != nil {
 		return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "Permintaan tidak valid. Silakan periksa kembali data yang anda masukkan."})
