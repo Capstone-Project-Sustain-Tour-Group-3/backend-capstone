@@ -5,6 +5,7 @@ import (
 	"capstone/entities"
 	"capstone/errorHandlers"
 	"capstone/repositories"
+
 	"github.com/google/uuid"
 )
 
@@ -69,7 +70,6 @@ func (uc *DestinationMediaUsecase) FindById(id uuid.UUID) (*dto.GetDetailDestina
 
 func (uc *DestinationMediaUsecase) Update(id uuid.UUID, request dto.UpdateDestinationMediaRequest) error {
 	destinationMedia, err := uc.destinationMediaRepo.FindById(id)
-
 	if err != nil {
 		return &errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
 	}
@@ -88,7 +88,6 @@ func (uc *DestinationMediaUsecase) Update(id uuid.UUID, request dto.UpdateDestin
 
 func (uc *DestinationMediaUsecase) Delete(id uuid.UUID) error {
 	destinationMedia, err := uc.destinationMediaRepo.FindById(id)
-
 	if err != nil {
 		return &errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
 	}

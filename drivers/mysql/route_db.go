@@ -14,6 +14,7 @@ type Route struct {
 	CityId         string         `gorm:"type:char(4);index;not null" json:"city_id"`
 	City           City           `gorm:"foreignKey:CityId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"city"`
 	Name           string         `gorm:"type:varchar(255);not null" json:"name"`
+	StartLocation  string         `gorm:"type:varchar(255);not null" json:"start_location"`
 	StartLongitude float64        `gorm:"type:decimal(9,6);not null" json:"start_longitude"`
 	StartLatitude  float64        `gorm:"type:decimal(9,6);not null" json:"start_latitude"`
 	Price          float64        `gorm:"type:decimal(10,2);not null" json:"price"`
