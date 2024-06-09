@@ -1,14 +1,16 @@
 package handlers
 
 import (
+	"net/http"
+
 	"capstone/dto"
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/usecases"
+
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"math"
-	"net/http"
 	"strconv"
 )
 
@@ -66,7 +68,6 @@ func (h *DestinationMediaHandler) DetailDestinationMedia(ctx echo.Context) error
 	}
 
 	destinationMedia, err := h.usecase.FindById(destinationMediaId)
-
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
@@ -112,7 +113,6 @@ func (h *DestinationMediaHandler) UpdateDestinationMedia(ctx echo.Context) error
 
 	id := ctx.Param("id")
 	destinationMediaId, err := uuid.Parse(id)
-
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
