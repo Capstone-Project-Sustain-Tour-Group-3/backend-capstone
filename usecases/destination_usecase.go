@@ -22,6 +22,8 @@ type IDestinationUsecase interface {
 	UpdateDestination(id uuid.UUID, destinationReq *dto.UpdateDestinationRequest) error
 	DeleteDestination(id uuid.UUID) error
 	IncrementVisitCount(id uuid.UUID) error
+	GetCitiesWithDestinations() (*[]dto.Cities, error)
+	GetDestinationByCityId(id string) (*[]dto.DestinationsByCity, error)
 }
 
 type DestinationUsecase struct {
@@ -298,4 +300,27 @@ func (uc *DestinationUsecase) IncrementVisitCount(id uuid.UUID) error {
 	}
 	destination.VisitCount++
 	return uc.destinationRepo.Update(destination)
+}
+
+func (uc *DestinationUsecase) GetCitiesWithDestinations() (*[]dto.Cities, error) {
+	cities, err := uc.cityRepo.GetCitiesWithDestinations()
+	if err != nil {
+		return nil, &errorHandlers.InternalServerError{Message: "Gagal untuk menemukan data kota"}
+	}
+
+	response := dto.ToCitiesResponse(&cities)
+
+	return response, nil
+}
+
+func (uc *DestinationUsecase) GetDestinationByCityId(id string) (*[]dto.DestinationsByCity, error) {
+	destinations, err := uc.destinationRepo.FindDestinationByCityId(id)
+	if err != nil {
+		return nil, &errorHandlers.InternalServerError{Message: "Gagal untuk menemukan data destinasi"}
+	}
+	if len(destinations) == 0 {
+		return nil, &errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
+	}
+	response := dto.ToDestinationsByCityResponse(&destinations)
+	return response, nil
 }
