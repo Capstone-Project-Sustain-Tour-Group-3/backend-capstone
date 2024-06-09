@@ -308,3 +308,35 @@ func (h *DestinationHandler) DeleteDestination(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, response)
 }
+
+func (h *DestinationHandler) GetCitiesWithDestinations(ctx echo.Context) error {
+	cities, err := h.usecase.GetCitiesWithDestinations()
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "berhasil menampilkan kota yang memiliki destinasi",
+		Data:       cities,
+	})
+
+	return ctx.JSON(http.StatusOK, response)
+}
+
+func (h *DestinationHandler) GetDestinationsByCityId(ctx echo.Context) error {
+	id := ctx.Param("id")
+
+	destinations, err := h.usecase.GetDestinationByCityId(id)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "berhasil menampilkan destinasi",
+		Data:       destinations,
+	})
+
+	return ctx.JSON(http.StatusOK, response)
+}

@@ -41,4 +41,6 @@ func DestinationRouter(r *echo.Group) {
 	handler := handlers.NewDestinationHandler(usecase)
 	r.GET("", handler.SearchDestinations)
 	r.GET("/:id", handler.DetailDestination)
+	r.GET("/cities", handler.GetCitiesWithDestinations)
+	r.GET("/cities/:id", handler.GetDestinationsByCityId)
 }
