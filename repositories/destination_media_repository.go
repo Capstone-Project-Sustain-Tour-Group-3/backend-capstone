@@ -2,14 +2,14 @@ package repositories
 
 import (
 	"capstone/entities"
-
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type IDestinationMediaRepository interface {
 	Create(destinationMedia *entities.DestinationMedia, tx *gorm.DB) error
-	FindAll() ([]entities.DestinationMedia, error)
+	FindAll(page, limit int, searchQuery string) (*int64, []entities.DestinationMedia, error)
 	FindById(id uuid.UUID) (*entities.DestinationMedia, error)
 	Update(destinationMedia *entities.DestinationMedia) error
 	Delete(destinationMedia *entities.DestinationMedia) error
@@ -39,17 +39,38 @@ func (r *DestinationMediaRepository) Create(destinationMedia *entities.Destinati
 	return nil
 }
 
-func (r *DestinationMediaRepository) FindAll() ([]entities.DestinationMedia, error) {
+func (r *DestinationMediaRepository) FindAll(page, limit int, searchQuery string) (*int64, []entities.DestinationMedia, error) {
 	var destinationMedias []entities.DestinationMedia
-	if err := r.db.Find(&destinationMedias).Error; err != nil {
-		return nil, err
+	var total int64
+
+	offset := (page - 1) * limit
+
+	db := r.db.Model(&entities.DestinationMedia{}).Joins("JOIN destinations ON destinations.id = destination_media.destination_id")
+
+	if searchQuery != "" {
+		db = db.Where("LOWER(destinations.name) LIKE ?", "%"+strings.ToLower(searchQuery)+"%")
 	}
-	return destinationMedias, nil
+
+	if err := db.Debug().
+		Limit(limit).
+		Offset(offset).
+		Preload("Destination").
+		Find(&destinationMedias).Error; err != nil {
+		return nil, nil, err
+	}
+
+	if err := db.Count(&total).Error; err != nil {
+		return nil, nil, err
+	}
+
+	return &total, destinationMedias, nil
 }
 
 func (r *DestinationMediaRepository) FindById(id uuid.UUID) (*entities.DestinationMedia, error) {
 	var destinationMedia *entities.DestinationMedia
-	if err := r.db.Where("id = ?", id).First(&destinationMedia).Error; err != nil {
+	if err := r.db.Where("id = ?", id).
+		Preload("Destination").
+		First(&destinationMedia).Error; err != nil {
 		return nil, err
 	}
 	return destinationMedia, nil

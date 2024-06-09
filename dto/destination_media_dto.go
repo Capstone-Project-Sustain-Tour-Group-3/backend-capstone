@@ -9,7 +9,7 @@ import (
 type CreateDestinationMediaRequest struct {
 	DestinationId uuid.UUID `json:"destination_id" validate:"required"`
 	Url           string    `json:"url" validate:"required"`
-	Type          string    `json:"type" validate:"required"`
+	Type          string    `json:"type" validate:"required,oneof=image video"`
 	Title         string    `json:"title" validate:"required"`
 }
 
@@ -21,7 +21,7 @@ type Destination struct {
 type UpdateDestinationMediaRequest struct {
 	DestinationId uuid.UUID `json:"destination_id" validate:"required"`
 	Url           string    `json:"url" validate:"required"`
-	Type          string    `json:"type" validate:"required"`
+	Type          string    `json:"type" validate:"required,oneof=image video"`
 	Title         string    `json:"title" validate:"required"`
 }
 
@@ -39,11 +39,19 @@ func ToGetDetailDestinationMediaResponse(destinationMedia entities.DestinationMe
 	}
 }
 
+func ToGetAllDestinationMediaResponse(destinationMedias []entities.DestinationMedia) []GetDetailDestinationMediaResponse {
+	var response []GetDetailDestinationMediaResponse
+	for _, destinationMedia := range destinationMedias {
+		response = append(response, ToGetDetailDestinationMediaResponse(destinationMedia))
+	}
+	return response
+}
+
 type GetDetailDestinationMediaResponse struct {
-	Id            uuid.UUID `json:"id"`
-	DestinationId uuid.UUID `json:"destination_id"`
-	Url           string    `json:"url"`
-	Type          string    `json:"type"`
-	Title         string    `json:"title"`
-	Destination   Destination
+	Id            uuid.UUID   `json:"id"`
+	DestinationId uuid.UUID   `json:"destination_id"`
+	Url           string      `json:"url"`
+	Type          string      `json:"type"`
+	Title         string      `json:"title"`
+	Destination   Destination `json:"destination"`
 }
