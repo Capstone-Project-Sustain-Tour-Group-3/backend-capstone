@@ -13,12 +13,12 @@ type UserRequest struct {
 	Password     string                `form:"password" validate:"required,min=8"`
 	NamaLengkap  string                `form:"nama_lengkap" validate:"required"`
 	Email        string                `form:"email" validate:"required,email"`
-	Bio          string                `form:"bio" validate:"required"`
+	Bio          string                `form:"bio"`
 	NoTelepon    string                `form:"no_telepon" validate:"required,number,startswith=08,min=11,max=13"`
 	FotoProfil   *multipart.FileHeader `form:"foto_profil"`
-	JenisKelamin string                `form:"jenis_kelamin" validate:"required"`
-	Kota         string                `form:"kota" validate:"required"`
-	Provinsi     string                `form:"provinsi" validate:"required"`
+	JenisKelamin string                `form:"jenis_kelamin"`
+	Kota         string                `form:"kota"`
+	Provinsi     string                `form:"provinsi"`
 }
 
 type findByIdResponse struct {

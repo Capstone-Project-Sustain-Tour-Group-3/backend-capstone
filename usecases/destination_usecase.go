@@ -290,7 +290,7 @@ func (uc *DestinationUsecase) DeleteDestination(id uuid.UUID) error {
 	return nil
 }
 
-// increment visit count
+// increment visit count.
 func (uc *DestinationUsecase) IncrementVisitCount(id uuid.UUID) error {
 	destination, err := uc.destinationRepo.FindById(id)
 	if err != nil {

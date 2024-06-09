@@ -1,13 +1,15 @@
 package handlers
 
 import (
+	"net/http"
+
 	"capstone/dto"
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/usecases"
+
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"net/http"
 )
 
 type DestinationMediaHandler struct {
@@ -34,7 +36,6 @@ func (h *DestinationMediaHandler) DetailMedia(ctx echo.Context) error {
 	}
 
 	destinationMedia, err := h.usecase.FindById(destinationMediaId)
-
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
@@ -63,7 +64,7 @@ func (h *DestinationMediaHandler) Create(ctx echo.Context) error {
 		})
 	}
 
-	if err := h.usecase.Create(req); err != nil {
+	if err = h.usecase.Create(req); err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
 
@@ -80,12 +81,11 @@ func (h *DestinationMediaHandler) Update(ctx echo.Context) error {
 
 	id := ctx.Param("id")
 	destinationMediaId, err := uuid.Parse(id)
-
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
 
-	if err := ctx.Bind(&req); err != nil {
+	if err = ctx.Bind(&req); err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
 
@@ -97,7 +97,7 @@ func (h *DestinationMediaHandler) Update(ctx echo.Context) error {
 		})
 	}
 
-	if err := h.usecase.Update(destinationMediaId, req); err != nil {
+	if err = h.usecase.Update(destinationMediaId, req); err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
 
@@ -116,7 +116,7 @@ func (h *DestinationMediaHandler) Delete(ctx echo.Context) error {
 		return errorHandlers.HandleError(ctx, err)
 	}
 
-	if err := h.usecase.Delete(destinationMediaId); err != nil {
+	if err = h.usecase.Delete(destinationMediaId); err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
 
