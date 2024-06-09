@@ -10,7 +10,7 @@ import (
 
 type IDestinationMediaUsecase interface {
 	Create(request dto.CreateDestinationMediaRequest) error
-	FindAll() ([]entities.DestinationMedia, error)
+	FindAll(page, limit int, searchQuery string) (*int64, []dto.GetDetailDestinationMediaResponse, error)
 	FindById(id uuid.UUID) (*dto.GetDetailDestinationMediaResponse, error)
 	Update(id uuid.UUID, request dto.UpdateDestinationMediaRequest) error
 	Delete(id uuid.UUID) error
@@ -48,12 +48,15 @@ func (uc *DestinationMediaUsecase) Create(request dto.CreateDestinationMediaRequ
 	return nil
 }
 
-func (uc *DestinationMediaUsecase) FindAll() ([]entities.DestinationMedia, error) {
-	destinationMedias, err := uc.destinationMediaRepo.FindAll()
+func (uc *DestinationMediaUsecase) FindAll(page, limit int, searchQuery string) (*int64, []dto.GetDetailDestinationMediaResponse, error) {
+	total, destinationMedias, err := uc.destinationMediaRepo.FindAll(page, limit, searchQuery)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	return destinationMedias, nil
+
+	response := dto.ToGetAllDestinationMediaResponse(destinationMedias)
+
+	return total, response, nil
 }
 
 func (uc *DestinationMediaUsecase) FindById(id uuid.UUID) (*dto.GetDetailDestinationMediaResponse, error) {

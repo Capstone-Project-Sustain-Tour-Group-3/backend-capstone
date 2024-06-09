@@ -42,5 +42,8 @@ func SetupRouter(e *echo.Echo) {
 
 		admins := v1Admin.Group("/admins")
 		admin.ManageAdminRouter(admins)
+
+		destinationMedia := v1Admin.Group("/destination-media")
+		admin.DestinationMediaRouter(destinationMedia)
 	}
 }
