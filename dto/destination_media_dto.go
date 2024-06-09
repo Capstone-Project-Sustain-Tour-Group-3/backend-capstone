@@ -48,10 +48,10 @@ func ToGetAllDestinationMediaResponse(destinationMedias []entities.DestinationMe
 }
 
 type GetDetailDestinationMediaResponse struct {
-	Id            uuid.UUID `json:"id"`
-	DestinationId uuid.UUID `json:"destination_id"`
-	Url           string    `json:"url"`
-	Type          string    `json:"type"`
-	Title         string    `json:"title"`
-	Destination   Destination
+	Id            uuid.UUID   `json:"id"`
+	DestinationId uuid.UUID   `json:"destination_id"`
+	Url           string      `json:"url"`
+	Type          string      `json:"type"`
+	Title         string      `json:"title"`
+	Destination   Destination `json:"destination"`
 }

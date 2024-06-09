@@ -17,6 +17,7 @@ tags:
   - name: Admin - Routes
   - name: Admin - Users
   - name: Admin - Admins
+  - name: Admin - Manage Content
 paths:
   /mobile/auth/register:
     post:
@@ -1769,6 +1770,7 @@ paths:
                   message:
                     type: string
                     example: 'Destinasi tidak ditemukan'
+
   /mobile/personalization:
     post:
       tags:
@@ -2345,6 +2347,350 @@ paths:
                   message:
                     type: string
                     example: 'Rute tidak ditemukan'
+
+  /admin/destination-media:
+    get:
+      tags:
+        - Admin - Manage Content
+      summary: Mendapatkan semua media destinasi
+      description: API untuk mendapatkan semua media destinasi.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successfully retrieved destination medias
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Success
+                  message:
+                    type: string
+                    example: berhasil menampilkan media destinasi
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          example: 1bde58e3-ef19-4daa-9df7-084ba5d3e933
+                        destination_id:
+                          type: string
+                          format: uuid
+                          example: 306d305e-3359-4884-8d38-89c04e8adec2
+                        url:
+                          type: string
+                          example: http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.video
+                        type:
+                          type: string
+                          example: video
+                        title:
+                          type: string
+                          example: We Are Going On Bullrun 3
+                        destination:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              example: 306d305e-3359-4884-8d38-89c04e8adec2
+                            name:
+                              type: string
+                              example: Pantai Kuta
+                  pagination:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                        example: 20
+                      per_page:
+                        type: integer
+                        example: 5
+                      current_page:
+                        type: integer
+                        example: 1
+                      last_page:
+                        type: integer
+                        example: 4
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Error
+                  message:
+                    type: string
+                    example: Invalid input
+    post:
+      tags:
+        - Admin - Manage Content
+      summary: Menambah media destinasi
+      description: API untuk menambah media destinasi.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                destination_id:
+                  type: string
+                  format: uuid
+                  example: 306d305e-3359-4884-8d38-89c04e8adec2
+                url:
+                  type: string
+                  example: http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.video
+                type:
+                  type: string
+                  example: video
+                title:
+                  type: string
+                  example: We Are Going On Bullrun 3
+              required:
+                - destination_id
+                - url
+                - type
+                - title
+              example:
+                destination_id: 306d305e-3359-4884-8d38-89c04e8adec2
+                url: http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.video
+                type: video
+                title: We Are Going On Bullrun 3
+      responses:
+        '200':
+          description: Successfully created destination media
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Success
+                  message:
+                    type: string
+                    example: Berhasilah menambahkan media destinasi
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Error
+                  message:
+                    type: string
+                    example: Internal server error
+
+  /admin/destination-media/{id}:
+    delete:
+      tags:
+        - Admin - Manage Content
+      summary: Menghapus media destinasi
+      description: API untuk menghapus media destinasi.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 1bde58e3-ef19-4daa-9df7-084ba5d3e941
+      responses:
+        '200':
+          description: Successfully deleted destination media
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Success
+                  message:
+                    type: string
+                    example: Berhasilah menghapus media destinasi
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Error
+                  message:
+                    type: string
+                    example: Internal server error
+    get:
+      tags:
+        - Admin - Manage Content
+      summary: Mengambil media destinasi
+      description: API untuk mengambil media destinasi.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 1bde58e3-ef19-4daa-9df7-084ba5d3e941
+      responses:
+        '200':
+          description: Successfully get destination media
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Success
+                  message:
+                    type: string
+                    example: Berhasilah mengambil media destinasi
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        example: 1bde58e3-ef19-4daa-9df7-084ba5d3e933
+                      destination_id:
+                        type: string
+                        format: uuid
+                        example: 306d305e-3359-4884-8d38-89c04e8adec2
+                      url:
+                        type: string
+                        example: http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.video
+                      type:
+                        type: string
+                        example: video
+                      title:
+                        type: string
+                        example: We Are Going On Bullrun 3
+                      destination:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            example: 306d305e-3359-4884-8d38-89c04e8adec2
+                          name:
+                            type: string
+                            example: Pantai Kuta
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Error
+                  message:
+                    type: string
+                    example: Internal server error
+    put:
+      tags:
+        - Admin - Manage Content
+      summary: Mengubah media destinasi
+      description: API untuk mengubah media destinasi.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 1bde58e3-ef19-4daa-9df7-084ba5d3e941
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                destination_id:
+                  type: string
+                  format: uuid
+                  example: 306d305e-3359-4884-8d38-89c04e8adec2
+                url:
+                  type: string
+                  example: http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.video
+                type:
+                  type: string
+                  example: video
+                title:
+                  type: string
+                  example: We Are Going On Bullrun 3
+      responses:
+        '200':
+          description: Successfully updated destination media
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Success
+                  message:
+                    type: string
+                    example: Berhasilah mengubah media destinasi
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Error
+                  message:
+                    type: string
+                    example: Internal server error
+
+
+
 components:
   schemas:
     Pagination:
