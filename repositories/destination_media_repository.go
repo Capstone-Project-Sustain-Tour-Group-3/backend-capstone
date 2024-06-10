@@ -1,10 +1,12 @@
 package repositories
 
 import (
+	"strings"
+
 	"capstone/entities"
+
 	"github.com/google/uuid"
 	"gorm.io/gorm"
-	"strings"
 )
 
 type IDestinationMediaRepository interface {

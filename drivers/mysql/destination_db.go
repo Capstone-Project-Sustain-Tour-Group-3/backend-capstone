@@ -12,7 +12,7 @@ type Destination struct {
 	Category    Category       `gorm:"foreignKey:CategoryId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE" json:"category"` //nolint:lll
 	CategoryId  uuid.UUID      `gorm:"type:varchar(191);index;not null" json:"province_id"`
 	Name        string         `gorm:"type:varchar(255);not null" json:"name"`
-	Description string         `gorm:"type:varchar(255)" json:"description"`
+	Description string         `gorm:"type:text" json:"description"`
 	OpenTime    string         `gorm:"type:varchar(255);not null" json:"open_time"`
 	CloseTime   string         `gorm:"type:varchar(255);not null" json:"close_time"`
 	EntryPrice  float64        `gorm:"type:decimal(10,2);not null" json:"entry_price"`

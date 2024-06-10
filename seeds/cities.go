@@ -2415,7 +2415,7 @@ func (s Seed) SeedCities() {
 		},
 		{
 			Id:         "9201",
-			ProvinceId: "92",
+			ProvinceId: "96",
 			Name:       "KAB. SORONG",
 		},
 		{
@@ -2430,12 +2430,12 @@ func (s Seed) SeedCities() {
 		},
 		{
 			Id:         "9204",
-			ProvinceId: "92",
+			ProvinceId: "96",
 			Name:       "KAB. SORONG SELATAN",
 		},
 		{
 			Id:         "9205",
-			ProvinceId: "92",
+			ProvinceId: "96",
 			Name:       "KAB. RAJA AMPAT",
 		},
 		{
@@ -2475,7 +2475,7 @@ func (s Seed) SeedCities() {
 		},
 		{
 			Id:         "9271",
-			ProvinceId: "92",
+			ProvinceId: "96",
 			Name:       "KOTA SORONG",
 		},
 		{
