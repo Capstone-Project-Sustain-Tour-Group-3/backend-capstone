@@ -10,7 +10,7 @@ func (s Seed) SeedProvinces() {
 	provinces := []entities.Province{
 		{
 			Id:   "11",
-			Name: "ACEH",
+			Name: "Nanggroe Aceh Darussalam",
 			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500661/i1ewbj47dsetsvxwu82n.png",
 		},
 		{
@@ -192,6 +192,11 @@ func (s Seed) SeedProvinces() {
 			Id:   "95",
 			Name: "PAPUA PEGUNUNGAN",
 			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500685/qefq7zxevvhlsgelti8g.jpg",
+		},
+		{
+			Id:   "96",
+			Name: "PAPUA BARAT DAYA",
+			Url:  "https://storage.googleapis.com/provinces_url/papua-barat-daya.jpeg",
 		},
 	}
 
