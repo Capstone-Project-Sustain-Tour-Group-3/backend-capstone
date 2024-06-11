@@ -103,6 +103,10 @@ func createDestination(s Seed, record []string, randGenerator *rand.Rand) (entit
 		return temp, nil
 	}
 
+	if err := s.db.Create(&destination).Error; err != nil {
+		return destination, err
+	}
+
 	return destination, nil
 }
 
