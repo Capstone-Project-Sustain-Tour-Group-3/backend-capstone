@@ -1196,11 +1196,11 @@ paths:
                 password:
                   type: string
                   example: '12345678'
-                foto:
+                foto_profil:
                   type: string
                   format: binary
             encoding:
-              foto:
+              foto_profil:
                 contentType: image/png, image/jpg, image/jpeg
       responses:
         '201':
@@ -1436,11 +1436,11 @@ paths:
                 password:
                   type: string
                   example: '12345678'
-                foto:
+                foto_profil:
                   type: string
                   format: binary
             encoding:
-              foto:
+              foto_profil:
                 contentType: image/png, image/jpg, image/jpeg
       responses:
         '200':
@@ -2784,8 +2784,6 @@ paths:
                   message:
                     type: string
                     example: Internal server error
-
-
 
 components:
   schemas:
