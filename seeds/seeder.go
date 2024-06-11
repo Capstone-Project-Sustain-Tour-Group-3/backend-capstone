@@ -57,13 +57,12 @@ func RunSeeder() {
 	methodList := []string{
 		// list of seed method name
 		// "SeedCategories",
-		// "SeedFacilities",
 		// "SeedProvinces",
 		// "SeedCities",
 		// "SeedSubdistricts",
-		// "SeedDestinations",
-		"SeedRoutes",
-		// "SeedDestinationFacilities",
+		// "SeedFacilities",
+		"SeedDestinations",
+		// "SeedRoutes",
 		// "SeedDestinationAddresses",
 		// "SeedDestinationMedias",
 	}

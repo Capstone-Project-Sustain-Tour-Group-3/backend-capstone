@@ -39,9 +39,15 @@ func (s Seed) SeedFacilities() {
 	}
 
 	for _, facility := range facilities {
-		if err = s.db.Where(entities.Facility{Name: facility.Name}).
-			FirstOrCreate(&facility).Error; err != nil {
-			log.Fatalf("failed to create facility: %v", err)
+		var temp entities.Facility
+		if err = s.db.FirstOrInit(&temp, entities.Facility{Name: facility.Name}).Error; err != nil {
+			log.Fatalf("failed to init facility: %v", err)
+		}
+
+		if temp.Id == uuid.Nil {
+			if err = s.db.Create(&facility).Error; err != nil {
+				log.Fatalf("failed to create facility: %v", err)
+			}
 		}
 	}
 }

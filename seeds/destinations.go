@@ -92,9 +92,15 @@ func createDestination(s Seed, record []string, randGenerator *rand.Rand) (entit
 		UpdatedAt:   time.Now(),
 	}
 
+	var temp entities.Destination
 	if err := s.db.Where(entities.Destination{Name: destination.Name}).
-		FirstOrCreate(&destination).Error; err != nil {
-		return destination, err
+		FirstOrInit(&temp).
+		Error; err != nil {
+		return entities.Destination{}, err
+	}
+
+	if temp.Id != uuid.Nil {
+		return temp, nil
 	}
 
 	return destination, nil
@@ -111,8 +117,19 @@ func processFacilities(s Seed, destination entities.Destination, facilitiesStr s
 					FacilityId:    facility.Id,
 				}
 
-				if err := s.db.Where(entities.DestinationFacility{DestinationId: destination.Id, FacilityId: facility.Id}).
-					FirstOrCreate(&destinationFacility).Error; err != nil {
+				var temp entities.DestinationFacility
+				if err := s.db.
+					Where(entities.DestinationFacility{DestinationId: destination.Id, FacilityId: facility.Id}).
+					FirstOrInit(&temp).
+					Error; err != nil {
+					return err
+				}
+
+				if temp.Id != uuid.Nil {
+					continue
+				}
+
+				if err := s.db.Create(&destinationFacility).Error; err != nil {
 					return err
 				}
 			}
@@ -147,8 +164,19 @@ func processMedia(s Seed, destination entities.Destination, record []string) err
 				UpdatedAt:     time.Now(),
 			}
 
-			if err := s.db.Where(entities.DestinationMedia{DestinationId: destination.Id, Url: media.Url}).
-				FirstOrCreate(&destinationMedia).Error; err != nil {
+			var temp entities.DestinationMedia
+			if err := s.db.
+				Where(entities.DestinationMedia{DestinationId: destination.Id, Url: media.Url}).
+				FirstOrInit(&temp).
+				Error; err != nil {
+				return err
+			}
+
+			if temp.Id != uuid.Nil {
+				continue
+			}
+
+			if err := s.db.Create(&destinationMedia).Error; err != nil {
 				return err
 			}
 		}
@@ -190,8 +218,19 @@ func processAddress(s Seed, destination entities.Destination, record []string) e
 		UpdatedAt:     time.Now(),
 	}
 
-	if err = s.db.Where(entities.DestinationAddress{DestinationId: destination.Id}).
-		FirstOrCreate(&destinationAddress).Error; err != nil {
+	var temp entities.DestinationAddress
+	if err = s.db.
+		Where(entities.DestinationAddress{DestinationId: destination.Id}).
+		FirstOrInit(&temp).
+		Error; err != nil {
+		return err
+	}
+
+	if temp.Id != uuid.Nil {
+		return nil
+	}
+
+	if err = s.db.Create(&destinationAddress).Error; err != nil {
 		return err
 	}
 
