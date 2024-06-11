@@ -10,6 +10,7 @@ type findAllResponse struct {
 	Id            uuid.UUID   `json:"id"`
 	Username      string      `json:"username"`
 	Kota          string      `json:"kota"`
+	NamaRute      string      `json:"nama_rute"`
 	Destinasi     []Destinasi `json:"destinasi"`
 	EstimasiBiaya float64     `json:"estimasi_biaya"`
 }
@@ -33,6 +34,7 @@ func ToFindAllRouteResponse(routes *[]entities.Route) *[]findAllResponse {
 			Id:            route.Id,
 			Username:      route.User.Username,
 			Kota:          route.City.Name,
+			NamaRute:      route.Name,
 			Destinasi:     destinasi,
 			EstimasiBiaya: route.Price,
 		}
@@ -53,6 +55,7 @@ func ToFindByIdRouteResponse(route *entities.Route) *findAllResponse {
 		Id:            route.Id,
 		Username:      route.User.Username,
 		Kota:          route.City.Name,
+		NamaRute:      route.Name,
 		Destinasi:     destinasi,
 		EstimasiBiaya: route.Price,
 	}

@@ -34,6 +34,8 @@ func errorMessage(fieldError validator.FieldError) string {
 		return fmt.Sprintf("Kolom %s harus terisi dengan jumlah lebih dari sama dengan %s", fieldError.Field(), fieldError.Param())
 	case "lte":
 		return fmt.Sprintf("Kolom %s harus terisi dengan jumlah kurang dari sama dengan %s", fieldError.Field(), fieldError.Param())
+	case "oneof":
+		return fmt.Sprintf("Kolom %s harus salah satu dari %s", fieldError.Field(), fieldError.Param())
 	}
 
 	return fieldError.Error()

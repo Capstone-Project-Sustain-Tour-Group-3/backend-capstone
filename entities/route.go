@@ -15,6 +15,7 @@ type Route struct {
 	User           User
 	RouteDetail    []RouteDetail
 	Name           string
+	StartLocation  string
 	StartLongitude float64
 	StartLatitude  float64
 	Price          float64
