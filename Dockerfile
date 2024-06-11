@@ -19,6 +19,7 @@ COPY --from=build /tourease .
 COPY --from=build /static/ /static/
 COPY --from=build /docs/ /docs/
 COPY --from=build /helpers/email_template.html /helpers/email_template.html
+COPY --from=build /storages/ /storages/
 
 EXPOSE 8080
 
