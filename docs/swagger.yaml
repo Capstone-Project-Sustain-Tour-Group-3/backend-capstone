@@ -2785,8 +2785,6 @@ paths:
                     type: string
                     example: Internal server error
 
-
-
 components:
   schemas:
     Pagination:
@@ -2942,7 +2940,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SimilarDestination'
-
   responses:
     UnauthorizedResponse:
       description: Unauthorized
@@ -2969,6 +2966,15 @@ components:
                 example: 'Berhasil mendapatkan kategori destinasi'
               data:
                 type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    nama:
+                      type: string
+                    url:
+                      type: string
                 example:
                   - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
                     nama: Alam
@@ -2994,6 +3000,15 @@ components:
                 example: 'Berhasil mendapatkan provinsi'
               data:
                 type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    nama:
+                      type: string
+                    url:
+                      type: string
                 example:
                   - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
                     nama: Jawa Timur
