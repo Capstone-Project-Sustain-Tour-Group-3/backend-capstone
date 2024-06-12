@@ -13,6 +13,8 @@ type RouteRepository interface {
 	FindAll(page, limit int, searchQuery string) (*[]entities.Route, *int64, error)
 	FindById(id uuid.UUID) (*entities.Route, error)
 	Delete(route *entities.Route) error
+
+	FindVisitedByUserSubquery(id uuid.UUID) *gorm.DB
 }
 
 type routeRepository struct {
@@ -69,4 +71,12 @@ func (r *routeRepository) Delete(route *entities.Route) error {
 		return err
 	}
 	return nil
+}
+
+func (r *routeRepository) FindVisitedByUserSubquery(id uuid.UUID) *gorm.DB {
+	return r.db.Model(&entities.Route{}).
+		Distinct("route_details.destination_id").
+		InnerJoins("RouteDetail").
+		InnerJoins("RouteDetail.Destination").
+		Where("user_id = ?", id)
 }

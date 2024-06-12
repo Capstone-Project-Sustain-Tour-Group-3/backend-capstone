@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"fmt"
 	"strings"
 
 	"capstone/dto"
@@ -9,6 +10,7 @@ import (
 	"github.com/google/uuid"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type IDestinationRepository interface {
@@ -16,6 +18,9 @@ type IDestinationRepository interface {
 	FindAll(page, limit int, searchQuery, sortQuery, filterQuery string) (string, *int64, []entities.Destination, error)
 	FindByCategoryId(ids uuid.UUID) ([]entities.Destination, error)
 	FindDestinationByCityId(id string) ([]entities.Destination, error)
+	FindByProvinceName(name string) (*[]entities.Destination, error)
+	FindPopularDestinationVideos() (*[]entities.Destination, error)
+	FindBySubquery(subquery *gorm.DB) (*[]entities.Destination, error)
 	Create(destination *entities.Destination, tx *gorm.DB) error
 	Update(destination *entities.Destination) error
 	Delete(destination *entities.Destination) error
@@ -165,6 +170,50 @@ func (r *DestinationRepository) FindDestinationByCityId(id string) ([]entities.D
 		Preload("Category").
 		Find(&destinations).
 		Error; err != nil {
+		return nil, err
+	}
+
+	return destinations, nil
+}
+
+func (r *DestinationRepository) FindByProvinceName(name string) (*[]entities.Destination, error) {
+	destinations := new([]entities.Destination)
+
+	if err := r.db.Clauses(clause.OrderBy{Expression: clause.Expr{SQL: "RAND()"}}).
+		Preload("DestinationAddress").
+		Preload("DestinationAddress.City").
+		Preload("DestinationAddress.Province").
+		Preload("DestinationMedias", "type = ?", "image").
+		Joins("JOIN destination_addresses ON destination_addresses.destination_id = destinations.id").
+		Joins("JOIN provinces ON provinces.id = destination_addresses.province_id").
+		Where("provinces.name LIKE ?", fmt.Sprint("%", name, "%")).
+		Find(destinations).Error; err != nil {
+		return nil, err
+	}
+
+	return destinations, nil
+}
+
+func (r *DestinationRepository) FindPopularDestinationVideos() (*[]entities.Destination, error) {
+	destinations := new([]entities.Destination)
+
+	if err := r.db.Order("visit_count DESC").
+		Preload("DestinationMedias", "type = ?", "video").
+		Find(destinations).Error; err != nil {
+		return nil, err
+	}
+
+	return destinations, nil
+}
+
+func (r *DestinationRepository) FindBySubquery(subquery *gorm.DB) (*[]entities.Destination, error) {
+	destinations := new([]entities.Destination)
+
+	if err := r.db.Preload("DestinationMedias", "type = ?", "image").
+		Preload("DestinationAddress").
+		Preload("DestinationAddress.Province").
+		Where(subquery).
+		Find(destinations).Error; err != nil {
 		return nil, err
 	}
 
