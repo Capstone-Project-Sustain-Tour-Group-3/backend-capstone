@@ -13,8 +13,10 @@ require (
 	github.com/labstack/echo/v4 v4.12.0
 	github.com/labstack/gommon v0.4.2
 	github.com/redis/go-redis/v9 v9.5.1
+	github.com/sashabaranov/go-openai v1.24.1
 	github.com/spf13/viper v1.18.2
 	golang.org/x/crypto v0.23.0
+	golang.org/x/text v0.15.0
 	google.golang.org/api v0.178.0
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gorm.io/driver/mysql v1.5.6
@@ -77,7 +79,6 @@ require (
 	golang.org/x/oauth2 v0.20.0 // indirect
 	golang.org/x/sync v0.7.0 // indirect
 	golang.org/x/sys v0.20.0 // indirect
-	golang.org/x/text v0.15.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240506185236-b8a5c65736ae // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240506185236-b8a5c65736ae // indirect
