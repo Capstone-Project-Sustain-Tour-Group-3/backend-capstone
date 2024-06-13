@@ -28,7 +28,7 @@ type findByIdResponse struct {
 	Bio          string    `json:"bio"`
 	Email        string    `json:"email"`
 	NoTelepon    string    `json:"no_telepon"`
-	FotoProfil   string    `json:"foto_profil"`
+	FotoProfil   *string   `json:"foto_profil"`
 	JenisKelamin string    `json:"jenis_kelamin"`
 	Kota         string    `json:"kota"`
 	Provinsi     string    `json:"provinsi"`
@@ -53,7 +53,7 @@ func ToFindByIdResponse(user *entities.User) *findByIdResponse {
 		Bio:          user.Bio,
 		Email:        user.Email,
 		NoTelepon:    user.PhoneNumber,
-		FotoProfil:   *user.ProfileImageUrl,
+		FotoProfil:   user.ProfileImageUrl,
 		JenisKelamin: user.Gender,
 		Kota:         user.City,
 		Provinsi:     user.Province,
