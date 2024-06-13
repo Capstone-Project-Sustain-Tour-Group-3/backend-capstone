@@ -12,6 +12,9 @@ import (
 )
 
 func UserRouter(r *echo.Group) {
+	r.Use(middlewares.JWTMiddleware)
+	r.Use(middlewares.RoleMiddleware("admin", "superadmin"))
+
 	repository := repositories.NewUserRepository(config.DB)
 	cloudinaryClient := cloudinary.NewCloudinaryClient(config.ENV.CLOUDINARY_URL)
 	usecase := usecases.NewUserUsecase(repository, cloudinaryClient)
