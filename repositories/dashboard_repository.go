@@ -81,38 +81,56 @@ func (r *dashboardRepository) GetTotalDestinationWithCategory() ([]dto.TotalDest
 func (r *dashboardRepository) GetMonthlyUsers() ([]dto.MonthlyUser, error) {
 	var monthlyUsers []dto.MonthlyUser
 	query := `
-        SELECT
-            CASE month
-                WHEN '01' THEN 'Jan'
-                WHEN '02' THEN 'Feb'
-                WHEN '03' THEN 'Mar'
-                WHEN '04' THEN 'Apr'
-                WHEN '05' THEN 'Mei'
-                WHEN '06' THEN 'Jun'
-                WHEN '07' THEN 'Jul'
-                WHEN '08' THEN 'Ags'
-                WHEN '09' THEN 'Sep'
-                WHEN '10' THEN 'Okt'
-                WHEN '11' THEN 'Nov'
-                WHEN '12' THEN 'Des'
-            END AS bulan,
-            pengguna_baru,
-            (
-                SELECT COUNT(u2.id)
-                FROM users u2
-                WHERE DATE_FORMAT(u2.created_at, '%m') <= month
-            ) AS total_pengguna
-        FROM (
-            SELECT
-                DATE_FORMAT(created_at, '%m') AS month,
-                COUNT(id) AS pengguna_baru
-            FROM
-                users
-            GROUP BY
-                month
-        ) AS bulan
-        ORDER BY
-            month;
+        WITH all_months AS (
+    SELECT '01' AS month UNION ALL
+    SELECT '02' AS month UNION ALL
+    SELECT '03' AS month UNION ALL
+    SELECT '04' AS month UNION ALL
+    SELECT '05' AS month UNION ALL
+    SELECT '06' AS month UNION ALL
+    SELECT '07' AS month UNION ALL
+    SELECT '08' AS month UNION ALL
+    SELECT '09' AS month UNION ALL
+    SELECT '10' AS month UNION ALL
+    SELECT '11' AS month UNION ALL
+    SELECT '12' AS month
+),
+monthly_data AS (
+    SELECT
+        DATE_FORMAT(created_at, '%m') AS month,
+        COUNT(id) AS pengguna_baru
+    FROM
+        users
+    GROUP BY
+        month
+)
+SELECT
+    CASE all_months.month
+        WHEN '01' THEN 'Jan'
+        WHEN '02' THEN 'Feb'
+        WHEN '03' THEN 'Mar'
+        WHEN '04' THEN 'Apr'
+        WHEN '05' THEN 'Mei'
+        WHEN '06' THEN 'Jun'
+        WHEN '07' THEN 'Jul'
+        WHEN '08' THEN 'Ags'
+        WHEN '09' THEN 'Sep'
+        WHEN '10' THEN 'Okt'
+        WHEN '11' THEN 'Nov'
+        WHEN '12' THEN 'Des'
+    END AS bulan,
+    COALESCE(monthly_data.pengguna_baru, 0) AS pengguna_baru,
+    (
+        SELECT COUNT(u2.id)
+        FROM users u2
+        WHERE DATE_FORMAT(u2.created_at, '%m') <= all_months.month
+    ) AS total_pengguna
+FROM
+    all_months
+LEFT JOIN
+    monthly_data ON all_months.month = monthly_data.month
+ORDER BY
+    all_months.month;
     `
 
 	if err := r.db.Raw(query).Scan(&monthlyUsers).Error; err != nil {
