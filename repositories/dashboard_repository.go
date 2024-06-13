@@ -3,6 +3,7 @@ package repositories
 import (
 	"capstone/dto"
 	"capstone/entities"
+
 	"gorm.io/gorm"
 )
 
@@ -76,6 +77,7 @@ func (r *dashboardRepository) GetTotalDestinationWithCategory() ([]dto.TotalDest
 	}
 	return totalDestinationationWithCategory, nil
 }
+
 func (r *dashboardRepository) GetMonthlyUsers() ([]dto.MonthlyUser, error) {
 	var monthlyUsers []dto.MonthlyUser
 	query := `
