@@ -24,6 +24,9 @@ func SetupRouter(e *echo.Echo) {
 
 		recommendation := v1Mobile.Group("/personalization")
 		mobile.PersonalizationRoute(recommendation)
+
+		homepage := v1Mobile.Group("/home")
+		mobile.HomepageRouter(homepage)
 	}
 
 	v1Admin := e.Group("/v1/admin")
@@ -45,5 +48,8 @@ func SetupRouter(e *echo.Echo) {
 
 		destinationMedia := v1Admin.Group("/destination-media")
 		admin.DestinationMediaRouter(destinationMedia)
+
+		dashboard := v1Admin.Group("/dashboard")
+		admin.DashboardRouter(dashboard)
 	}
 }
