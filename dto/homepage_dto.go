@@ -2,11 +2,8 @@ package dto
 
 import (
 	"capstone/entities"
-	"strings"
 
 	"github.com/google/uuid"
-	"golang.org/x/text/cases"
-	"golang.org/x/text/language"
 )
 
 type HomepageRequest struct {
@@ -14,14 +11,21 @@ type HomepageRequest struct {
 }
 
 type HomepageResponse struct {
-	// RecommendDestination []entities.Destination      `json:"destinasi_rekomendasi"`
-	NearbyDestination       []NearbyDestination `json:"destinasi_sekitar"`
-	PopularDestinationMedia []DestinationMedia  `json:"konten_destinasi_populer"`
+	RecommendDestinations    []RecommendDestination `json:"destinasi_rekomendasi"`
+	NearbyDestinations       []NearbyDestination    `json:"destinasi_sekitar"`
+	PopularDestinationMedias []DestinationMedia     `json:"konten_destinasi_populer"`
+}
+
+type RecommendDestination struct {
+	Id       uuid.UUID `json:"id"`
+	Name     string    `json:"nama"`
+	ImageUrl *string   `json:"url_gambar"`
+	Province Province  `json:"provinsi"`
 }
 
 type NearbyDestination struct {
 	Id                 uuid.UUID `json:"id"`
-	Name               string    `json:"name"`
+	Name               string    `json:"nama"`
 	DestinationAddress Address   `json:"lokasi"`
 	ImageUrl           *string   `json:"url_gambar"`
 }
@@ -51,31 +55,23 @@ func ToHomepageRequest(cityName string) *HomepageRequest {
 	}
 }
 
-func ToHomepageResponse(
-	nearbyDestination, popularDestinationMedia *[]entities.Destination,
-) (*HomepageResponse, error) {
-	nearbyDestinationResponse := toNearbyDestinations(nearbyDestination)
-	popularDestinationMediaResponse := toPopularDestinationMedias(popularDestinationMedia)
+func ToRecommendDestinations(recommendDestinations *[]entities.Destination) []RecommendDestination {
+	var recommendDestinationResponse []RecommendDestination
 
-	res := &HomepageResponse{
-		NearbyDestination:       nearbyDestinationResponse,
-		PopularDestinationMedia: popularDestinationMediaResponse,
+	for _, destination := range *recommendDestinations {
+		recommendDestinationResponse = append(
+			recommendDestinationResponse,
+			toRecommendDestination(&destination),
+		)
 	}
 
-	return res, nil
+	return recommendDestinationResponse
 }
 
-func toNearbyDestinations(nearbyDestination *[]entities.Destination) []NearbyDestination {
+func ToNearbyDestinations(nearbyDestination *[]entities.Destination) []NearbyDestination {
 	var nearbyDestinationResponse []NearbyDestination
 
-	lenNearbyDestination := len(*nearbyDestination)
-	limitNearby := 5
-
-	if lenNearbyDestination < limitNearby {
-		limitNearby = lenNearbyDestination
-	}
-
-	for _, destination := range (*nearbyDestination)[:limitNearby] {
+	for _, destination := range *nearbyDestination {
 		nearbyDestinationResponse = append(
 			nearbyDestinationResponse,
 			toNearbyDestination(&destination),
@@ -85,7 +81,7 @@ func toNearbyDestinations(nearbyDestination *[]entities.Destination) []NearbyDes
 	return nearbyDestinationResponse
 }
 
-func toPopularDestinationMedias(popularDestinations *[]entities.Destination) []DestinationMedia {
+func ToPopularDestinationMedias(popularDestinations *[]entities.Destination) []DestinationMedia {
 	const limit = 5
 	var popularDestinationMediaResponse []DestinationMedia
 
@@ -110,28 +106,15 @@ func toPopularDestinationMedias(popularDestinations *[]entities.Destination) []D
 }
 
 func toNearbyDestination(destination *entities.Destination) NearbyDestination {
-	var province string = destination.DestinationAddress.Province.Name
-
-	caser := cases.Title(language.Indonesian)
-	city := caser.String(strings.Split(destination.DestinationAddress.City.Name, " ")[1])
-
-	if strings.HasPrefix(province, "DKI") {
-		province = "DKI " + caser.String(province[4:])
-	} else if strings.HasPrefix(province, "DI") {
-		province = "DI " + caser.String(province[3:])
-	} else {
-		province = caser.String(destination.DestinationAddress.Province.Name)
-	}
-
 	res := NearbyDestination{
 		Id:   destination.Id,
 		Name: destination.Name,
 		DestinationAddress: Address{
 			City: City{
-				Name: city,
+				Name: destination.DestinationAddress.City.Name,
 			},
 			Province: Province{
-				Name: province,
+				Name: destination.DestinationAddress.Province.Name,
 			},
 		},
 		ImageUrl: nil,
@@ -149,5 +132,22 @@ func toPopularDestinationMedia(destinationMedia *entities.DestinationMedia) Dest
 		Id:    destinationMedia.Id,
 		Title: destinationMedia.Title,
 		Url:   destinationMedia.Url,
+	}
+}
+
+func toRecommendDestination(destination *entities.Destination) RecommendDestination {
+	var imageUrl *string = nil
+
+	if len(destination.DestinationMedias) != 0 {
+		imageUrl = &destination.DestinationMedias[0].Url
+	}
+
+	return RecommendDestination{
+		Id:       destination.Id,
+		Name:     destination.Name,
+		ImageUrl: imageUrl,
+		Province: Province{
+			Name: destination.DestinationAddress.Province.Name,
+		},
 	}
 }
