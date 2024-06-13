@@ -13,6 +13,7 @@ import (
 
 func DestinationRouter(r *echo.Group) {
 	r.Use(middlewares.JWTMiddleware)
+	r.Use(middlewares.RoleMiddleware("admin", "superadmin"))
 
 	destinationRepo := repositories.NewDestinationRepository(config.DB)
 	destinationFacilityRepo := repositories.NewDestinationFacilityRepository(config.DB)

@@ -13,6 +13,7 @@ tags:
   - name: Mobile - Profile
   - name: Mobile - Personalization
   - name: Admin - Auth
+  - name: Admin - Dashboard
   - name: Admin - Destinations
   - name: Admin - Routes
   - name: Admin - Users
@@ -375,7 +376,94 @@ paths:
                   message:
                     type: string
                     example: 'Logout berhasil!'
-
+  /admin/dashboard:
+    get:
+      tags:
+        - Admin - Dashboard
+      summary: Menampilkan Data Dashboard
+      description: API untuk menampilkan data dashboard admin.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Berhasil Menampilkan Data Dashboard
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Berhasil menampilkan data dashboard'
+                  data:
+                    type: object
+                    properties:
+                      total_data:
+                        type: object
+                        properties:
+                          total_admin:
+                            type: integer
+                            example: 2
+                          total_user:
+                            type: integer
+                            example: 7
+                          total_rute:
+                            type: integer
+                            example: 14
+                      pertumbuhan_pengguna:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            bulan:
+                              type: string
+                              example: 'Jan'
+                            pengguna_baru:
+                              type: integer
+                              example: 1
+                            total_pengguna:
+                              type: integer
+                              example: 1
+                      total_content_vid:
+                        type: object
+                        properties:
+                          total_content:
+                            type: integer
+                            example: 962
+                          total_destinasi:
+                            type: integer
+                            example: 322
+                      kategori_destinasi:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            nama_kategori:
+                              type: string
+                              example: 'Alam'
+                            total:
+                              type: integer
+                              example: 178
+                      route_user:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            username:
+                              type: string
+                              example: 'user1'
+                            nama_rute:
+                              type: string
+                              example: 'Route ke 12'
+                            jumlah_destinasi:
+                              type: integer
+                              example: 1
+                            biaya:
+                              type: integer
+                              example: 100000
   /admin/auth/token:
     get:
       tags:
@@ -415,6 +503,7 @@ paths:
                   message:
                     type: string
                     example: 'Token tidak ditemukan'
+
   /mobile/auth/logout:
     delete:
       tags:
