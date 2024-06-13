@@ -80,6 +80,15 @@ func (r *redisClient) DeleteChatHistory(key string) error {
 func (r *redisClient) GetRecommendedDestinationsIds(key string) (*[]string, error) {
 	ctx := context.Background()
 
+	flag, err := r.client.Exists(ctx, key).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	if flag == 0 {
+		return nil, redis.Nil
+	}
+
 	history, err := r.client.LRange(ctx, key, 0, -1).Result()
 	if err != nil {
 		return nil, err
@@ -92,6 +101,11 @@ func (r *redisClient) SetRecommendedDestinationsIds(key string, values []string)
 	ctx := context.Background()
 
 	err := r.client.RPush(ctx, key, values).Err()
+	if err != nil {
+		return err
+	}
+
+	err = r.client.Expire(ctx, key, 1*time.Hour).Err()
 	if err != nil {
 		return err
 	}

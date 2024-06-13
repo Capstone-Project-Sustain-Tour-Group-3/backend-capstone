@@ -1,8 +1,9 @@
 package openai
 
 import (
-	"capstone/helpers"
 	"context"
+
+	"capstone/helpers"
 
 	oai "github.com/sashabaranov/go-openai"
 )
@@ -36,9 +37,9 @@ func (o *openaiClient) GetRecommendation(prompt string) (string, error) {
 					Content: prompt,
 				},
 			},
+			Temperature: 0,
 		},
 	)
-
 	if err != nil {
 		return "", err
 	}
