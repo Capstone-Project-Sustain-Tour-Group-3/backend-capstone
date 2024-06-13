@@ -14,6 +14,8 @@ type RedisClient interface {
 	UpdateChatHistory(key string, value string) error
 	GetChatHistory(key string) (*[]string, error)
 	DeleteChatHistory(key string) error
+	SetRecommendedDestinationsIds(key string, values []string) error
+	GetRecommendedDestinationsIds(key string) (*[]string, error)
 }
 
 type redisClient struct {
@@ -38,7 +40,7 @@ func (r *redisClient) UpdateChatHistory(key string, value string) error {
 		return err
 	}
 
-	err = r.client.Expire(ctx, key, 1*time.Hour).Err()
+	err = r.client.Expire(ctx, key, 6*time.Hour).Err()
 	if err != nil {
 		return err
 	}
@@ -70,6 +72,42 @@ func (r *redisClient) DeleteChatHistory(key string) error {
 		return &errorHandlers.InternalServerError{
 			Message: "failed to delete chat history",
 		}
+	}
+
+	return nil
+}
+
+func (r *redisClient) GetRecommendedDestinationsIds(key string) (*[]string, error) {
+	ctx := context.Background()
+
+	flag, err := r.client.Exists(ctx, key).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	if flag == 0 {
+		return nil, redis.Nil
+	}
+
+	history, err := r.client.LRange(ctx, key, 0, -1).Result()
+	if err != nil {
+		return nil, err
+	}
+
+	return &history, nil
+}
+
+func (r *redisClient) SetRecommendedDestinationsIds(key string, values []string) error {
+	ctx := context.Background()
+
+	err := r.client.RPush(ctx, key, values).Err()
+	if err != nil {
+		return err
+	}
+
+	err = r.client.Expire(ctx, key, 1*time.Hour).Err()
+	if err != nil {
+		return err
 	}
 
 	return nil
