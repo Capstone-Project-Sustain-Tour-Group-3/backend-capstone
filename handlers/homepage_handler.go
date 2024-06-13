@@ -1,12 +1,13 @@
 package handlers
 
 import (
+	"net/http"
+	"strings"
+
 	"capstone/dto"
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/usecases"
-	"net/http"
-	"strings"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -41,9 +42,25 @@ func (h *homePageHandler) GetHomepageData(ctx echo.Context) error {
 
 	req := dto.ToHomepageRequest(cityName)
 
-	data, err := h.usecase.GetHomepageData(req, *uid)
+	nearbyDestinations, err := h.usecase.GetNearbyDestinations(req)
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
+	}
+
+	popularDestinationMedias, err := h.usecase.GetPopularDestinationMeadias()
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	recommendDestinations, err := h.usecase.GetRecommendations(*uid)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	data := &dto.HomepageResponse{
+		RecommendDestinations:    recommendDestinations,
+		NearbyDestinations:       nearbyDestinations,
+		PopularDestinationMedias: popularDestinationMedias,
 	}
 
 	res := helpers.Response(dto.ResponseParams{

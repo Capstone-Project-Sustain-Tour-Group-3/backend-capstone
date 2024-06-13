@@ -15,12 +15,13 @@ import (
 
 type IDestinationRepository interface {
 	FindById(id uuid.UUID) (*entities.Destination, error)
+	FindByManyIds(ids []string) (*[]entities.Destination, error)
 	FindAll(page, limit int, searchQuery, sortQuery, filterQuery string) (string, *int64, []entities.Destination, error)
 	FindByCategoryId(ids uuid.UUID) ([]entities.Destination, error)
 	FindDestinationByCityId(id string) ([]entities.Destination, error)
-	FindByProvinceName(name string) (*[]entities.Destination, error)
+	FindByProvinceName(name string, limit int) (*[]entities.Destination, error)
 	FindPopularDestinationVideos() (*[]entities.Destination, error)
-	FindBySubquery(subquery *gorm.DB) (*[]entities.Destination, error)
+	FindBySubqueryRoute(subquery *gorm.DB, isVisited bool, provinceIds []string, categoryIds []uuid.UUID) (*[]entities.Destination, error)
 	Create(destination *entities.Destination, tx *gorm.DB) error
 	Update(destination *entities.Destination) error
 	Delete(destination *entities.Destination) error
@@ -176,7 +177,7 @@ func (r *DestinationRepository) FindDestinationByCityId(id string) ([]entities.D
 	return destinations, nil
 }
 
-func (r *DestinationRepository) FindByProvinceName(name string) (*[]entities.Destination, error) {
+func (r *DestinationRepository) FindByProvinceName(name string, limit int) (*[]entities.Destination, error) {
 	destinations := new([]entities.Destination)
 
 	if err := r.db.Clauses(clause.OrderBy{Expression: clause.Expr{SQL: "RAND()"}}).
@@ -187,6 +188,7 @@ func (r *DestinationRepository) FindByProvinceName(name string) (*[]entities.Des
 		Joins("JOIN destination_addresses ON destination_addresses.destination_id = destinations.id").
 		Joins("JOIN provinces ON provinces.id = destination_addresses.province_id").
 		Where("provinces.name LIKE ?", fmt.Sprint("%", name, "%")).
+		Limit(limit).
 		Find(destinations).Error; err != nil {
 		return nil, err
 	}
@@ -206,13 +208,34 @@ func (r *DestinationRepository) FindPopularDestinationVideos() (*[]entities.Dest
 	return destinations, nil
 }
 
-func (r *DestinationRepository) FindBySubquery(subquery *gorm.DB) (*[]entities.Destination, error) {
+func (r *DestinationRepository) FindBySubqueryRoute(subquery *gorm.DB, isVisited bool, provinceIds []string, categoryIds []uuid.UUID) (*[]entities.Destination, error) {
 	destinations := new([]entities.Destination)
 
-	if err := r.db.Preload("DestinationMedias", "type = ?", "image").
+	var db *gorm.DB = r.db.Where("destination_addresses.province_id IN ? AND category_id IN ?", provinceIds, categoryIds)
+
+	if isVisited {
+		db = db.Where("destinations.id IN (?)", subquery)
+	} else {
+		db = db.Where("destinations.id NOT IN (?)", subquery)
+	}
+
+	if err := db.
+		Joins("JOIN destination_addresses ON destination_addresses.destination_id = destinations.id").
+		Preload("DestinationMedias", "type = ?", "image").
+		Find(destinations).Error; err != nil {
+		return nil, err
+	}
+
+	return destinations, nil
+}
+
+func (r *DestinationRepository) FindByManyIds(ids []string) (*[]entities.Destination, error) {
+	destinations := new([]entities.Destination)
+
+	if err := r.db.Where("id IN ?", ids).
+		Preload("DestinationMedias", "type = ?", "image").
 		Preload("DestinationAddress").
 		Preload("DestinationAddress.Province").
-		Where(subquery).
 		Find(destinations).Error; err != nil {
 		return nil, err
 	}
