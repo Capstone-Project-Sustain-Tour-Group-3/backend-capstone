@@ -113,6 +113,7 @@ func (r *DestinationRepository) FindByCategoryId(id uuid.UUID) ([]entities.Desti
 
 	if err := r.db.Model(&entities.Destination{}).
 		Limit(5).
+		Order("RAND()").
 		Joins("JOIN categories ON categories.id = destinations.category_id").
 		Where("categories.id = ?", id).
 		Preload("DestinationMedias", "type = ?", "image").
