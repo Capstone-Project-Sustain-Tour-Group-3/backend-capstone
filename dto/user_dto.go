@@ -66,10 +66,10 @@ type UserDetailRequest struct {
 	FotoProfil   *multipart.FileHeader `form:"foto_profil"`
 	Email        string                `form:"email" validate:"required,email"`
 	NoTelepon    string                `form:"no_telepon" validate:"required,number,startswith=08,min=11,max=13"`
-	Bio          string                `form:"bio" validate:"required"`
-	JenisKelamin string                `form:"jenis_kelamin" validate:"required"`
-	Kota         string                `form:"kota" validate:"required"`
-	Provinsi     string                `form:"provinsi" validate:"required"`
+	Bio          string                `form:"bio"`
+	JenisKelamin string                `form:"jenis_kelamin"`
+	Kota         string                `form:"kota"`
+	Provinsi     string                `form:"provinsi"`
 }
 
 type ChangePasswordRequest struct {

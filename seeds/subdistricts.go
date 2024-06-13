@@ -23709,6 +23709,11 @@ func (s Seed) SeedSubdistricts() {
 			Name:   "Nanga Pinoh",
 		},
 		{
+			Id:     "950835",
+			CityId: "6106",
+			Name:   "Nanga Kantuk",
+		},
+		{
 			Id:     "611003",
 			CityId: "6110",
 			Name:   "Ella Hilir",
@@ -32964,6 +32969,26 @@ func (s Seed) SeedSubdistricts() {
 			Name:   "Jayapura Selatan",
 		},
 		{
+			Id:     "950840",
+			CityId: "9171",
+			Name:   "Distrik Ebungfa",
+		},
+		{
+			Id:     "950841",
+			CityId: "9171",
+			Name:   "Distrik Waibu",
+		},
+		{
+			Id:     "950842",
+			CityId: "9501",
+			Name:   "Palebaga",
+		},
+		{
+			Id:     "950843",
+			CityId: "9202",
+			Name:   "Distrik Manokwari",
+		},
+		{
 			Id:     "917103",
 			CityId: "9171",
 			Name:   "Abepura",
@@ -33000,7 +33025,7 @@ func (s Seed) SeedSubdistricts() {
 		},
 		{
 			Id:     "920107",
-			CityId: "9201",
+			CityId: "9206",
 			Name:   "Aimas",
 		},
 		{
@@ -33385,7 +33410,7 @@ func (s Seed) SeedSubdistricts() {
 		},
 		{
 			Id:     "920511",
-			CityId: "9205",
+			CityId: "9206",
 			Name:   "Meos Mansar",
 		},
 		{
@@ -36393,6 +36418,36 @@ func (s Seed) SeedSubdistricts() {
 			CityId: "9508",
 			Name:   "Pasir Putih",
 		},
+		{
+			Id:     "950833",
+			CityId: "6401",
+			Name:   "Pasir Belengkong",
+		},
+		{
+			Id:     "950834",
+			CityId: "7501",
+			Name:   "Telaga Jaya",
+		},
+		{
+			Id:     "950836",
+			CityId: "1375",
+			Name:   "Guguk Panjang",
+		},
+		{
+			Id:     "950837",
+			CityId: "1405",
+			Name:   "Segati",
+		},
+		{
+			Id:     "950838",
+			CityId: "1901",
+			Name:   "Sinar Baru",
+		},
+		{
+			Id:     "950839",
+			CityId: "9304",
+			Name:   "Yakapis",
+		},
 	}
 
 	for _, subdistrict := range subdistricts {
@@ -36401,14 +36456,4 @@ func (s Seed) SeedSubdistricts() {
 			log.Fatalf("failed to create subdistrict: %v", err)
 		}
 	}
-}
-
-func getRandomSubdistrict(s Seed) (*entities.Subdistrict, error) {
-	var subdistrict entities.Subdistrict
-
-	if err := s.db.Order("RAND()").Preload("City").First(&subdistrict).Error; err != nil {
-		return nil, err
-	}
-
-	return &subdistrict, nil
 }

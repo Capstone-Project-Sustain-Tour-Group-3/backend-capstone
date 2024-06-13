@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"math"
 	"net/http"
+	"strconv"
 
 	"capstone/dto"
 	"capstone/errorHandlers"
@@ -10,8 +12,6 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"math"
-	"strconv"
 )
 
 type DestinationMediaHandler struct {
@@ -34,7 +34,6 @@ func (h *DestinationMediaHandler) AllDestinationMedia(ctx echo.Context) error {
 	searchQuery := ctx.QueryParam("search")
 
 	totalPtr, destinationMedias, err := h.usecase.FindAll(page, limit, searchQuery)
-
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}

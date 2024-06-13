@@ -15,6 +15,7 @@ type IDestinationRepository interface {
 	FindById(id uuid.UUID) (*entities.Destination, error)
 	FindAll(page, limit int, searchQuery, sortQuery, filterQuery string) (string, *int64, []entities.Destination, error)
 	FindByCategoryId(ids uuid.UUID) ([]entities.Destination, error)
+	FindDestinationByCityId(id string) ([]entities.Destination, error)
 	Create(destination *entities.Destination, tx *gorm.DB) error
 	Update(destination *entities.Destination) error
 	Delete(destination *entities.Destination) error
@@ -148,4 +149,24 @@ func (r *DestinationRepository) Delete(destination *entities.Destination) error 
 		return err
 	}
 	return nil
+}
+
+func (r *DestinationRepository) FindDestinationByCityId(id string) ([]entities.Destination, error) {
+	var destinations []entities.Destination
+
+	if err := r.db.Model(&entities.Destination{}).
+		Joins("JOIN destination_addresses ON destination_addresses.destination_id = destinations.id").
+		Where("destination_addresses.city_id = ?", id).
+		Preload("DestinationMedias", "type = ?", "image").
+		Preload("DestinationAddress").
+		Preload("DestinationAddress.Province").
+		Preload("DestinationAddress.City").
+		Preload("DestinationAddress.Subdistrict").
+		Preload("Category").
+		Find(&destinations).
+		Error; err != nil {
+		return nil, err
+	}
+
+	return destinations, nil
 }

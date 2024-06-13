@@ -1196,11 +1196,11 @@ paths:
                 password:
                   type: string
                   example: '12345678'
-                foto:
+                foto_profil:
                   type: string
                   format: binary
             encoding:
-              foto:
+              foto_profil:
                 contentType: image/png, image/jpg, image/jpeg
       responses:
         '201':
@@ -1436,11 +1436,11 @@ paths:
                 password:
                   type: string
                   example: '12345678'
-                foto:
+                foto_profil:
                   type: string
                   format: binary
             encoding:
-              foto:
+              foto_profil:
                 contentType: image/png, image/jpg, image/jpeg
       responses:
         '200':
@@ -1770,7 +1770,103 @@ paths:
                   message:
                     type: string
                     example: 'Destinasi tidak ditemukan'
-
+  /mobile/destinations/cities:
+    get:
+      tags:
+        - Mobile - Destinations
+      summary: Menampilkan kota yang memiliki destinasi
+      description: API untuk mendapatkan daftar kota yang memiliki destinasi wisata.
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Berhasil menampilkan kota
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'berhasil menampilkan kota yang memiliki destinasi'
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: '3212'
+                        nama:
+                          type: string
+                          example: 'KAB. INDRAMAYU'
+  /mobile/destinations/cities/{id}:
+    get:
+      tags:
+        - Mobile - Destinations
+      summary: Menampilkan destinasi berdasarkan kota
+      description: API untuk mendapatkan daftar destinasi wisata berdasarkan kota.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Berhasil menampilkan destinasi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'berhasil menampilkan destinasi'
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: '3636246c-3dd5-4140-9822-72ce76f11124'
+                        nama_destinasi:
+                          type: string
+                          example: 'Danau Lau Kawar'
+                        nama_jalan:
+                          type: string
+                          example: 'testing'
+                        kecamatan:
+                          type: string
+                          example: 'Karangampel'
+                        kota:
+                          type: string
+                          example: 'KAB. INDRAMAYU'
+                        provinsi:
+                          type: string
+                          example: 'JAWA BARAT'
+        404:
+          description: Destinasi tidak ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Destinasi tidak ditemukan'
   /mobile/personalization:
     post:
       tags:
@@ -2688,8 +2784,6 @@ paths:
                   message:
                     type: string
                     example: Internal server error
-
-
 
 components:
   schemas:
