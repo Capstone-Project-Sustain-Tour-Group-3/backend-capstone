@@ -9,6 +9,7 @@ servers:
     description: Development Server
 tags:
   - name: Mobile - Auth
+  - name: Mobile - Homepage
   - name: Mobile - Destinations
   - name: Mobile - Profile
   - name: Mobile - Personalization
@@ -19,6 +20,81 @@ tags:
   - name: Admin - Admins
   - name: Admin - Manage Content
 paths:
+  /mobile/home:
+    get:
+      tags:
+        - Mobile - Homepage
+      summary: Mendapatkan Data pada Homepage
+      description: API untuk mendapatkan data pada homepage.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: provinsi
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/HomepageResponseSuccess'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Format token tidak valid, gunakan bearer token
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Personalisasi belum dibuat
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+              examples:
+                error destinasi sekitar:
+                  value:
+                    status: Failed
+                    message: Gagal mendapatkan destinasi sekitar
+                error destinasi populer:
+                  value:
+                    status: Failed
+                    message: Gagal mendapatkan destinasi populer
+                error personalisasi:
+                  value:
+                    status: Failed
+                    message: Gagal mendapatkan data personalisasi
+                error mendapatkan rekomendasi:
+                  value:
+                    status: Failed
+                    message: Gagal mendapatkan rekomendasi destinasi
+                error simpan rekomendasi:
+                  value:
+                    status: Failed
+                    message: Gagal menyimpan rekomendasi destinasi
+
   /mobile/auth/register:
     post:
       tags:
@@ -3016,7 +3092,97 @@ components:
                   - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
                     nama: Jawa Barat
                     url: https://picsum.photos/300/200
-
+    HomepageResponseSuccess:
+      description: OK
+      content:
+        application/json:
+          schema:
+            properties:
+              status:
+                type: string
+                example: Success
+              message:
+                type: string
+                example: Berhasil mendapatkan data pada homepage
+              data:
+                type: object
+                properties:
+                  destinasi_rekomendasi:
+                    type: array
+                    items:
+                      properties:
+                        id:
+                          type: string
+                        nama:
+                          type: string
+                        url_gambar:
+                          type: string
+                    example:
+                      - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                        nama: Kawah Ijen
+                        url_gambar: https://picsum.photos/300/200
+                      - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                        nama: Kawah Ijen
+                        url_gambar: https://picsum.photos/300/200
+                  destinasi_sekitar:
+                    type: array
+                    items:
+                      properties:
+                        id:
+                          type: string
+                        nama:
+                          type: string
+                        lokasi:
+                          type: object
+                          properties:
+                            kota:
+                              type: object
+                              properties:
+                                nama:
+                                  type: string
+                                  example: Nama Kota
+                            provinsi:
+                              type: object
+                              properties:
+                                nama:
+                                  type: string
+                                  example: Nama Provinsi
+                        url_gambar:
+                          type: string
+                    example:
+                      - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                        nama: Kawah Ijen
+                        lokasi:
+                          kota:
+                            nama: Nama Kota
+                          provinsi:
+                            nama: Nama Provinsi
+                        url_gambar: https://picsum.photos/300/200
+                      - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                        nama: Kawah Ijen
+                        lokasi:
+                          kota:
+                            nama: Nama Kota
+                          provinsi:
+                            nama: Nama Provinsi
+                        url_gambar: https://picsum.photos/300/200
+                  konten_destinasi_populer:
+                    type: array
+                    items:
+                      properties:
+                        id:
+                          type: string
+                        judul:
+                          type: string
+                        url:
+                          type: string
+                    example:
+                      - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                        nama: Kawah Ijen
+                        url: https://video.mp4
+                      - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                        nama: Kawah Ijen
+                        url: https://video.mp4
   securitySchemes:
     BearerAuth:
       type: http
