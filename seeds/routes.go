@@ -43,6 +43,7 @@ func (s Seed) SeedRoutes() {
 		uuid.MustParse("12d9132d-487f-456c-8903-583969dc6a3b"),
 		uuid.MustParse("0308d6d2-d28b-42d0-ad28-e64fd96bb2fd"),
 		uuid.MustParse("3e9009a5-8edd-421f-9c2c-0740bfde93f8"),
+		uuid.MustParse("f8fad44d-e5b1-4a3b-939e-1955bf9f7c67"),
 	}
 
 	routeDetailIds := [15]uuid.UUID{
@@ -60,6 +61,7 @@ func (s Seed) SeedRoutes() {
 		uuid.MustParse("dbfe7fcd-b57f-4a03-b448-f875b0f300b9"),
 		uuid.MustParse("9bc4a709-4806-46d1-a994-31cc5615e56c"),
 		uuid.MustParse("43025319-7917-4bd9-8a6a-bf94fbccb2f0"),
+		uuid.MustParse("f4f9cfed-0a58-4cf9-b29d-fcdf9716a126"),
 	}
 
 	for i := range [15]int{} {
