@@ -1,6 +1,8 @@
 package dto
 
 import (
+	"strings"
+
 	"capstone/entities"
 
 	"github.com/google/uuid"
@@ -56,8 +58,70 @@ type Province struct {
 }
 
 func ToHomepageRequest(cityName string) *HomepageRequest {
+	var translatedCityName string
+	switch strings.ToLower(cityName) {
+	case "north sumatra":
+		translatedCityName = "Sumatera Utara"
+	case "west sumatra":
+		translatedCityName = "Sumatera Barat"
+	case "south sumatra":
+		translatedCityName = "Sumatera Selatan"
+	case "riau islands":
+		translatedCityName = "Kepulauan Riau"
+	case "bangka belitung islands":
+		translatedCityName = "Bangka Belitung"
+	case "west java":
+		translatedCityName = "Jawa Barat"
+	case "central java":
+		translatedCityName = "Jawa Tengah"
+	case "east java":
+		translatedCityName = "Jawa Timur"
+	case "west nusa tenggara":
+		translatedCityName = "Nusa Tenggara Barat"
+	case "east nusa tenggara":
+		translatedCityName = "Nusa Tenggara Timur"
+	case "west kalimantan":
+		translatedCityName = "Kalimantan Barat"
+	case "central kalimantan":
+		translatedCityName = "Kalimantan Tengah"
+	case "north kalimantan":
+		translatedCityName = "Kalimantan Utara"
+	case "east kalimantan":
+		translatedCityName = "Kalimantan Timur"
+	case "south kalimantan":
+		translatedCityName = "Kalimantan Selatan"
+	case "south sulawesi":
+		translatedCityName = "Sulawesi Selatan"
+	case "north sulawesi":
+		translatedCityName = "Sulawesi Utara"
+	case "central sulawesi":
+		translatedCityName = "Sulawesi Tengah"
+	case "west sulawesi":
+		translatedCityName = "Sulawesi Barat"
+	case "southeast sulawesi":
+		translatedCityName = "Sulawesi Tenggara"
+	case "south east sulawesi":
+		translatedCityName = "Sulawesi Tenggara"
+	case "north maluku":
+		translatedCityName = "Maluku Utara"
+	case "west papua":
+		translatedCityName = "Papua Barat"
+	case "south papua":
+		translatedCityName = "Papua Selatan"
+	case "central papua":
+		translatedCityName = "Papua Tengah"
+	case "mountain papua":
+		translatedCityName = "Papua Pegunungan"
+	case "southwest papua":
+		translatedCityName = "Papua Barat Daya"
+	case "south west papua":
+		translatedCityName = "Papua Barat Daya"
+	default:
+		translatedCityName = cityName
+	}
+
 	return &HomepageRequest{
-		CityName: cityName,
+		CityName: translatedCityName,
 	}
 }
 
