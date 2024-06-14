@@ -143,7 +143,6 @@ func toPopularDestination(destination *entities.Destination) PopularDestination 
 			Url:   destination.DestinationMedias[0].Url,
 		},
 	}
-
 }
 
 func toRecommendDestination(destination *entities.Destination) RecommendDestination {
