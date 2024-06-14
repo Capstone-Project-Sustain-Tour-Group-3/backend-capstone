@@ -3255,23 +3255,37 @@ components:
                           provinsi:
                             nama: Nama Provinsi
                         url_gambar: https://picsum.photos/300/200
-                  konten_destinasi_populer:
+                  destinasi_populer:
                     type: array
                     items:
                       properties:
                         id:
                           type: string
-                        judul:
+                        nama:
                           type: string
-                        url:
-                          type: string
+                        konten:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            judul:
+                              type: string
+                            url:
+                              type: string
                     example:
                       - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
                         nama: Kawah Ijen
-                        url: https://video.mp4
+                        konten:
+                          id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                          judul: Kawah Ijen Keren
+                          url: https://video.mp4
                       - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
                         nama: Kawah Ijen
-                        url: https://video.mp4
+                        konten:
+                          id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                          judul: Kawah Ijen Indah
+                          url: https://video.mp4
+
   securitySchemes:
     BearerAuth:
       type: http
