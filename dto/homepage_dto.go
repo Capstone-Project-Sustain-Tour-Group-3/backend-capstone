@@ -13,7 +13,7 @@ type HomepageRequest struct {
 type HomepageResponse struct {
 	RecommendDestinations    []RecommendDestination `json:"destinasi_rekomendasi"`
 	NearbyDestinations       []NearbyDestination    `json:"destinasi_sekitar"`
-	PopularDestinationMedias []DestinationMedia     `json:"konten_destinasi_populer"`
+	PopularDestinationMedias []PopularDestination   `json:"destinasi_populer"`
 }
 
 type RecommendDestination struct {
@@ -28,6 +28,12 @@ type NearbyDestination struct {
 	Name               string    `json:"nama"`
 	DestinationAddress Address   `json:"lokasi"`
 	ImageUrl           *string   `json:"url_gambar"`
+}
+
+type PopularDestination struct {
+	Id      uuid.UUID        `json:"id"`
+	Name    string           `json:"nama"`
+	Content DestinationMedia `json:"konten"`
 }
 
 type DestinationMedia struct {
@@ -81,9 +87,9 @@ func ToNearbyDestinations(nearbyDestination *[]entities.Destination) []NearbyDes
 	return nearbyDestinationResponse
 }
 
-func ToPopularDestinationMedias(popularDestinations *[]entities.Destination) []DestinationMedia {
+func ToPopularDestinations(popularDestinations *[]entities.Destination) []PopularDestination {
 	const limit = 5
-	var popularDestinationMediaResponse []DestinationMedia
+	var popularDestinationResponse []PopularDestination
 
 	ctr := 0
 	for _, destination := range *popularDestinations {
@@ -95,14 +101,14 @@ func ToPopularDestinationMedias(popularDestinations *[]entities.Destination) []D
 			continue
 		}
 
-		popularDestinationMediaResponse = append(
-			popularDestinationMediaResponse,
-			toPopularDestinationMedia(&destination.DestinationMedias[0]),
+		popularDestinationResponse = append(
+			popularDestinationResponse,
+			toPopularDestination(&destination),
 		)
 		ctr += 1
 	}
 
-	return popularDestinationMediaResponse
+	return popularDestinationResponse
 }
 
 func toNearbyDestination(destination *entities.Destination) NearbyDestination {
@@ -127,12 +133,17 @@ func toNearbyDestination(destination *entities.Destination) NearbyDestination {
 	return res
 }
 
-func toPopularDestinationMedia(destinationMedia *entities.DestinationMedia) DestinationMedia {
-	return DestinationMedia{
-		Id:    destinationMedia.Id,
-		Title: destinationMedia.Title,
-		Url:   destinationMedia.Url,
+func toPopularDestination(destination *entities.Destination) PopularDestination {
+	return PopularDestination{
+		Id:   destination.Id,
+		Name: destination.Name,
+		Content: DestinationMedia{
+			Id:    destination.DestinationMedias[0].Id,
+			Title: destination.DestinationMedias[0].Title,
+			Url:   destination.DestinationMedias[0].Url,
+		},
 	}
+
 }
 
 func toRecommendDestination(destination *entities.Destination) RecommendDestination {

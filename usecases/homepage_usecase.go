@@ -21,7 +21,7 @@ import (
 
 type HomepageUsecase interface {
 	GetNearbyDestinations(req *dto.HomepageRequest) ([]dto.NearbyDestination, error)
-	GetPopularDestinationMeadias() ([]dto.DestinationMedia, error)
+	GetPopularDestinationMeadias() ([]dto.PopularDestination, error)
 	GetRecommendations(uid uuid.UUID) ([]dto.RecommendDestination, error)
 }
 
@@ -60,13 +60,13 @@ func (uc *homepageUsecase) GetNearbyDestinations(req *dto.HomepageRequest) ([]dt
 	return dto.ToNearbyDestinations(nearbyDestination), nil
 }
 
-func (uc *homepageUsecase) GetPopularDestinationMeadias() ([]dto.DestinationMedia, error) {
-	popularDestinationsMedia, err := uc.destinationRepo.FindPopularDestinationVideos()
+func (uc *homepageUsecase) GetPopularDestinationMeadias() ([]dto.PopularDestination, error) {
+	popularDestinations, err := uc.destinationRepo.FindPopularDestinationVideos()
 	if err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: "Gagal mendapatkan destinasi populer"}
 	}
 
-	return dto.ToPopularDestinationMedias(popularDestinationsMedia), nil
+	return dto.ToPopularDestinations(popularDestinations), nil
 }
 
 func (uc *homepageUsecase) GetRecommendations(uid uuid.UUID) ([]dto.RecommendDestination, error) {
