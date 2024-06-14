@@ -97,15 +97,13 @@ func (s Seed) SeedRoutes() {
 	}
 
 	for _, route := range routes {
-		if err = s.db.Where(entities.Route{Id: route.Id}).
-			FirstOrCreate(&route).Error; err != nil {
+		if err = s.db.Save(&route).Error; err != nil {
 			log.Fatalf("failed to create route: %v", err)
 		}
 	}
 
 	for _, routeDetail := range routeDetails {
-		if err = s.db.Where(entities.RouteDetail{Id: routeDetail.Id}).
-			FirstOrCreate(&routeDetail).Error; err != nil {
+		if err = s.db.Save(&routeDetail).Error; err != nil {
 			log.Fatalf("failed to create route detail: %v", err)
 		}
 	}
