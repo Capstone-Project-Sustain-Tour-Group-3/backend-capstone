@@ -4,6 +4,7 @@ import (
 	"capstone/config"
 	"capstone/externals/cloudinary"
 	"capstone/handlers"
+	"capstone/helpers"
 	"capstone/middlewares"
 	"capstone/repositories"
 	"capstone/usecases"
@@ -14,7 +15,10 @@ import (
 func AuthUserRouter(r *echo.Group) {
 	userRepo := repositories.NewAuthRepository(config.DB)
 	cacheRepo := repositories.NewCacheRepository()
-	usecase := usecases.NewAuthUsecase(userRepo, cacheRepo)
+	emailSenderRepo := helpers.NewEmailSender()
+	passwordHelper := helpers.NewPasswordHelper()
+	tokenHelper := helpers.NewTokenHelper()
+	usecase := usecases.NewAuthUsecase(userRepo, &cacheRepo, emailSenderRepo, passwordHelper, tokenHelper)
 	handler := handlers.NewAuthHandler(usecase)
 
 	r.POST("/register", handler.Register)
@@ -33,8 +37,9 @@ func AuthUserRouter(r *echo.Group) {
 func AuthAdminRouter(r *echo.Group) {
 	repository := repositories.NewAdminRepository(config.DB)
 	cloudinaryClient := cloudinary.NewCloudinaryClient(config.ENV.CLOUDINARY_URL)
-
-	usecase := usecases.NewAdminUsecase(repository, cloudinaryClient)
+	passwordHelper := helpers.NewPasswordHelper()
+	tokenHelper := helpers.NewTokenHelper()
+	usecase := usecases.NewAdminUsecase(repository, cloudinaryClient, passwordHelper, tokenHelper)
 
 	handler := handlers.NewAdminHandler(usecase)
 

@@ -24,12 +24,27 @@ type AuthUsecase interface {
 }
 
 type authUsecase struct {
-	userRepo  repositories.AuthRepository
-	cacheRepo *repositories.CacheRepository
+	userRepo       repositories.AuthRepository
+	cacheRepo      repositories.CacheRepository
+	emailSender    helpers.EmailSender
+	passwordHelper helpers.PasswordHelper
+	tokenHelper    helpers.TokenHelper
 }
 
-func NewAuthUsecase(userRepo repositories.AuthRepository, cacheRepo *repositories.CacheRepository) *authUsecase {
-	return &authUsecase{userRepo, cacheRepo}
+func NewAuthUsecase(
+	userRepo repositories.AuthRepository,
+	cacheRepo repositories.CacheRepository,
+	emailSender helpers.EmailSender,
+	passwordHelper helpers.PasswordHelper,
+	tokenHelper helpers.TokenHelper,
+) *authUsecase {
+	return &authUsecase{
+		userRepo:       userRepo,
+		cacheRepo:      cacheRepo,
+		emailSender:    emailSender,
+		passwordHelper: passwordHelper,
+		tokenHelper:    tokenHelper,
+	}
 }
 
 func (uc *authUsecase) Register(request *dto.RegisterRequest) (*dto.RegisterResponse, error) {
@@ -46,7 +61,7 @@ func (uc *authUsecase) Register(request *dto.RegisterRequest) (*dto.RegisterResp
 		return nil, &errorHandlers.BadRequestError{Message: "username tidak boleh mengandung spasi"}
 	}
 
-	password, err := helpers.HashPassword(request.Password)
+	password, err := uc.passwordHelper.HashPassword(request.Password)
 	if err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: "Gagal hashing password"}
 	}
@@ -67,8 +82,7 @@ func (uc *authUsecase) Register(request *dto.RegisterRequest) (*dto.RegisterResp
 	if err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: "Gagal untuk mendaftar"}
 	}
-
-	if err = helpers.SendOTP(user.Email, user.Fullname, otp); err != nil {
+	if err = uc.emailSender.SendOTP(user.Email, user.Fullname, otp); err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: "Gagal mengirimkan email"}
 	}
 	response := dto.RegisterResponse{ReferenceId: ref}
@@ -85,7 +99,7 @@ func (uc *authUsecase) ResendOTP(email string) (*dto.RegisterResponse, error) {
 	uc.cacheRepo.Set(referenceId, otp)
 	uc.cacheRepo.Set(referenceId+"_email", user.Email)
 
-	if err := helpers.SendOTP(user.Email, user.Fullname, otp); err != nil {
+	if err := uc.emailSender.SendOTP(user.Email, user.Fullname, otp); err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: "Gagal mengirimkan email"}
 	}
 	response := dto.RegisterResponse{ReferenceId: referenceId}
@@ -113,7 +127,7 @@ func (uc *authUsecase) VerifyEmail(request *dto.VerifyEmailRequest) error {
 	user.EmailVerifiedAt = &now
 	err := uc.userRepo.Update(user)
 	if err != nil {
-		return &errorHandlers.InternalServerError{Message: "Akun tidak ditemukan"}
+		return &errorHandlers.InternalServerError{Message: "Gagal memperbarui data user"}
 	}
 	return nil
 }
@@ -123,15 +137,18 @@ func (uc *authUsecase) Login(request *dto.LoginRequest) (*dto.LoginResponse, err
 	if user == nil {
 		return nil, &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
 	}
-	if err := helpers.VerifyPassword(user.Password, request.Password); err != nil {
+	if user.EmailVerifiedAt == nil {
+		return nil, &errorHandlers.BadRequestError{Message: "Email belum terverifikasi"}
+	}
+	if err := uc.passwordHelper.VerifyPassword(user.Password, request.Password); err != nil {
 		return nil, &errorHandlers.BadRequestError{Message: "Email atau password salah"}
 	}
 
-	accessToken, err := helpers.GenerateAccessToken(user)
+	accessToken, err := uc.tokenHelper.GenerateAccessToken(user)
 	if err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
 	}
-	refreshToken, err := helpers.GenerateRefreshToken(user)
+	refreshToken, err := uc.tokenHelper.GenerateRefreshToken(user)
 	if err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
 	}
@@ -157,7 +174,7 @@ func (uc *authUsecase) ForgotPassword(request *dto.ForgotPasswordRequest) error 
 	if request.Password != request.KonfirmasiPassword {
 		return &errorHandlers.BadRequestError{Message: "Password tidak cocok"}
 	}
-	password, err := helpers.HashPassword(request.Password)
+	password, err := uc.passwordHelper.HashPassword(request.Password)
 	if err != nil {
 		return &errorHandlers.InternalServerError{Message: "Gagal hashing password"}
 	}
@@ -177,13 +194,10 @@ func (uc *authUsecase) Logout(token string) error {
 	if token == "" {
 		return &errorHandlers.BadRequestError{Message: "Token tidak boleh kosong"}
 	}
-	if user.RefreshToken != token {
-		return &errorHandlers.UnAuthorizedError{Message: "Token tidak valid"}
-	}
 	user.RefreshToken = ""
 	err = uc.userRepo.Update(user)
 	if err != nil {
-		return &errorHandlers.InternalServerError{Message: err.Error()}
+		return &errorHandlers.InternalServerError{Message: "Gagal logout"}
 	}
 	return nil
 }
@@ -196,10 +210,8 @@ func (uc *authUsecase) GetNewAccessToken(refreshToken string) (*dto.NewToken, er
 	if refreshToken == "" {
 		return nil, &errorHandlers.BadRequestError{Message: "Token tidak boleh kosong"}
 	}
-	if user.RefreshToken != refreshToken {
-		return nil, &errorHandlers.UnAuthorizedError{Message: "Token tidak valid"}
-	}
-	accessToken, err := helpers.GenerateAccessToken(user)
+
+	accessToken, err := uc.tokenHelper.GenerateAccessToken(user)
 	if err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
 	}

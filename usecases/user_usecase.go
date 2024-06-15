@@ -24,10 +24,15 @@ type UserUsecase interface {
 type userUsecase struct {
 	repository       repositories.UserRepository
 	cloudinaryClient cloudinary.ICloudinaryClient
+	passwordHelper   helpers.PasswordHelper
 }
 
-func NewUserUsecase(repository repositories.UserRepository, client cloudinary.ICloudinaryClient) *userUsecase {
-	return &userUsecase{repository: repository, cloudinaryClient: client}
+func NewUserUsecase(
+	repository repositories.UserRepository,
+	client cloudinary.ICloudinaryClient,
+	passwordHelper helpers.PasswordHelper,
+) *userUsecase {
+	return &userUsecase{repository: repository, cloudinaryClient: client, passwordHelper: passwordHelper}
 }
 
 func (uc *userUsecase) FindById(id uuid.UUID) (*entities.User, error) {
@@ -57,7 +62,7 @@ func (uc *userUsecase) Create(request *dto.UserRequest) error {
 		return &errorHandlers.ConflictError{Message: "Email sudah digunakan"}
 	}
 
-	password, err := helpers.HashPassword(request.Password)
+	password, err := uc.passwordHelper.HashPassword(request.Password)
 	if err != nil {
 		return &errorHandlers.InternalServerError{Message: "Gagal hashing password"}
 	}
@@ -105,7 +110,7 @@ func (uc *userUsecase) Update(id uuid.UUID, request *dto.UserRequest) error {
 		}
 	}
 
-	password, err := helpers.HashPassword(request.Password)
+	password, err := uc.passwordHelper.HashPassword(request.Password)
 	if err != nil {
 		return &errorHandlers.InternalServerError{Message: "Gagal hashing password"}
 	}

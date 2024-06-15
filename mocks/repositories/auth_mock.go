@@ -1,4 +1,4 @@
-package mocks
+package repositories
 
 import (
 	"capstone/entities"
@@ -6,11 +6,11 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type MockUserRepository struct {
+type MockAuthRepository struct {
 	mock.Mock
 }
 
-func (m *MockUserRepository) FindByEmail(email string) (*entities.User, error) {
+func (m *MockAuthRepository) FindByEmail(email string) (*entities.User, error) {
 	args := m.Called(email)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -18,7 +18,7 @@ func (m *MockUserRepository) FindByEmail(email string) (*entities.User, error) {
 	return args.Get(0).(*entities.User), nil
 }
 
-func (m *MockUserRepository) GetUserByRefreshToken(refreshToken string) (*entities.User, error) {
+func (m *MockAuthRepository) GetUserByRefreshToken(refreshToken string) (*entities.User, error) {
 	args := m.Called(refreshToken)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
@@ -26,7 +26,7 @@ func (m *MockUserRepository) GetUserByRefreshToken(refreshToken string) (*entiti
 	return args.Get(0).(*entities.User), nil
 }
 
-func (m *MockUserRepository) Create(user *entities.User) error {
+func (m *MockAuthRepository) Create(user *entities.User) error {
 	args := m.Called(user)
 	if args.Error(0) == nil {
 		return nil
@@ -34,7 +34,7 @@ func (m *MockUserRepository) Create(user *entities.User) error {
 	return args.Error(0)
 }
 
-func (m *MockUserRepository) Update(user *entities.User) error {
+func (m *MockAuthRepository) Update(user *entities.User) error {
 	args := m.Called(user)
 	if args.Error(0) == nil {
 		return nil
@@ -42,7 +42,7 @@ func (m *MockUserRepository) Update(user *entities.User) error {
 	return args.Error(0)
 }
 
-func (m *MockUserRepository) FindByUsername(name string) (*entities.User, error) {
+func (m *MockAuthRepository) FindByUsername(name string) (*entities.User, error) {
 	args := m.Called(name)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)

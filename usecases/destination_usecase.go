@@ -77,12 +77,12 @@ func (uc *DestinationUsecase) SearchDestinations(page, limit int, searchQuery, s
 func (uc *DestinationUsecase) DetailDestination(id uuid.UUID) (*dto.DetailDestinationResponse, error) {
 	destination, err := uc.destinationRepo.FindById(id)
 	if err != nil {
-		return nil, err
+		return nil, &errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
 	}
 
 	similarDestinations, err := uc.destinationRepo.FindByCategoryId(destination.CategoryId)
 	if err != nil {
-		return nil, err
+		return nil, &errorHandlers.InternalServerError{Message: "Gagal mendapatkan destinasi serupa"}
 	}
 
 	response := dto.ToDetailDestinationResponse(destination, &similarDestinations)
@@ -259,7 +259,7 @@ func (uc *DestinationUsecase) GetAllDestinations(page, limit int, searchQuery st
 func (uc *DestinationUsecase) GetDestinationById(id uuid.UUID) (*dto.GetByIdDestinationResponse, error) {
 	destination, err := uc.destinationRepo.FindById(id)
 	if err != nil {
-		return nil, err
+		return nil, &errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
 	}
 
 	response := dto.ToGetByIdDestinationResponse(destination)
@@ -270,7 +270,7 @@ func (uc *DestinationUsecase) GetDestinationById(id uuid.UUID) (*dto.GetByIdDest
 func (uc *DestinationUsecase) DeleteDestination(id uuid.UUID) error {
 	destination, err := uc.destinationRepo.FindById(id)
 	if err != nil {
-		return err
+		return &errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
 	}
 
 	if err = uc.destinationRepo.Delete(destination); err != nil {
