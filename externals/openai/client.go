@@ -37,7 +37,6 @@ func (o *openaiClient) GetRecommendation(prompt string) (string, error) {
 					Content: prompt,
 				},
 			},
-			Temperature: 0,
 		},
 	)
 	if err != nil {
