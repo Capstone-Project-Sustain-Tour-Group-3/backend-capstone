@@ -2,6 +2,7 @@ package mocks
 
 import (
 	"capstone/entities"
+
 	"github.com/stretchr/testify/mock"
 )
 
