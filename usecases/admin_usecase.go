@@ -27,12 +27,21 @@ type AdminUsecase interface {
 type adminUsecase struct {
 	repository       repositories.AdminRepository
 	cloudinaryClient cloudinary.ICloudinaryClient
+	passwordHelper   helpers.PasswordHelper
+	tokenHelper      helpers.TokenHelper
 }
 
-func NewAdminUsecase(repository repositories.AdminRepository, cloudinaryClient cloudinary.ICloudinaryClient) *adminUsecase {
+func NewAdminUsecase(
+	repository repositories.AdminRepository,
+	cloudinaryClient cloudinary.ICloudinaryClient,
+	passwordHelper helpers.PasswordHelper,
+	tokenHelper helpers.TokenHelper,
+) *adminUsecase {
 	return &adminUsecase{
 		repository:       repository,
 		cloudinaryClient: cloudinaryClient,
+		passwordHelper:   passwordHelper,
+		tokenHelper:      tokenHelper,
 	}
 }
 
@@ -41,15 +50,15 @@ func (uc *adminUsecase) Login(request *dto.LoginAdminRequest) (*dto.LoginAdminRe
 	if err != nil {
 		return nil, &errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
 	}
-	if err = helpers.VerifyPassword(admin.Password, request.Password); err != nil {
+	if err = uc.passwordHelper.VerifyPassword(admin.Password, request.Password); err != nil {
 		return nil, &errorHandlers.ConflictError{Message: "Email atau password salah"}
 	}
 
-	accessToken, err := helpers.GenerateAccessToken(admin)
+	accessToken, err := uc.tokenHelper.GenerateAccessToken(admin)
 	if err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
 	}
-	refreshToken, err := helpers.GenerateRefreshToken(admin)
+	refreshToken, err := uc.tokenHelper.GenerateRefreshToken(admin)
 	if err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
 	}
@@ -88,7 +97,7 @@ func (uc *adminUsecase) GetNewAccessToken(refreshToken string) (*dto.NewToken, e
 	if admin.RefreshToken != refreshToken {
 		return nil, &errorHandlers.UnAuthorizedError{Message: "Token tidak valid"}
 	}
-	accessToken, err := helpers.GenerateAccessToken(admin)
+	accessToken, err := uc.tokenHelper.GenerateAccessToken(admin)
 	if err != nil {
 		return nil, &errorHandlers.InternalServerError{Message: err.Error()}
 	}
@@ -136,7 +145,7 @@ func (uc *adminUsecase) CreateAdmin(request *dto.AdminRequest) error {
 		profileImageURL = &url
 	}
 
-	hashedPassword, err := helpers.HashPassword(request.Password)
+	hashedPassword, err := uc.passwordHelper.HashPassword(request.Password)
 	if err != nil {
 		return &errorHandlers.InternalServerError{Message: "Gagal menambah data admin"}
 	}
@@ -172,7 +181,7 @@ func (uc *adminUsecase) UpdateAdmin(request *dto.UpdateAdminRequest, id uuid.UUI
 	if request.Password == "" {
 		request.Password = admin.Password
 	} else {
-		hashedPassword, hashErr := helpers.HashPassword(request.Password)
+		hashedPassword, hashErr := uc.passwordHelper.HashPassword(request.Password)
 		if hashErr != nil {
 			return &errorHandlers.InternalServerError{Message: "Gagal mengubah data admin"}
 		}

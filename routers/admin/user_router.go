@@ -4,6 +4,7 @@ import (
 	"capstone/config"
 	"capstone/externals/cloudinary"
 	"capstone/handlers"
+	"capstone/helpers"
 	"capstone/middlewares"
 	"capstone/repositories"
 	"capstone/usecases"
@@ -17,7 +18,8 @@ func UserRouter(r *echo.Group) {
 
 	repository := repositories.NewUserRepository(config.DB)
 	cloudinaryClient := cloudinary.NewCloudinaryClient(config.ENV.CLOUDINARY_URL)
-	usecase := usecases.NewUserUsecase(repository, cloudinaryClient)
+	passwordHelper := helpers.NewPasswordHelper()
+	usecase := usecases.NewUserUsecase(repository, cloudinaryClient, passwordHelper)
 	handler := handlers.NewUserHandler(usecase)
 	r.Use(middlewares.JWTMiddleware)
 	r.Use(middlewares.RoleMiddleware("admin"))

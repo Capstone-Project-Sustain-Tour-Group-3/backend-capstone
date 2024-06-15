@@ -22,10 +22,15 @@ type ProfileUsecase interface {
 type profileUsecase struct {
 	userRepo         repositories.UserRepository
 	cloudinaryClient cloudinary.ICloudinaryClient
+	passwordHelper   helpers.PasswordHelper
 }
 
-func NewProfileUsecase(repository repositories.UserRepository, client cloudinary.ICloudinaryClient) *profileUsecase {
-	return &profileUsecase{userRepo: repository, cloudinaryClient: client}
+func NewProfileUsecase(
+	repository repositories.UserRepository,
+	client cloudinary.ICloudinaryClient,
+	passwordHelper helpers.PasswordHelper,
+) *profileUsecase {
+	return &profileUsecase{userRepo: repository, cloudinaryClient: client, passwordHelper: passwordHelper}
 }
 
 func (uc *profileUsecase) GetDetailUser(id uuid.UUID) (*entities.User, error) {
@@ -108,7 +113,7 @@ func (uc *profileUsecase) ChangePassword(request *dto.ChangePasswordRequest, id 
 		return &errorHandlers.ConflictError{Message: "User tidak ditemukan"}
 	}
 
-	if err := helpers.VerifyPassword(user.Password, request.PasswordLama); err != nil {
+	if err := uc.passwordHelper.VerifyPassword(user.Password, request.PasswordLama); err != nil {
 		return &errorHandlers.ConflictError{Message: "Password lama tidak valid"}
 	}
 
@@ -116,7 +121,7 @@ func (uc *profileUsecase) ChangePassword(request *dto.ChangePasswordRequest, id 
 		return &errorHandlers.BadRequestError{Message: "Password dan konfirmasi password tidak cocok"}
 	}
 
-	hashPassword, err := helpers.HashPassword(request.PasswordBaru)
+	hashPassword, err := uc.passwordHelper.HashPassword(request.PasswordBaru)
 	if err != nil {
 		return &errorHandlers.InternalServerError{Message: "Gagal hashing password"}
 	}
