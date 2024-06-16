@@ -40,8 +40,7 @@ func AuthAdminRouter(r *echo.Group) {
 	passwordHelper := helpers.NewPasswordHelper()
 	tokenHelper := helpers.NewTokenHelper()
 	usecase := usecases.NewAdminUsecase(repository, cloudinaryClient, passwordHelper, tokenHelper)
-
-	handler := handlers.NewAdminHandler(usecase)
+	handler := handlers.NewAdminHandler(usecase, nil)
 
 	r.POST("/login", handler.Login)
 	r.DELETE("/logout", handler.Logout)

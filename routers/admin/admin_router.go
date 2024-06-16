@@ -22,8 +22,8 @@ func ManageAdminRouter(r *echo.Group) {
 	cloudinaryClient := cloudinary.NewCloudinaryClient(config.ENV.CLOUDINARY_URL)
 
 	usecase := usecases.NewAdminUsecase(repository, cloudinaryClient, passwordHelper, tokenHelper)
-
-	handler := handlers.NewAdminHandler(usecase)
+	iVal := helpers.NewValidationHelper()
+	handler := handlers.NewAdminHandler(usecase, iVal)
 
 	r.GET("", handler.GetAllAdmins)
 	r.POST("", handler.CreateAdmin)
