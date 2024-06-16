@@ -17,6 +17,7 @@ type ProfileUsecase interface {
 	GetDetailUser(id uuid.UUID) (*entities.User, error)
 	InsertUserDetail(request *dto.UserDetailRequest, id uuid.UUID) error
 	ChangePassword(request *dto.ChangePasswordRequest, id uuid.UUID) error
+	HandleProfilePictureUpdate(request *dto.UserDetailRequest, user *entities.User) error
 }
 
 type profileUsecase struct {
@@ -64,7 +65,7 @@ func (uc *profileUsecase) InsertUserDetail(request *dto.UserDetailRequest, id uu
 	user.Province = request.Provinsi
 	user.Email = request.Email
 
-	if err := uc.handleProfilePictureUpdate(request, user); err != nil {
+	if err := uc.HandleProfilePictureUpdate(request, user); err != nil {
 		return err
 	}
 
@@ -74,7 +75,7 @@ func (uc *profileUsecase) InsertUserDetail(request *dto.UserDetailRequest, id uu
 	return nil
 }
 
-func (uc *profileUsecase) handleProfilePictureUpdate(request *dto.UserDetailRequest, user *entities.User) error {
+func (uc *profileUsecase) HandleProfilePictureUpdate(request *dto.UserDetailRequest, user *entities.User) error {
 	if request.FotoProfil == nil {
 		return nil
 	}
