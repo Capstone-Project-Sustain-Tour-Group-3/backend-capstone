@@ -13,7 +13,6 @@ import (
 )
 
 func UserRouter(r *echo.Group) {
-	r.Use(middlewares.JWTMiddleware)
 
 	repository := repositories.NewUserRepository(config.DB)
 	cloudinaryClient := cloudinary.NewCloudinaryClient(config.ENV.CLOUDINARY_URL)
