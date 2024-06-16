@@ -23,14 +23,16 @@ type profileUsecase struct {
 	userRepo         repositories.UserRepository
 	cloudinaryClient cloudinary.ICloudinaryClient
 	passwordHelper   helpers.PasswordHelper
+	iValidation      helpers.IValidationHelper
 }
 
 func NewProfileUsecase(
 	repository repositories.UserRepository,
 	client cloudinary.ICloudinaryClient,
 	passwordHelper helpers.PasswordHelper,
+	iValidation helpers.IValidationHelper,
 ) *profileUsecase {
-	return &profileUsecase{userRepo: repository, cloudinaryClient: client, passwordHelper: passwordHelper}
+	return &profileUsecase{userRepo: repository, cloudinaryClient: client, passwordHelper: passwordHelper, iValidation: iValidation}
 }
 
 func (uc *profileUsecase) GetDetailUser(id uuid.UUID) (*entities.User, error) {
@@ -77,10 +79,10 @@ func (uc *profileUsecase) handleProfilePictureUpdate(request *dto.UserDetailRequ
 		return nil
 	}
 
-	if !helpers.IsValidImageType(request.FotoProfil) {
+	if !uc.iValidation.IsValidImageType(request.FotoProfil) {
 		return &errorHandlers.BadRequestError{Message: "Tipe foto profil tidak valid"}
 	}
-	if !helpers.IsValidImageSize(request.FotoProfil) {
+	if !uc.iValidation.IsValidImageSize(request.FotoProfil) {
 		return &errorHandlers.BadRequestError{Message: "Ukuran foto profil tidak valid"}
 	}
 
