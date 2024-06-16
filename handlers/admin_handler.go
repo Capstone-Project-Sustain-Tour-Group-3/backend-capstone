@@ -17,11 +17,12 @@ import (
 )
 
 type adminHandler struct {
-	usecase usecases.AdminUsecase
+	usecase         usecases.AdminUsecase
+	imageValidation helpers.IValidationHelper
 }
 
-func NewAdminHandler(uc usecases.AdminUsecase) *adminHandler {
-	return &adminHandler{uc}
+func NewAdminHandler(uc usecases.AdminUsecase, iVal helpers.IValidationHelper) *adminHandler {
+	return &adminHandler{uc, iVal}
 }
 
 func (h *adminHandler) Login(ctx echo.Context) error {
@@ -183,7 +184,7 @@ func (h *adminHandler) CreateAdmin(ctx echo.Context) error {
 	}
 
 	if fileHeader != nil {
-		if !helpers.IsValidImageType(fileHeader) || !helpers.IsValidImageSize(fileHeader) {
+		if !h.imageValidation.IsValidImageType(fileHeader) || !h.imageValidation.IsValidImageSize(fileHeader) {
 			return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "File harus berupa gambar dan kurang dari 2 MB"})
 		}
 
@@ -239,7 +240,7 @@ func (h *adminHandler) UpdateAdmin(ctx echo.Context) error {
 	}
 
 	if fileHeader != nil {
-		if !helpers.IsValidImageType(fileHeader) || !helpers.IsValidImageSize(fileHeader) {
+		if !h.imageValidation.IsValidImageType(fileHeader) || !h.imageValidation.IsValidImageSize(fileHeader) {
 			return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "File harus berupa gambar dan kurang dari 2 MB"})
 		}
 

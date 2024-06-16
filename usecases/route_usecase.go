@@ -34,7 +34,7 @@ func (uc *routeUsecase) FindAll(page, limit int, searchQuery string) (*[]entitie
 func (uc *routeUsecase) FindById(id uuid.UUID) (*entities.Route, error) {
 	route, err := uc.routeRepo.FindById(id)
 	if err != nil {
-		return nil, &errorHandlers.ConflictError{Message: "Rute tidak ditemukan"}
+		return nil, &errorHandlers.NotFoundError{Message: "Rute tidak ditemukan"}
 	}
 	return route, nil
 }
@@ -42,7 +42,7 @@ func (uc *routeUsecase) FindById(id uuid.UUID) (*entities.Route, error) {
 func (uc *routeUsecase) DeleteRoute(id uuid.UUID) error {
 	route, err := uc.routeRepo.FindById(id)
 	if err != nil {
-		return &errorHandlers.ConflictError{Message: "Rute tidak ditemukan"}
+		return &errorHandlers.NotFoundError{Message: "Rute tidak ditemukan"}
 	}
 	if err = uc.routeRepo.Delete(route); err != nil {
 		return &errorHandlers.InternalServerError{Message: "Gagal menghapus rute"}
