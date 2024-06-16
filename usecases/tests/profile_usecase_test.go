@@ -2,20 +2,22 @@ package tests
 
 import (
 	"bytes"
+	"errors"
+	"mime"
+	"mime/multipart"
+	"net/http"
+	"testing"
+
 	"capstone/dto"
 	"capstone/entities"
 	"capstone/errorHandlers"
 	"capstone/mocks/externals"
 	"capstone/mocks/repositories"
 	"capstone/usecases"
-	"errors"
+
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"mime"
-	"mime/multipart"
-	"net/http"
-	"testing"
 )
 
 type detailUser struct {
@@ -161,7 +163,6 @@ func TestInsertUserDetail(t *testing.T) {
 			} else {
 				require.NoError(t, err)
 			}
-
 		})
 	}
 }
@@ -228,7 +229,6 @@ func TestChangePassword(t *testing.T) {
 			mockSetup: func(userRepo *repositories.MockUserRepository, passwordHelper *externals.MockPasswordHelper) {
 				userRepo.On("FindById", userID).Return(existingUser, nil)
 				passwordHelper.On("VerifyPassword", existingUser.Password, request.PasswordLama).Return(nil)
-
 			},
 			expectedError: &errorHandlers.BadRequestError{Message: "Password dan konfirmasi password tidak cocok"},
 		},
