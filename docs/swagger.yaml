@@ -13,6 +13,7 @@ tags:
   - name: Mobile - Destinations
   - name: Mobile - Profile
   - name: Mobile - Personalization
+  - name: Mobile - Routes
   - name: Admin - Auth
   - name: Admin - Dashboard
   - name: Admin - Destinations
@@ -21,6 +22,115 @@ tags:
   - name: Admin - Admins
   - name: Admin - Manage Content
 paths:
+  /mobile/routes/summarize:
+    post:
+      tags:
+        - Mobile - Routes
+      summary: Mendapatkan Rekomendasi Rute
+      description: API untuk mendapatkan rekomendasi rute.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id_kota:
+                  type: string
+                  example: '1001'
+                lokasi_awal:
+                  type: object
+                  properties:
+                    nama:
+                      type: string
+                      example: Nama Lokasi Awal
+                    latitude:
+                      type: number
+                      format: float
+                      example: -1.23456
+                    longitude:
+                      type: number
+                      format: float
+                      example: -6.54321
+                id_destinasi_tujuan:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - f8fad44d-e5b1-4a3b-939e-1955bf9f7c67
+                    - 80490850-db2a-468c-948c-55a5ef26c995
+                    - 2984e114-18d1-4f22-8f6b-6fd867e8d51b
+      responses:
+        '200':
+          $ref: '#/components/responses/SummarizeRouteResponseSuccess'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                        message:
+                          type: string
+                required:
+                  - message
+              examples:
+                token tidak valid:
+                  value:
+                    message: Format token tidak valid, gunakan bearer token
+                request tidak valid:
+                  value:
+                    status: Failed
+                    message: Permintaan tidak valid. Silakan periksa kembali data yang anda masukkan.
+                    errors:
+                      - field: id_kota
+                        message: id_kota tidak boleh kosong
+                      - field: lokasi_awal
+                        message: lokasi_awal tidak boleh kosong
+                      - field: id_destinasi_tujuan
+                        message: id_destinasi_tujuan tidak boleh kosong
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Destinasi ke-2 tidak ditemukan
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Gagal mendapatkan rekomendasi rute
+
   /mobile/home:
     get:
       tags:
@@ -3285,6 +3395,90 @@ components:
                           id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
                           judul: Kawah Ijen Indah
                           url: https://video.mp4
+    SummarizeRouteResponseSuccess:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: Success
+              message:
+                type: string
+                example: Berhasil mendapatkan rekomendasi rute
+              data:
+                type: object
+                properties:
+                  lokasi_awal:
+                    type: object
+                    properties:
+                      nama:
+                        type: string
+                        example: Nama Lokasi Awal
+                      latitude:
+                        type: number
+                        format: float
+                        example: -1.23456
+                      longitude:
+                        type: number
+                        format: float
+                        example: -6.54321
+                  detail_rute:
+                    type: array
+                    items:
+                      properties:
+                        destinasi:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: '18d8624a-4e83-4354-83fb-fb11aed4fdc4'
+                            nama:
+                              type: string
+                              example: 'Kawah Ijen'
+                            latitude:
+                              type: number
+                              format: float
+                              example: -1.23456
+                            longitude:
+                              type: number
+                              format: float
+                              example: -6.54321
+                            url_gambar:
+                              type: string
+                              example: 'https://picsum.photos/300/200'
+                            biaya_masuk:
+                              type: object
+                              properties:
+                                raw:
+                                  type: number
+                                  example: 20000
+                                format:
+                                  type: string
+                                  example: Rp. 20.000
+                        durasi:
+                          type: object
+                          properties:
+                            raw:
+                              type: number
+                              example: 120
+                            simple:
+                              type: string
+                              example: 2m
+                            full:
+                              type: string
+                              example: 2menit
+                        urutan:
+                          type: number
+                          example: 1
+                        waktu_kunjungan:
+                          type: string
+                          example: '08:00'
+                        waktu_selesai:
+                          type: string
+                          example: '10:00'
 
   securitySchemes:
     BearerAuth:
