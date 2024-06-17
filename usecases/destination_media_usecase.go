@@ -63,7 +63,7 @@ func (uc *DestinationMediaUsecase) FindAll(page, limit int, searchQuery string) 
 func (uc *DestinationMediaUsecase) FindById(id uuid.UUID) (*dto.GetDetailDestinationMediaResponse, error) {
 	destinationMedia, err := uc.destinationMediaRepo.FindById(id)
 	if err != nil {
-		return nil, err
+		return nil, &errorHandlers.NotFoundError{Message: "Konten media destinasi tidak ditemukan"}
 	}
 
 	response := dto.ToGetDetailDestinationMediaResponse(*destinationMedia)

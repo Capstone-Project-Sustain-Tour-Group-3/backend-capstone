@@ -79,7 +79,7 @@ func (r *DestinationRepository) FindAll(page, limit int, searchQuery, sortQuery,
 	db := r.db.Model(&entities.Destination{})
 
 	if searchQuery != "" {
-		db = db.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(searchQuery)+"%")
+		db = db.Where("LOWER(destinations.name) LIKE ?", "%"+strings.ToLower(searchQuery)+"%")
 	}
 
 	switch {

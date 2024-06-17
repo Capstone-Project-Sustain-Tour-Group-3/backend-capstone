@@ -9,6 +9,17 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
+type IValidationHelper interface {
+	IsValidImageType(fileHeader *multipart.FileHeader) bool
+	IsValidImageSize(fileHeader *multipart.FileHeader) bool
+}
+
+type validationHelper struct{}
+
+func NewValidationHelper() IValidationHelper {
+	return &validationHelper{}
+}
+
 type ApiError struct {
 	Field   string `json:"field"`
 	Message string `json:"message"`
@@ -45,7 +56,7 @@ func errorMessage(fieldError validator.FieldError) string {
 	return fieldError.Error()
 }
 
-func IsValidImageType(fileHeader *multipart.FileHeader) bool {
+func (i *validationHelper) IsValidImageType(fileHeader *multipart.FileHeader) bool {
 	allowedTypes := map[string]bool{
 		"image/jpeg": true,
 		"image/jpg":  true,
@@ -72,7 +83,7 @@ func IsValidImageType(fileHeader *multipart.FileHeader) bool {
 	return true
 }
 
-func IsValidImageSize(fileHeader *multipart.FileHeader) bool {
+func (i *validationHelper) IsValidImageSize(fileHeader *multipart.FileHeader) bool {
 	maxSize := 2 * 1024 * 1014
 	fileSize := fileHeader.Size
 	return fileSize <= int64(maxSize)

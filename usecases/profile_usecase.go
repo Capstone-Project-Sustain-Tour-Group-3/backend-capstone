@@ -17,15 +17,23 @@ type ProfileUsecase interface {
 	GetDetailUser(id uuid.UUID) (*entities.User, error)
 	InsertUserDetail(request *dto.UserDetailRequest, id uuid.UUID) error
 	ChangePassword(request *dto.ChangePasswordRequest, id uuid.UUID) error
+	HandleProfilePictureUpdate(request *dto.UserDetailRequest, user *entities.User) error
 }
 
 type profileUsecase struct {
 	userRepo         repositories.UserRepository
 	cloudinaryClient cloudinary.ICloudinaryClient
+	passwordHelper   helpers.PasswordHelper
+	iValidation      helpers.IValidationHelper
 }
 
-func NewProfileUsecase(repository repositories.UserRepository, client cloudinary.ICloudinaryClient) *profileUsecase {
-	return &profileUsecase{userRepo: repository, cloudinaryClient: client}
+func NewProfileUsecase(
+	repository repositories.UserRepository,
+	client cloudinary.ICloudinaryClient,
+	passwordHelper helpers.PasswordHelper,
+	iValidation helpers.IValidationHelper,
+) *profileUsecase {
+	return &profileUsecase{userRepo: repository, cloudinaryClient: client, passwordHelper: passwordHelper, iValidation: iValidation}
 }
 
 func (uc *profileUsecase) GetDetailUser(id uuid.UUID) (*entities.User, error) {
@@ -57,7 +65,7 @@ func (uc *profileUsecase) InsertUserDetail(request *dto.UserDetailRequest, id uu
 	user.Province = request.Provinsi
 	user.Email = request.Email
 
-	if err := uc.handleProfilePictureUpdate(request, user); err != nil {
+	if err := uc.HandleProfilePictureUpdate(request, user); err != nil {
 		return err
 	}
 
@@ -67,15 +75,15 @@ func (uc *profileUsecase) InsertUserDetail(request *dto.UserDetailRequest, id uu
 	return nil
 }
 
-func (uc *profileUsecase) handleProfilePictureUpdate(request *dto.UserDetailRequest, user *entities.User) error {
+func (uc *profileUsecase) HandleProfilePictureUpdate(request *dto.UserDetailRequest, user *entities.User) error {
 	if request.FotoProfil == nil {
 		return nil
 	}
 
-	if !helpers.IsValidImageType(request.FotoProfil) {
+	if !uc.iValidation.IsValidImageType(request.FotoProfil) {
 		return &errorHandlers.BadRequestError{Message: "Tipe foto profil tidak valid"}
 	}
-	if !helpers.IsValidImageSize(request.FotoProfil) {
+	if !uc.iValidation.IsValidImageSize(request.FotoProfil) {
 		return &errorHandlers.BadRequestError{Message: "Ukuran foto profil tidak valid"}
 	}
 
@@ -108,7 +116,7 @@ func (uc *profileUsecase) ChangePassword(request *dto.ChangePasswordRequest, id 
 		return &errorHandlers.ConflictError{Message: "User tidak ditemukan"}
 	}
 
-	if err := helpers.VerifyPassword(user.Password, request.PasswordLama); err != nil {
+	if err := uc.passwordHelper.VerifyPassword(user.Password, request.PasswordLama); err != nil {
 		return &errorHandlers.ConflictError{Message: "Password lama tidak valid"}
 	}
 
@@ -116,7 +124,7 @@ func (uc *profileUsecase) ChangePassword(request *dto.ChangePasswordRequest, id 
 		return &errorHandlers.BadRequestError{Message: "Password dan konfirmasi password tidak cocok"}
 	}
 
-	hashPassword, err := helpers.HashPassword(request.PasswordBaru)
+	hashPassword, err := uc.passwordHelper.HashPassword(request.PasswordBaru)
 	if err != nil {
 		return &errorHandlers.InternalServerError{Message: "Gagal hashing password"}
 	}
