@@ -33,6 +33,7 @@ func (m *MockCityRepository) FindById(id string) (*entities.City, error) {
 	}
 	return args.Get(0).(*entities.City), args.Error(1)
 }
+
 func (m *MockCityRepository) Update(city *entities.City) error {
 	args := m.Called(city)
 	if args.Error(0) == nil {
