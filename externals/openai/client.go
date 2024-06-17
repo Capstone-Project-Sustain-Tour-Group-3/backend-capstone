@@ -3,13 +3,11 @@ package openai
 import (
 	"context"
 
-	"capstone/helpers"
-
 	oai "github.com/sashabaranov/go-openai"
 )
 
 type OpenAIClient interface {
-	GetRecommendation(prompt string) (string, error)
+	GenerateAnswer(prompt, instruction string) (string, error)
 }
 
 type openaiClient struct {
@@ -22,7 +20,7 @@ func NewOpenAIClient(apiKey string) *openaiClient {
 	}
 }
 
-func (o *openaiClient) GetRecommendation(prompt string) (string, error) {
+func (o *openaiClient) GenerateAnswer(prompt, instruction string) (string, error) {
 	res, err := o.client.CreateChatCompletion(
 		context.Background(),
 		oai.ChatCompletionRequest{
@@ -30,13 +28,14 @@ func (o *openaiClient) GetRecommendation(prompt string) (string, error) {
 			Messages: []oai.ChatCompletionMessage{
 				{
 					Role:    oai.ChatMessageRoleSystem,
-					Content: helpers.GetRecommendationSystemInstruction(),
+					Content: instruction,
 				},
 				{
 					Role:    oai.ChatMessageRoleUser,
 					Content: prompt,
 				},
 			},
+			Temperature: 0,
 		},
 	)
 	if err != nil {
