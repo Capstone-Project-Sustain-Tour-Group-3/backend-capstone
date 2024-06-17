@@ -15,6 +15,7 @@ import (
 
 type IDestinationRepository interface {
 	FindById(id uuid.UUID) (*entities.Destination, error)
+	FindByIdInCityId(id uuid.UUID, cityId string) (*entities.Destination, error)
 	FindByManyIds(ids []string) (*[]entities.Destination, error)
 	FindAll(page, limit int, searchQuery, sortQuery, filterQuery string) (string, *int64, []entities.Destination, error)
 	FindByCategoryId(ids uuid.UUID) ([]entities.Destination, error)
@@ -50,6 +51,19 @@ func (r *DestinationRepository) FindById(id uuid.UUID) (*entities.Destination, e
 		Preload("DestinationAddress.Province").
 		Preload("DestinationAddress.City").
 		Preload("DestinationAddress.Subdistrict").
+		First(&destination).Error; err != nil {
+		return nil, err
+	}
+
+	return destination, nil
+}
+
+func (r *DestinationRepository) FindByIdInCityId(id uuid.UUID, cityId string) (*entities.Destination, error) {
+	var destination *entities.Destination
+	if err := r.db.
+		Joins("JOIN destination_addresses ON destination_addresses.destination_id = destinations.id").
+		Where("destinations.id = ? AND destination_addresses.city_id = ?", id, cityId).
+		Preload("DestinationMedias", "type = ?", "image").
 		First(&destination).Error; err != nil {
 		return nil, err
 	}
