@@ -1,8 +1,8 @@
 package routers
 
 import (
-	admin "capstone/routers/admin"
-	mobile "capstone/routers/mobile"
+	"capstone/routers/admin"
+	"capstone/routers/mobile"
 
 	"github.com/labstack/echo/v4"
 )
@@ -27,6 +27,9 @@ func SetupRouter(e *echo.Echo) {
 
 		homepage := v1Mobile.Group("/home")
 		mobile.HomepageRouter(homepage)
+
+		route := v1Mobile.Group("/routes")
+		mobile.RouteRouter(route)
 	}
 
 	v1Admin := e.Group("/v1/admin")
