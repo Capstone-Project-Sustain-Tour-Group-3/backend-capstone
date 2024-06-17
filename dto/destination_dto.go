@@ -198,7 +198,6 @@ func ToCitiesResponse(cities *[]entities.City) *[]Cities {
 	}
 
 	return &responses
-
 }
 
 func ToUrlImages(destination *entities.Destination) *[]UrlImage {

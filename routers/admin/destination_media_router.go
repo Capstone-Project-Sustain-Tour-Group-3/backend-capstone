@@ -6,11 +6,13 @@ import (
 	"capstone/middlewares"
 	"capstone/repositories"
 	"capstone/usecases"
+
 	"github.com/labstack/echo/v4"
 )
 
 func DestinationMediaRouter(r *echo.Group) {
 	r.Use(middlewares.JWTMiddleware)
+	r.Use(middlewares.RoleMiddleware("admin", "superadmin"))
 
 	destinationRepo := repositories.NewDestinationRepository(config.DB)
 	destinationMediaRepo := repositories.NewDestinationMediaRepository(config.DB)

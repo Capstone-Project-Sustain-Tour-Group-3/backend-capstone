@@ -9,16 +9,93 @@ servers:
     description: Development Server
 tags:
   - name: Mobile - Auth
+  - name: Mobile - Homepage
   - name: Mobile - Destinations
   - name: Mobile - Profile
   - name: Mobile - Personalization
   - name: Admin - Auth
+  - name: Admin - Dashboard
   - name: Admin - Destinations
   - name: Admin - Routes
   - name: Admin - Users
   - name: Admin - Admins
   - name: Admin - Manage Content
 paths:
+  /mobile/home:
+    get:
+      tags:
+        - Mobile - Homepage
+      summary: Mendapatkan Data pada Homepage
+      description: API untuk mendapatkan data pada homepage.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: provinsi
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/HomepageResponseSuccess'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Format token tidak valid, gunakan bearer token
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Personalisasi belum dibuat
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+              examples:
+                error destinasi sekitar:
+                  value:
+                    status: Failed
+                    message: Gagal mendapatkan destinasi sekitar
+                error destinasi populer:
+                  value:
+                    status: Failed
+                    message: Gagal mendapatkan destinasi populer
+                error personalisasi:
+                  value:
+                    status: Failed
+                    message: Gagal mendapatkan data personalisasi
+                error mendapatkan rekomendasi:
+                  value:
+                    status: Failed
+                    message: Gagal mendapatkan rekomendasi destinasi
+                error simpan rekomendasi:
+                  value:
+                    status: Failed
+                    message: Gagal menyimpan rekomendasi destinasi
+
   /mobile/auth/register:
     post:
       tags:
@@ -375,7 +452,94 @@ paths:
                   message:
                     type: string
                     example: 'Logout berhasil!'
-
+  /admin/dashboard:
+    get:
+      tags:
+        - Admin - Dashboard
+      summary: Menampilkan Data Dashboard
+      description: API untuk menampilkan data dashboard admin.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Berhasil Menampilkan Data Dashboard
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Berhasil menampilkan data dashboard'
+                  data:
+                    type: object
+                    properties:
+                      total_data:
+                        type: object
+                        properties:
+                          total_admin:
+                            type: integer
+                            example: 2
+                          total_user:
+                            type: integer
+                            example: 7
+                          total_rute:
+                            type: integer
+                            example: 14
+                      pertumbuhan_pengguna:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            bulan:
+                              type: string
+                              example: 'Jan'
+                            pengguna_baru:
+                              type: integer
+                              example: 1
+                            total_pengguna:
+                              type: integer
+                              example: 1
+                      total_content_vid:
+                        type: object
+                        properties:
+                          total_content:
+                            type: integer
+                            example: 962
+                          total_destinasi:
+                            type: integer
+                            example: 322
+                      kategori_destinasi:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            nama_kategori:
+                              type: string
+                              example: 'Alam'
+                            total:
+                              type: integer
+                              example: 178
+                      route_user:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            username:
+                              type: string
+                              example: 'user1'
+                            nama_rute:
+                              type: string
+                              example: 'Route ke 12'
+                            jumlah_destinasi:
+                              type: integer
+                              example: 1
+                            biaya:
+                              type: integer
+                              example: 100000
   /admin/auth/token:
     get:
       tags:
@@ -415,6 +579,7 @@ paths:
                   message:
                     type: string
                     example: 'Token tidak ditemukan'
+
   /mobile/auth/logout:
     delete:
       tags:
@@ -1196,11 +1361,11 @@ paths:
                 password:
                   type: string
                   example: '12345678'
-                foto:
+                foto_profil:
                   type: string
                   format: binary
             encoding:
-              foto:
+              foto_profil:
                 contentType: image/png, image/jpg, image/jpeg
       responses:
         '201':
@@ -1436,11 +1601,11 @@ paths:
                 password:
                   type: string
                   example: '12345678'
-                foto:
+                foto_profil:
                   type: string
                   format: binary
             encoding:
-              foto:
+              foto_profil:
                 contentType: image/png, image/jpg, image/jpeg
       responses:
         '200':
@@ -2785,8 +2950,6 @@ paths:
                     type: string
                     example: Internal server error
 
-
-
 components:
   schemas:
     Pagination:
@@ -2942,7 +3105,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SimilarDestination'
-
   responses:
     UnauthorizedResponse:
       description: Unauthorized
@@ -2969,6 +3131,15 @@ components:
                 example: 'Berhasil mendapatkan kategori destinasi'
               data:
                 type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    nama:
+                      type: string
+                    url:
+                      type: string
                 example:
                   - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
                     nama: Alam
@@ -2994,6 +3165,15 @@ components:
                 example: 'Berhasil mendapatkan provinsi'
               data:
                 type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    nama:
+                      type: string
+                    url:
+                      type: string
                 example:
                   - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
                     nama: Jawa Timur
@@ -3001,6 +3181,110 @@ components:
                   - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
                     nama: Jawa Barat
                     url: https://picsum.photos/300/200
+    HomepageResponseSuccess:
+      description: OK
+      content:
+        application/json:
+          schema:
+            properties:
+              status:
+                type: string
+                example: Success
+              message:
+                type: string
+                example: Berhasil mendapatkan data pada homepage
+              data:
+                type: object
+                properties:
+                  destinasi_rekomendasi:
+                    type: array
+                    items:
+                      properties:
+                        id:
+                          type: string
+                        nama:
+                          type: string
+                        url_gambar:
+                          type: string
+                    example:
+                      - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                        nama: Kawah Ijen
+                        url_gambar: https://picsum.photos/300/200
+                      - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                        nama: Kawah Ijen
+                        url_gambar: https://picsum.photos/300/200
+                  destinasi_sekitar:
+                    type: array
+                    items:
+                      properties:
+                        id:
+                          type: string
+                        nama:
+                          type: string
+                        lokasi:
+                          type: object
+                          properties:
+                            kota:
+                              type: object
+                              properties:
+                                nama:
+                                  type: string
+                                  example: Nama Kota
+                            provinsi:
+                              type: object
+                              properties:
+                                nama:
+                                  type: string
+                                  example: Nama Provinsi
+                        url_gambar:
+                          type: string
+                    example:
+                      - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                        nama: Kawah Ijen
+                        lokasi:
+                          kota:
+                            nama: Nama Kota
+                          provinsi:
+                            nama: Nama Provinsi
+                        url_gambar: https://picsum.photos/300/200
+                      - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                        nama: Kawah Ijen
+                        lokasi:
+                          kota:
+                            nama: Nama Kota
+                          provinsi:
+                            nama: Nama Provinsi
+                        url_gambar: https://picsum.photos/300/200
+                  destinasi_populer:
+                    type: array
+                    items:
+                      properties:
+                        id:
+                          type: string
+                        nama:
+                          type: string
+                        konten:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            judul:
+                              type: string
+                            url:
+                              type: string
+                    example:
+                      - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                        nama: Kawah Ijen
+                        konten:
+                          id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                          judul: Kawah Ijen Keren
+                          url: https://video.mp4
+                      - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                        nama: Kawah Ijen
+                        konten:
+                          id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                          judul: Kawah Ijen Indah
+                          url: https://video.mp4
 
   securitySchemes:
     BearerAuth:

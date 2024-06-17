@@ -3,6 +3,7 @@ package admin
 import (
 	"capstone/config"
 	"capstone/handlers"
+	"capstone/middlewares"
 	"capstone/repositories"
 	"capstone/usecases"
 
@@ -10,6 +11,9 @@ import (
 )
 
 func RouteRouter(r *echo.Group) {
+	r.Use(middlewares.JWTMiddleware)
+	r.Use(middlewares.RoleMiddleware("admin", "superadmin"))
+
 	repository := repositories.NewRouteRepository(config.DB)
 	routeRepo := repositories.NewRouteDetailRepository(config.DB)
 	usecase := usecases.NewRouteUsecase(repository, routeRepo)

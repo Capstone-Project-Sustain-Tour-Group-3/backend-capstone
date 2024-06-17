@@ -24,6 +24,8 @@ type Config struct {
 	REDIS_PASSWORD string
 
 	CLOUDINARY_URL string
+
+	OPENAI_API_KEY string
 }
 
 var ENV *Config
@@ -51,6 +53,8 @@ func LoadConfig() {
 			REDIS_PASSWORD: os.Getenv("REDIS_PASSWORD"),
 
 			CLOUDINARY_URL: os.Getenv("CLOUDINARY_URL"),
+
+			OPENAI_API_KEY: os.Getenv("OPENAI_API_KEY"),
 		}
 
 		return
