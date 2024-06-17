@@ -1,12 +1,14 @@
 package tests
 
 import (
+	"testing"
+
 	"capstone/dto"
 	"capstone/errorHandlers"
 	"capstone/mocks/repositories"
 	"capstone/usecases"
+
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestGetAllData(t *testing.T) {
