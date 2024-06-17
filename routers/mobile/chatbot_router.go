@@ -1,4 +1,4 @@
-package routers
+package mobile
 
 import (
 	"capstone/config"

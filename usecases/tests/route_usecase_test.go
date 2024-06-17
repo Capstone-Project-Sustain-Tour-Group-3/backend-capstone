@@ -5,6 +5,7 @@ import (
 
 	"capstone/entities"
 	"capstone/errorHandlers"
+	"capstone/mocks/externals"
 	"capstone/mocks/repositories"
 	"capstone/usecases"
 
@@ -61,9 +62,12 @@ func TestFindAllRoute(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			cityRepo := new(repositories.MockCityRepository)
+			destinationRepo := new(repositories.MockDestinationRepository)
 			routeRepo := new(repositories.MockRouteRepository)
 			routeDet := new(repositories.MockRouteDetailRepository)
-			uc := usecases.NewRouteUsecase(routeRepo, routeDet)
+			openAIClient := new(externals.MockOpenAIClient)
+			uc := usecases.NewRouteUsecase(cityRepo, destinationRepo, routeRepo, routeDet, openAIClient)
 
 			tc.mockSetup(routeRepo)
 
@@ -117,9 +121,12 @@ func TestFindRouteById(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			cityRepo := new(repositories.MockCityRepository)
+			destinationRepo := new(repositories.MockDestinationRepository)
 			routeRepo := new(repositories.MockRouteRepository)
 			routeDet := new(repositories.MockRouteDetailRepository)
-			uc := usecases.NewRouteUsecase(routeRepo, routeDet)
+			openAIClient := new(externals.MockOpenAIClient)
+			uc := usecases.NewRouteUsecase(cityRepo, destinationRepo, routeRepo, routeDet, openAIClient)
 
 			tc.mockSetup(routeRepo)
 
@@ -190,9 +197,12 @@ func TestDeleteRoute(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
+			cityRepo := new(repositories.MockCityRepository)
+			destinationRepo := new(repositories.MockDestinationRepository)
 			routeRepo := new(repositories.MockRouteRepository)
 			routeDet := new(repositories.MockRouteDetailRepository)
-			uc := usecases.NewRouteUsecase(routeRepo, routeDet)
+			openAIClient := new(externals.MockOpenAIClient)
+			uc := usecases.NewRouteUsecase(cityRepo, destinationRepo, routeRepo, routeDet, openAIClient)
 
 			tc.mockSetup(routeRepo, routeDet)
 

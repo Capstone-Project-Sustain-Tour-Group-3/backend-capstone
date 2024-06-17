@@ -128,7 +128,10 @@ func (uc *homepageUsecase) GetRecommendations(uid uuid.UUID) ([]dto.RecommendDes
 	} else {
 		var recommendations string
 		prompt := helpers.ToRecommendationPrompt(visitedDestinations, unVisitedDestinations)
-		recommendations, err = uc.openAIClient.GetRecommendation(prompt)
+		recommendations, err = uc.openAIClient.GenerateAnswer(
+			prompt,
+			helpers.GetRecommendationSystemInstruction(),
+		)
 		if err != nil {
 			return nil, &errorHandlers.InternalServerError{Message: "Gagal mendapatkan rekomendasi destinasi"}
 		}

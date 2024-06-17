@@ -1,4 +1,4 @@
-package admin
+package mobile
 
 import (
 	"capstone/config"
@@ -13,7 +13,6 @@ import (
 
 func RouteRouter(r *echo.Group) {
 	r.Use(middlewares.JWTMiddleware)
-	r.Use(middlewares.RoleMiddleware("admin", "superadmin"))
 
 	repository := repositories.NewRouteRepository(config.DB)
 	cityRepo := repositories.NewCityRepository(config.DB)
@@ -23,7 +22,6 @@ func RouteRouter(r *echo.Group) {
 
 	usecase := usecases.NewRouteUsecase(cityRepo, destinationRepo, repository, routeRepo, openAIClient)
 	handler := handlers.NewRouteHandler(usecase)
-	r.GET("", handler.FindAll)
-	r.GET("/:id", handler.FindById)
-	r.DELETE("/:id", handler.DeleteRoute)
+
+	r.POST("/summarize", handler.SummarizeRoute)
 }
