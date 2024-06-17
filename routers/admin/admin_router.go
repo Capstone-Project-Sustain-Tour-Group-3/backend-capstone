@@ -4,6 +4,7 @@ import (
 	"capstone/config"
 	"capstone/externals/cloudinary"
 	"capstone/handlers"
+	"capstone/helpers"
 	"capstone/middlewares"
 	"capstone/repositories"
 	"capstone/usecases"
@@ -16,11 +17,13 @@ func ManageAdminRouter(r *echo.Group) {
 	r.Use(middlewares.RoleMiddleware("superadmin"))
 
 	repository := repositories.NewAdminRepository(config.DB)
+	passwordHelper := helpers.NewPasswordHelper()
+	tokenHelper := helpers.NewTokenHelper()
 	cloudinaryClient := cloudinary.NewCloudinaryClient(config.ENV.CLOUDINARY_URL)
 
-	usecase := usecases.NewAdminUsecase(repository, cloudinaryClient)
-
-	handler := handlers.NewAdminHandler(usecase)
+	usecase := usecases.NewAdminUsecase(repository, cloudinaryClient, passwordHelper, tokenHelper)
+	iVal := helpers.NewValidationHelper()
+	handler := handlers.NewAdminHandler(usecase, iVal)
 
 	r.GET("", handler.GetAllAdmins)
 	r.POST("", handler.CreateAdmin)

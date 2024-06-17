@@ -11,6 +11,17 @@ import (
 	"github.com/spf13/viper"
 )
 
+type TokenHelper interface {
+	GenerateAccessToken(user interface{}) (string, error)
+	GenerateRefreshToken(user interface{}) (string, error)
+}
+
+type tokenHelper struct{}
+
+func NewTokenHelper() TokenHelper {
+	return &tokenHelper{}
+}
+
 type JWTClaims struct {
 	Id       uuid.UUID
 	Username string
@@ -22,7 +33,7 @@ func init() {
 	viper.AutomaticEnv()
 }
 
-func GenerateAccessToken(user interface{}) (string, error) {
+func (t *tokenHelper) GenerateAccessToken(user interface{}) (string, error) {
 	accessTokenSecret := []byte(viper.GetString("ACCESS_TOKEN_SECRET"))
 
 	var role string
@@ -65,7 +76,7 @@ func GenerateAccessToken(user interface{}) (string, error) {
 	return signedString, nil
 }
 
-func GenerateRefreshToken(user interface{}) (string, error) {
+func (t *tokenHelper) GenerateRefreshToken(user interface{}) (string, error) {
 	accessTokenSecret := []byte(viper.GetString("REFRESH_TOKEN_SECRET"))
 
 	var role string
