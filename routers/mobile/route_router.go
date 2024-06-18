@@ -1,7 +1,8 @@
-package routers
+package mobile
 
 import (
 	"capstone/config"
+	"capstone/externals/openai"
 	"capstone/handlers"
 	"capstone/middlewares"
 	"capstone/repositories"
@@ -14,9 +15,15 @@ func RouteRouter(r *echo.Group) {
 	r.Use(middlewares.JWTMiddleware)
 
 	repository := repositories.NewRouteRepository(config.DB)
+	cityRepo := repositories.NewCityRepository(config.DB)
 	routeRepo := repositories.NewRouteDetailRepository(config.DB)
-	usecase := usecases.NewRouteUsecase(repository, routeRepo)
+	destinationRepo := repositories.NewDestinationRepository(config.DB)
+	openAIClient := openai.NewOpenAIClient(config.ENV.OPENAI_API_KEY)
+
+	usecase := usecases.NewRouteUsecase(cityRepo, destinationRepo, repository, routeRepo, openAIClient)
 	handler := handlers.NewRouteHandler(usecase)
-	r.POST("", handler.SaveRoute)
-	r.DELETE("/:id", handler.DeleteRoute)
+
+	r.POST("/summarize", handler.SummarizeRoute)
+	r.POST("/save", handler.SaveRoute)
+	r.DELETE("/unsave/:id", handler.DeleteRoute)
 }

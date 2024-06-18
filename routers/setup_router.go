@@ -1,8 +1,8 @@
 package routers
 
 import (
-	admin "capstone/routers/admin"
-	mobile "capstone/routers/mobile"
+	"capstone/routers/admin"
+	"capstone/routers/mobile"
 
 	"github.com/labstack/echo/v4"
 )

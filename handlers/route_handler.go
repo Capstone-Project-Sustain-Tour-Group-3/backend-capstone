@@ -92,6 +92,39 @@ func (h *RouteHandler) DeleteRoute(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, response)
 }
 
+func (h *RouteHandler) SummarizeRoute(ctx echo.Context) error {
+	request := new(dto.RouteSummaryRequest)
+	if err := ctx.Bind(request); err != nil {
+		return errorHandlers.HandleError(
+			ctx,
+			&errorHandlers.BadRequestError{
+				Message: "Permintaan tidak valid. Silakan periksa kembali data yang anda masukkan.",
+			},
+		)
+	}
+
+	if err := helpers.ValidateRequest(request); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "Failed",
+			Message: "Permintaan tidak valid. Silakan periksa kembali data yang anda masukkan.",
+			Errors:  err,
+		})
+	}
+
+	result, err := h.RouteUsecase.SummarizeRoute(request)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "Berhasil mendapatkan rekomendasi rute",
+		Data:       result,
+	})
+
+	return ctx.JSON(http.StatusOK, response)
+}
+
 func (h *RouteHandler) SaveRoute(ctx echo.Context) error {
 	var request dto.SaveRouteRequest
 
@@ -135,5 +168,6 @@ func (h *RouteHandler) SaveRoute(ctx echo.Context) error {
 		StatusCode: http.StatusOK,
 		Message:    "data rute berhasil disimpan",
 	})
+
 	return ctx.JSON(http.StatusOK, response)
 }
