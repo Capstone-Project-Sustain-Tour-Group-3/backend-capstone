@@ -38,10 +38,10 @@ func (m *MockDestinationRepository) FindByIdInCityId(id uuid.UUID, cityId string
 
 func (m *MockDestinationRepository) FindAll(page, limit int, searchQuery, sortQuery, filterQuery string) (string, *int64, []entities.Destination, error) {
 	args := m.Called(page, limit, searchQuery, sortQuery, filterQuery)
-	if args.Get(0) == nil {
-		return "", nil, nil, args.Error(4)
+	if args.Get(0) == "" {
+		return "", nil, nil, args.Error(3)
 	}
-	return args.Get(0).(string), args.Get(1).(*int64), args.Get(2).([]entities.Destination), args.Error(4)
+	return args.String(0), args.Get(1).(*int64), args.Get(2).([]entities.Destination), args.Error(3)
 }
 
 func (m *MockDestinationRepository) FindByCategoryId(id uuid.UUID) ([]entities.Destination, error) {
@@ -63,9 +63,9 @@ func (m *MockDestinationRepository) Create(destination *entities.Destination, tx
 func (m *MockDestinationRepository) Update(destination *entities.Destination) error {
 	args := m.Called(destination)
 	if args.Get(0) == nil {
-		return args.Error(1)
+		return args.Error(0)
 	}
-	return args.Error(1)
+	return args.Error(0)
 }
 
 func (m *MockDestinationRepository) Delete(destination *entities.Destination) error {
