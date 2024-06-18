@@ -51,3 +51,19 @@ func (m *MockRouteRepository) Create(route *entities.Route) error {
 	}
 	return args.Error(0)
 }
+
+func (m *MockRouteRepository) FindAllByCurrentUser(user_id uuid.UUID) (*[]entities.Route, error) {
+	args := m.Called(user_id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*[]entities.Route), args.Error(1)
+}
+
+func (m *MockRouteRepository) FindByIdCurrentUser(user_id, id uuid.UUID) (*entities.Route, error) {
+	args := m.Called(user_id, id)
+	if args.Get(0) == nil {
+		return nil, args.Error(1)
+	}
+	return args.Get(0).(*entities.Route), args.Error(1)
+}
