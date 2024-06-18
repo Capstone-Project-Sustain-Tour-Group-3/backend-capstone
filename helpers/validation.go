@@ -47,6 +47,10 @@ func errorMessage(fieldError validator.FieldError) string {
 		return fmt.Sprintf("Kolom %s harus terisi dengan jumlah kurang dari sama dengan %s", fieldError.Field(), fieldError.Param())
 	case "oneof":
 		return fmt.Sprintf("Kolom %s harus salah satu dari %s", fieldError.Field(), fieldError.Param())
+	case "latitude":
+		return fmt.Sprintf("Kolom %s harus berada pada rentang -90 sampai 90", fieldError.Field())
+	case "longitude":
+		return fmt.Sprintf("Kolom %s harus berada pada rentang -180 sampai 180", fieldError.Field())
 	}
 
 	return fieldError.Error()
