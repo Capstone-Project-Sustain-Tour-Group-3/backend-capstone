@@ -43,3 +43,11 @@ func (m *MockRouteRepository) FindVisitedByUserSubquery(uid uuid.UUID) *gorm.DB 
 	}
 	return args.Get(0).(*gorm.DB)
 }
+
+func (m *MockRouteRepository) Create(route *entities.Route) error {
+	args := m.Called(route)
+	if args.Error(0) == nil {
+		return nil
+	}
+	return args.Error(0)
+}

@@ -150,7 +150,6 @@ func (h *RouteHandler) SaveRoute(ctx echo.Context) error {
 	}
 
 	err := h.RouteUsecase.SaveRoute(&request)
-
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}

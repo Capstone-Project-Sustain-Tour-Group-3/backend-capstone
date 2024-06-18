@@ -23,7 +23,7 @@ func (m *MockCityRepository) FindAll() ([]entities.City, error) {
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).([]entities.City), args.Error(1)
+	return args.Get(0).([]entities.City), nil
 }
 
 func (m *MockCityRepository) FindById(id string) (*entities.City, error) {
@@ -31,7 +31,7 @@ func (m *MockCityRepository) FindById(id string) (*entities.City, error) {
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*entities.City), args.Error(1)
+	return args.Get(0).(*entities.City), nil
 }
 
 func (m *MockCityRepository) Update(city *entities.City) error {
@@ -55,5 +55,5 @@ func (m *MockCityRepository) GetCitiesWithDestinations() ([]entities.City, error
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).([]entities.City), args.Error(1)
+	return args.Get(0).([]entities.City), nil
 }
