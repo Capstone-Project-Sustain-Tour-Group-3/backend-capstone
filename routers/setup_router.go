@@ -27,6 +27,9 @@ func SetupRouter(e *echo.Echo) {
 
 		homepage := v1Mobile.Group("/home")
 		mobile.HomepageRouter(homepage)
+
+		route := v1Mobile.Group("/routes")
+		mobile.RouteRouter(route)
 	}
 
 	v1Admin := e.Group("/v1/admin")

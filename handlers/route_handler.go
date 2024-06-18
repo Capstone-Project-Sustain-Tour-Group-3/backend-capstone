@@ -91,3 +91,49 @@ func (h *RouteHandler) DeleteRoute(ctx echo.Context) error {
 	})
 	return ctx.JSON(http.StatusOK, response)
 }
+
+func (h *RouteHandler) SaveRoute(ctx echo.Context) error {
+	var request dto.SaveRouteRequest
+
+	userId, ok := ctx.Get("userId").(*uuid.UUID)
+	if !ok {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "failed",
+			Message: "permintaan tidak valid. silakan periksa kembali data yang anda masukkan.",
+		})
+	}
+	request.UserId = *userId
+
+	if err := ctx.Bind(&request); err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	if err := helpers.ValidateRequest(request); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "failed",
+			Message: "permintaan tidak valid. silakan periksa kembali data yang anda masukkan.",
+			Errors:  err,
+		})
+	}
+
+	for _, detail := range request.RouteDetails {
+		if err := helpers.ValidateRequest(detail); err != nil {
+			return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+				Status:  "failed",
+				Message: "permintaan route detail tidak valid. silakan periksa kembali data yang anda masukkan. destination_id = " + detail.DestinationId.String(),
+				Errors:  err,
+			})
+		}
+	}
+
+	err := h.RouteUsecase.SaveRoute(&request)
+
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "data rute berhasil disimpan",
+	})
+	return ctx.JSON(http.StatusOK, response)
+}

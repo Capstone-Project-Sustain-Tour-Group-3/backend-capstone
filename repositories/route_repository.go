@@ -15,6 +15,8 @@ type RouteRepository interface {
 	Delete(route *entities.Route) error
 
 	FindVisitedByUserSubquery(uid uuid.UUID) *gorm.DB
+
+	Create(route *entities.Route) error
 }
 
 type routeRepository struct {
@@ -78,4 +80,8 @@ func (r *routeRepository) FindVisitedByUserSubquery(uid uuid.UUID) *gorm.DB {
 		Distinct("route_details.destination_id").
 		Joins("INNER JOIN route_details ON route_details.route_id = routes.id").
 		Where("routes.user_id = ?", uid)
+}
+
+func (r *routeRepository) Create(route *entities.Route) error {
+	return r.db.Create(route).Error
 }

@@ -2,7 +2,6 @@ package dto
 
 import (
 	"capstone/entities"
-
 	"github.com/google/uuid"
 )
 
@@ -18,6 +17,27 @@ type findAllResponse struct {
 type Destinasi struct {
 	Id            uuid.UUID `json:"id"`
 	NamaDestinasi string    `json:"nama_destinasi"`
+}
+
+type DetailRouteRequest struct {
+	DestinationId uuid.UUID `json:"destination_id" validate:"required"`
+	Longitude     float64   `json:"longitude" validate:"required"`
+	Latitude      float64   `json:"latitude" validate:"required"`
+	Duration      int       `json:"duration" validate:"required"`
+	Order         int       `json:"order" validate:"required"`
+	VisitStart    string    `json:"visit_start" validate:""`
+	VisitEnd      string    `json:"visit_end" validate:""`
+}
+
+type SaveRouteRequest struct {
+	UserId         uuid.UUID            `json:"user_id" validate:"required"`
+	CityId         string               `json:"city_id" validate:"required"`
+	Name           string               `json:"name" validate:"required"`
+	StartLocation  string               `json:"start_location" validate:"required"`
+	StartLongitude float64              `json:"start_longitude" validate:"required"`
+	StartLatitude  float64              `json:"start_latitude" validate:"required"`
+	Price          float64              `json:"price" validate:"required"`
+	RouteDetails   []DetailRouteRequest `json:"route_details" validate:"required"`
 }
 
 func ToFindAllRouteResponse(routes *[]entities.Route) *[]findAllResponse {
