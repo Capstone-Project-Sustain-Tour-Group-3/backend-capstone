@@ -2,8 +2,9 @@ package tests
 
 import (
 	"errors"
-	"github.com/stretchr/testify/mock"
 	"testing"
+
+	"github.com/stretchr/testify/mock"
 
 	"capstone/entities"
 	"capstone/errorHandlers"
