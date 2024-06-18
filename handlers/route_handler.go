@@ -124,3 +124,40 @@ func (h *RouteHandler) SummarizeRoute(ctx echo.Context) error {
 
 	return ctx.JSON(http.StatusOK, response)
 }
+
+func (h *RouteHandler) SaveRoute(ctx echo.Context) error {
+	var request dto.SaveRouteRequest
+
+	userId, ok := ctx.Get("userId").(*uuid.UUID)
+	if !ok {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "failed",
+			Message: "permintaan tidak valid. silakan periksa kembali data yang anda masukkan.",
+		})
+	}
+	request.UserId = *userId
+
+	if err := ctx.Bind(&request); err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	if err := helpers.ValidateRequest(request); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "failed",
+			Message: "permintaan tidak valid. silakan periksa kembali data yang anda masukkan.",
+			Errors:  err,
+		})
+	}
+
+	err := h.RouteUsecase.SaveRoute(&request)
+
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusCreated,
+		Message:    "data rute berhasil disimpan",
+	})
+
+	return ctx.JSON(http.StatusOK, response)
+}

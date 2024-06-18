@@ -24,4 +24,6 @@ func RouteRouter(r *echo.Group) {
 	handler := handlers.NewRouteHandler(usecase)
 
 	r.POST("/summarize", handler.SummarizeRoute)
+	r.POST("/save", handler.SaveRoute)
+	r.DELETE("/unsave/:id", handler.DeleteRoute)
 }

@@ -8,6 +8,7 @@ import (
 )
 
 type RouteDetailRepository interface {
+	Create(routeDetail *entities.RouteDetail) error
 	DeleteMany(routeDetail *[]entities.RouteDetail) error
 }
 
@@ -17,6 +18,13 @@ type routeDetailRepository struct {
 
 func NewRouteDetailRepository(db *gorm.DB) *routeDetailRepository {
 	return &routeDetailRepository{db}
+}
+
+func (r *routeDetailRepository) Create(routeDetail *entities.RouteDetail) error {
+	if err := r.db.Create(&routeDetail).Error; err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *routeDetailRepository) DeleteMany(routeDetail *[]entities.RouteDetail) error {

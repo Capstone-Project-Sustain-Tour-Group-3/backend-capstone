@@ -123,3 +123,24 @@ func ToFindByIdRouteResponse(route *entities.Route) *findAllResponse {
 	}
 	return &response
 }
+
+type DetailRouteRequest struct {
+	DestinationId uuid.UUID `json:"destination_id" validate:"required"`
+	Longitude     float64   `json:"longitude" validate:"required"`
+	Latitude      float64   `json:"latitude" validate:"required"`
+	Duration      int       `json:"duration" validate:"required"`
+	Order         int       `json:"order" validate:"required"`
+	VisitStart    string    `json:"visit_start" validate:"required"`
+	VisitEnd      string    `json:"visit_end" validate:"required"`
+}
+
+type SaveRouteRequest struct {
+	UserId         uuid.UUID            `json:"user_id" validate:"required"`
+	CityId         string               `json:"city_id" validate:"required,len=4"`
+	Name           string               `json:"name" validate:"required"`
+	StartLocation  string               `json:"start_location" validate:"required"`
+	StartLongitude float64              `json:"start_longitude" validate:"required"`
+	StartLatitude  float64              `json:"start_latitude" validate:"required"`
+	Price          float64              `json:"price" validate:"required"`
+	RouteDetails   []DetailRouteRequest `json:"route_details" validate:"required,dive"`
+}
