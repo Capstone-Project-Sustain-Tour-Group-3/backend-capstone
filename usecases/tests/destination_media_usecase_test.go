@@ -1,17 +1,19 @@
 package tests
 
 import (
+	"errors"
+	"testing"
+
 	"capstone/dto"
 	"capstone/entities"
 	"capstone/errorHandlers"
 	"capstone/mocks/repositories"
 	"capstone/usecases"
-	"errors"
+
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"gorm.io/gorm"
-	"testing"
 )
 
 func TestCreateDestinationMedia(t *testing.T) {

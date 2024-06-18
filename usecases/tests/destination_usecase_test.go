@@ -1,17 +1,19 @@
 package tests
 
 import (
+	"errors"
+	"testing"
+
 	"capstone/dto"
 	"capstone/entities"
 	"capstone/errorHandlers"
 	"capstone/mocks/externals"
 	"capstone/mocks/repositories"
 	"capstone/usecases"
-	"errors"
+
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestSearchDestinations(t *testing.T) {
@@ -210,7 +212,6 @@ func TestDetailDestination(t *testing.T) {
 						},
 					},
 				}, nil).Once()
-
 			},
 			mockSimilarDestinationSetup: func() {
 				mockDestinationRepo.On("FindByCategoryId", mock.Anything).Return([]entities.Destination{
