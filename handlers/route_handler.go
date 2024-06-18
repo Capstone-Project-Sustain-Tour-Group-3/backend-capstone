@@ -149,23 +149,13 @@ func (h *RouteHandler) SaveRoute(ctx echo.Context) error {
 		})
 	}
 
-	for _, detail := range request.RouteDetails {
-		if err := helpers.ValidateRequest(detail); err != nil {
-			return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
-				Status:  "failed",
-				Message: "permintaan route detail tidak valid. silakan periksa kembali data yang anda masukkan. destination_id = " + detail.DestinationId.String(),
-				Errors:  err,
-			})
-		}
-	}
-
 	err := h.RouteUsecase.SaveRoute(&request)
 
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
 	response := helpers.Response(dto.ResponseParams{
-		StatusCode: http.StatusOK,
+		StatusCode: http.StatusCreated,
 		Message:    "data rute berhasil disimpan",
 	})
 
