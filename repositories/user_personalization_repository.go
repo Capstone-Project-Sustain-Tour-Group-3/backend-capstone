@@ -26,10 +26,12 @@ func (r *userPersonalizationRepository) Create(userPersonalization *entities.Use
 
 func (r *userPersonalizationRepository) FindByUserId(uid uuid.UUID) (*entities.UserPersonalization, error) {
 	userPersonalization := new(entities.UserPersonalization)
-	if err := r.db.
+	db := r.db.Begin()
+	if err := db.
 		Preload("PersonalizationProvinces").
 		Preload("PersonalizationCategories").
 		First(userPersonalization, "user_id = ?", uid).Error; err != nil {
+		db.Rollback()
 		return nil, err
 	}
 	return userPersonalization, nil

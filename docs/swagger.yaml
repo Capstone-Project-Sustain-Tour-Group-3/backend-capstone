@@ -138,7 +138,7 @@ paths:
       summary: Menyimpan Rekomendasi Rute
       description: API untuk menyimpan rekomendasi rute.
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -253,7 +253,7 @@ paths:
       summary: Menghapus Rekomendasi Rute
       description: API untuk menghapus rekomendasi rute.
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -1206,7 +1206,7 @@ paths:
         - Mobile - Profile
       summary: Mendapatkan Data Rute
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       description: API untuk mendapatkan data rute yang tersedia.
       responses:
         '200':
@@ -1255,7 +1255,7 @@ paths:
         - Mobile - Profile
       summary: Mendapatkan Detail Rute
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       description: API untuk mendapatkan detail rute berdasarkan ID.
       parameters:
         - in: path
@@ -1295,12 +1295,14 @@ paths:
                             nama_destinasi:
                               type: string
                               example: 'Pantai Tanjung Karang'
-                            jam_buka:
+                            waktu_kunjungan:
                               type: string
-                              example: '0:00'
-                            jam_tutup:
+                              description: waktu kunjungan destinasi
+                              example: '08:00'
+                            waktu_selesai_kunjungan:
                               type: string
-                              example: '23:59'
+                              description: waktu selesai kunjungan destinasi
+                              example: '09:00'
                             biaya:
                               type: integer
                               example: 10000
@@ -2576,6 +2578,19 @@ paths:
 
         '401':
           $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Provinsi pilihan ke-1 tidak ditemukan
         '409':
           description: Conflict
           content:
@@ -3489,10 +3504,10 @@ components:
           example: 1
         visit_start:
           type: string
-          example: "08:30"
+          example: '08:30'
         visit_end:
           type: string
-          example: "09:30"
+          example: '09:30'
 
     UrlVideo:
       type: object
@@ -3863,7 +3878,6 @@ components:
                         waktu_selesai:
                           type: string
                           example: '10:00'
-
 
   securitySchemes:
     BearerAuth:
