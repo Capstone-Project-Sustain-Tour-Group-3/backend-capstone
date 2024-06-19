@@ -1295,12 +1295,14 @@ paths:
                             nama_destinasi:
                               type: string
                               example: 'Pantai Tanjung Karang'
-                            jam_buka:
+                            waktu_kunjungan:
                               type: string
-                              example: '0:00'
-                            jam_tutup:
+                              description: waktu kunjungan destinasi
+                              example: '08:00'
+                            waktu_selesai_kunjungan:
                               type: string
-                              example: '23:59'
+                              description: waktu selesai kunjungan destinasi
+                              example: '09:00'
                             biaya:
                               type: integer
                               example: 10000

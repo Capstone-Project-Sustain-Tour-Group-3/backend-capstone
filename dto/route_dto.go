@@ -79,22 +79,22 @@ type GetDetailRouteByCurrUserRequest struct {
 }
 
 type DetailRouteByCurrUserResponse struct {
-	Id            uuid.UUID `json:"id"`
-	NamaDestinasi string    `json:"nama_destinasi"`
-	JamBuka       string    `json:"jam_buka"`
-	JamTutup      string    `json:"jam_tutup"`
-	Biaya         float64   `json:"biaya"`
+	Id                    uuid.UUID `json:"id"`
+	NamaDestinasi         string    `json:"nama_destinasi"`
+	WaktuKunjungan        string    `json:"waktu_kunjungan"`
+	WaktuSelesaiKunjungan string    `json:"waktu_selesai_kunjungan"`
+	Biaya                 float64   `json:"biaya"`
 }
 
 func ToDetailRouteByCurrUserResponse(route *entities.Route) *GetDetailRouteByCurrUserRequest {
 	var destinasi []DetailRouteByCurrUserResponse
 	for _, routeDetail := range route.RouteDetail {
 		destinasi = append(destinasi, DetailRouteByCurrUserResponse{
-			Id:            routeDetail.DestinationId,
-			NamaDestinasi: routeDetail.Destination.Name,
-			JamBuka:       routeDetail.Destination.OpenTime,
-			JamTutup:      routeDetail.Destination.CloseTime,
-			Biaya:         routeDetail.Destination.EntryPrice,
+			Id:                    routeDetail.DestinationId,
+			NamaDestinasi:         routeDetail.Destination.Name,
+			WaktuKunjungan:        string(routeDetail.VisitStart)[:5],
+			WaktuSelesaiKunjungan: string(routeDetail.VisitEnd)[:5],
+			Biaya:                 routeDetail.Destination.EntryPrice,
 		})
 	}
 	response := GetDetailRouteByCurrUserRequest{
