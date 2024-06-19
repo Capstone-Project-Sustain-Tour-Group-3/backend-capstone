@@ -13,8 +13,10 @@ type RouteRepository interface {
 	FindAll(page, limit int, searchQuery string) (*[]entities.Route, *int64, error)
 	FindById(id uuid.UUID) (*entities.Route, error)
 	Delete(route *entities.Route) error
-
 	FindVisitedByUserSubquery(uid uuid.UUID) *gorm.DB
+	Create(route *entities.Route) error
+	FindAllByCurrentUser(user_id uuid.UUID) (*[]entities.Route, error)
+	FindByIdCurrentUser(user_id, id uuid.UUID) (*entities.Route, error)
 }
 
 type routeRepository struct {
@@ -78,4 +80,38 @@ func (r *routeRepository) FindVisitedByUserSubquery(uid uuid.UUID) *gorm.DB {
 		Distinct("route_details.destination_id").
 		Joins("INNER JOIN route_details ON route_details.route_id = routes.id").
 		Where("routes.user_id = ?", uid)
+}
+
+func (r *routeRepository) Create(route *entities.Route) error {
+	return r.db.Create(route).Error
+}
+
+func (r *routeRepository) FindAllByCurrentUser(user_id uuid.UUID) (*[]entities.Route, error) {
+	var routes []entities.Route
+	if err := r.db.Debug().
+		Preload("User").
+		Preload("RouteDetail").
+		Preload("RouteDetail.Destination").
+		Where("user_id = ?", user_id).
+		Find(&routes).
+		Error; err != nil {
+		return nil, err
+	}
+
+	return &routes, nil
+}
+
+func (r *routeRepository) FindByIdCurrentUser(user_id, id uuid.UUID) (*entities.Route, error) {
+	var route entities.Route
+	if err := r.db.Debug().
+		Preload("User").
+		Preload("City").
+		Preload("RouteDetail").
+		Preload("RouteDetail.Destination").
+		Where("id = ? AND user_id = ?", id, user_id).
+		First(&route).
+		Error; err != nil {
+		return nil, err
+	}
+	return &route, nil
 }
