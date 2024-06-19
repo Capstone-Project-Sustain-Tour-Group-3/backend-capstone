@@ -61,7 +61,7 @@ func (h *personalizationHandler) CreatePersonalization(ctx echo.Context) error {
 	if err := ctx.Bind(&req); err != nil {
 		return errorHandlers.HandleError(
 			ctx,
-			&errorHandlers.BadRequestError{Message: err.Error()},
+			&errorHandlers.BadRequestError{Message: "Format data permintaan tidak valid"},
 		)
 	}
 
