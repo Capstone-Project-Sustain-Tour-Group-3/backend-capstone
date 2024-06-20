@@ -264,6 +264,49 @@ func (h *DestinationHandler) UpdateDestination(ctx echo.Context) error {
 		})
 	}
 
+	files, _ := ctx.MultipartForm()
+
+	fileHeaders := files.File["file_medias"]
+
+	for i, fileHeader := range fileHeaders {
+		file, errFile := fileHeader.Open()
+		if errFile != nil {
+			return errorHandlers.HandleError(ctx, err)
+		}
+		defer file.Close()
+
+		var file_juduls []string
+		if err = json.Unmarshal([]byte(ctx.FormValue("file_juduls")), &file_juduls); err != nil {
+			return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+				Status:  "error",
+				Message: "Invalid file_juduls",
+				Errors:  err.Error(),
+			})
+		}
+
+		var file_ids []string
+		if err = json.Unmarshal([]byte(ctx.FormValue("file_ids")), &file_ids); err != nil {
+			return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+				Status:  "error",
+				Message: "Invalid file_ids",
+				Errors:  err.Error(),
+			})
+		}
+
+		if file_ids[i] == "" {
+			req.DestinationImages = append(req.DestinationImages, dto.UpdateDestinationImageRequest{
+				File:  file, // atau simpan dalam format yang diperlukan
+				Title: file_juduls[i],
+			})
+		} else {
+			req.DestinationImages = append(req.DestinationImages, dto.UpdateDestinationImageRequest{
+				Id:    uuid.MustParse(file_ids[i]),
+				File:  file, // atau simpan dalam format yang diperlukan
+				Title: file_juduls[i],
+			})
+		}
+	}
+
 	reqJSON, _ := json.MarshalIndent(req, "", "  ")
 
 	fmt.Println(string(reqJSON))
