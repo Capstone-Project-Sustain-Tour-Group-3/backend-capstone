@@ -149,57 +149,8 @@ func (h *DestinationHandler) GetDestinationById(ctx echo.Context) error {
 func (h *DestinationHandler) CreateDestination(ctx echo.Context) error {
 	var req dto.CreateDestinationRequest
 
-	// Bind basic fields
-	req.Name = ctx.FormValue("nama_destinasi")
-	req.Description = ctx.FormValue("deskripsi")
-	req.OpenTime = ctx.FormValue("jam_buka")
-	req.CloseTime = ctx.FormValue("jam_tutup")
-	req.EntryPrice, _ = strconv.ParseFloat(ctx.FormValue("harga_masuk"), 64)
-	req.CategoryId, _ = uuid.Parse(ctx.FormValue("id_kategori"))
-	req.Latitude, _ = strconv.ParseFloat(ctx.FormValue("latitude"), 64)
-	req.Longitude, _ = strconv.ParseFloat(ctx.FormValue("longitude"), 64)
-
-	// Unmarshal nested JSON fields
-	if err := json.Unmarshal([]byte(ctx.FormValue("fasilitas")), &req.FacilityIds); err != nil {
-		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
-			Status:  "error",
-			Message: "Invalid fasilitas",
-			Errors:  err.Error(),
-		})
-	}
-
-	if err := json.Unmarshal([]byte(ctx.FormValue("alamat_destinasi")), &req.DestinationAddress); err != nil {
-		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
-			Status:  "error",
-			Message: "Invalid alamat destinasi",
-			Errors:  err.Error(),
-		})
-	}
-
-	files, _ := ctx.MultipartForm()
-
-	fileHeaders := files.File["files"]
-
-	for i, fileHeader := range fileHeaders {
-		file, err := fileHeader.Open()
-		if err != nil {
-			return errorHandlers.HandleError(ctx, err)
-		}
-		defer file.Close()
-
-		var judul []string
-		if err = json.Unmarshal([]byte(ctx.FormValue("judul")), &judul); err != nil {
-			return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
-				Status:  "error",
-				Message: "Invalid judul",
-				Errors:  err.Error(),
-			})
-		}
-
-		req.DestinationImages = append(req.DestinationImages, dto.CreateDestinationImageRequest{
-			File:  file, // atau simpan dalam format yang diperlukan
-			Title: judul[i],
-		})
+	if err := ctx.Bind(&req); err != nil {
+		return errorHandlers.HandleError(ctx, err)
 	}
 
 	if err := helpers.ValidateRequest(req); err != nil {
@@ -209,10 +160,6 @@ func (h *DestinationHandler) CreateDestination(ctx echo.Context) error {
 			Errors:  err,
 		})
 	}
-
-	reqJSON, _ := json.MarshalIndent(req, "", "  ")
-
-	fmt.Println(string(reqJSON))
 
 	err := h.usecase.CreateDestination(&req)
 	if err != nil {

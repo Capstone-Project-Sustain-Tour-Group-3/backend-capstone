@@ -2702,7 +2702,7 @@ paths:
       requestBody:
         required: true
         content:
-          multipart/form-data:
+          application/json:
             schema:
               type: object
               properties:
@@ -2743,22 +2743,9 @@ paths:
                   type: array
                   items:
                     type: string
-                    format: uuid
                   description: Array ID fasilitas
                   example:
                     ['515cb2da-3361-48b8-99fd-bd894828efa1', '515cb2da-3361-48b8-99fd-bd894828efa2']
-                files:
-                  type: array
-                  items:
-                    type: string
-                    format: binary
-                  description: Array of image files
-                judul:
-                  type: array
-                  items:
-                    type: string
-                  description: Array of image titles
-
                 alamat_destinasi:
                   type: object
                   properties:

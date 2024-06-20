@@ -123,22 +123,6 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 		return fmt.Errorf("error when create destination facility: %w", err)
 	}
 
-	for _, image := range destinationReq.DestinationImages {
-		urlMedia, errFile := uc.cloudinaryClient.UploadImage(image.File, "destinations")
-
-		if errFile != nil {
-			txDestination.Rollback()
-			return fmt.Errorf("error when upload image to cloud: %w", errFile)
-		}
-
-		destinationMedia := dto.ToDestinationMedia(destination.Id, "image", urlMedia, image.Title)
-
-		if err = uc.destinationMediaRepo.Create(destinationMedia, txDestination); err != nil {
-			txDestination.Rollback()
-			return fmt.Errorf("error when create destination media: %w", err)
-		}
-	}
-
 	destinationAddress := dto.ToDestinationAddress(destination.Id, destinationReq.DestinationAddress)
 
 	// check province

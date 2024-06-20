@@ -82,8 +82,8 @@ func (h *DestinationMediaHandler) DetailDestinationMedia(ctx echo.Context) error
 
 func (h *DestinationMediaHandler) CreateDestinationMedia(ctx echo.Context) error {
 	var req dto.CreateDestinationMediaRequest
-	err := ctx.Bind(&req)
-	if err != nil {
+
+	if err := ctx.Bind(&req); err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
 
@@ -95,7 +95,7 @@ func (h *DestinationMediaHandler) CreateDestinationMedia(ctx echo.Context) error
 		})
 	}
 
-	if err = h.usecase.Create(req); err != nil {
+	if err := h.usecase.Create(req); err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
 
