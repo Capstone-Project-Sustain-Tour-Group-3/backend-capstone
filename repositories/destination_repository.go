@@ -24,8 +24,8 @@ type IDestinationRepository interface {
 	FindPopularDestinationVideos() (*[]entities.Destination, error)
 	FindBySubqueryRoute(subquery *gorm.DB, isVisited bool, provinceIds []string, categoryIds []uuid.UUID) (*[]entities.Destination, error)
 	Create(destination *entities.Destination, tx *gorm.DB) error
-	Update(destination *entities.Destination) error
-	Delete(destination *entities.Destination) error
+	Update(destination *entities.Destination, tx *gorm.DB) error
+	Delete(destination *entities.Destination, tx *gorm.DB) error
 	BeginTx() *gorm.DB
 }
 
@@ -158,15 +158,15 @@ func (r *DestinationRepository) Create(destination *entities.Destination, tx *go
 	return nil
 }
 
-func (r *DestinationRepository) Update(destination *entities.Destination) error {
-	if err := r.db.Save(&destination).Error; err != nil {
+func (r *DestinationRepository) Update(destination *entities.Destination, tx *gorm.DB) error {
+	if err := tx.Save(&destination).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *DestinationRepository) Delete(destination *entities.Destination) error {
-	if err := r.db.Delete(&destination).Error; err != nil {
+func (r *DestinationRepository) Delete(destination *entities.Destination, tx *gorm.DB) error {
+	if err := tx.Delete(&destination).Error; err != nil {
 		return err
 	}
 	return nil

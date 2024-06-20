@@ -14,8 +14,9 @@ type IDestinationMediaRepository interface {
 	FindAll(page, limit int, searchQuery string) (*int64, []entities.DestinationMedia, error)
 	FindById(id uuid.UUID) (*entities.DestinationMedia, error)
 	Update(destinationMedia *entities.DestinationMedia) error
-	Delete(destinationMedia *entities.DestinationMedia) error
-	DeleteMany(destinationMedias *[]entities.DestinationMedia) error
+	Delete(destinationMedia *entities.DestinationMedia, tx *gorm.DB) error
+	DeleteMany(destinationMedias *[]entities.DestinationMedia, tx *gorm.DB) error
+	BeginTx() *gorm.DB
 }
 
 type DestinationMediaRepository struct {
@@ -24,6 +25,10 @@ type DestinationMediaRepository struct {
 
 func NewDestinationMediaRepository(db *gorm.DB) *DestinationMediaRepository {
 	return &DestinationMediaRepository{db}
+}
+
+func (r *DestinationMediaRepository) BeginTx() *gorm.DB {
+	return r.db.Begin()
 }
 
 func (r *DestinationMediaRepository) Create(destinationMedia *entities.DestinationMedia, tx *gorm.DB) error {
@@ -85,14 +90,14 @@ func (r *DestinationMediaRepository) Update(destinationMedia *entities.Destinati
 	return nil
 }
 
-func (r *DestinationMediaRepository) Delete(destinationMedia *entities.DestinationMedia) error {
-	if err := r.db.Delete(destinationMedia).Error; err != nil {
+func (r *DestinationMediaRepository) Delete(destinationMedia *entities.DestinationMedia, tx *gorm.DB) error {
+	if err := tx.Delete(destinationMedia).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *DestinationMediaRepository) DeleteMany(destinationMedias *[]entities.DestinationMedia) error {
+func (r *DestinationMediaRepository) DeleteMany(destinationMedias *[]entities.DestinationMedia, tx *gorm.DB) error {
 	if len(*destinationMedias) == 0 {
 		return nil
 	}
@@ -103,7 +108,7 @@ func (r *DestinationMediaRepository) DeleteMany(destinationMedias *[]entities.De
 		ids = append(ids, destinationMedia.Id)
 	}
 
-	if err := r.db.Where("id IN ?", ids).Delete(&entities.DestinationMedia{}).Error; err != nil {
+	if err := tx.Where("id IN ?", ids).Delete(&entities.DestinationMedia{}).Error; err != nil {
 		return err
 	}
 	return nil
