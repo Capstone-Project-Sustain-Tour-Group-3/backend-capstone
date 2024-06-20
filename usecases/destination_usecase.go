@@ -226,6 +226,36 @@ func (uc *DestinationUsecase) UpdateDestination(id uuid.UUID, destinationReq *dt
 		return fmt.Errorf("error when update destination address: %w", err)
 	}
 
+	for _, image := range destinationReq.DestinationImages {
+		urlMedia, errFile := uc.cloudinaryClient.UploadImage(image.File, "destinations")
+
+		if errFile != nil {
+			return fmt.Errorf("error when upload image to cloud: %w", errFile)
+		}
+
+		if image.Id == uuid.Nil {
+			fmt.Println("Create gambar baru")
+			destinationMedia := dto.ToDestinationMedia(destination.Id, "image", urlMedia, image.Title)
+			if err = uc.destinationMediaRepo.Create(destinationMedia, nil); err != nil {
+				return fmt.Errorf("error when create destination media: %w", err)
+			}
+		} else {
+			fmt.Println("Update gambar lama")
+			destinationMedia, errDestinationMedia := uc.destinationMediaRepo.FindById(image.Id)
+			if errDestinationMedia != nil {
+				return fmt.Errorf("error when find destination media: %w", errDestinationMedia)
+			}
+
+			destinationMedia.DestinationId = destination.Id
+			destinationMedia.Url = urlMedia
+			destinationMedia.Title = image.Title
+
+			if err = uc.destinationMediaRepo.Update(destinationMedia); err != nil {
+				return fmt.Errorf("error when update destination media: %w", err)
+			}
+		}
+	}
+
 	return nil
 }
 

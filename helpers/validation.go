@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"net/http"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 )
@@ -51,6 +52,8 @@ func errorMessage(fieldError validator.FieldError) string {
 		return fmt.Sprintf("Kolom %s harus berada pada rentang -90 sampai 90", fieldError.Field())
 	case "longitude":
 		return fmt.Sprintf("Kolom %s harus berada pada rentang -180 sampai 180", fieldError.Field())
+	case "fileext":
+		return fmt.Sprintf("Kolom %s harus berupa file ekstensi %s", fieldError.Field(), fieldError.Param())
 	}
 
 	return fieldError.Error()
@@ -89,8 +92,27 @@ func (i *validationHelper) IsValidImageSize(fileHeader *multipart.FileHeader) bo
 	return fileSize <= int64(maxSize)
 }
 
+func fileExtValidator(fl validator.FieldLevel) bool {
+	param := fl.Param()
+	allowedExtensions := strings.Split(param, " ")
+
+	url := fl.Field().String()
+	ext := strings.ToLower(strings.Split(url, "?")[0])
+
+	for _, allowedExt := range allowedExtensions {
+		if strings.HasSuffix(ext, "."+allowedExt) {
+			return true
+		}
+	}
+	return false
+}
+
 func ValidateRequest(str interface{}) interface{} {
 	validate := validator.New()
+	if err := validate.RegisterValidation("fileext", fileExtValidator); err != nil {
+		fmt.Println("Failed to register validation ", err)
+		panic(err)
+	}
 
 	if err := validate.Struct(str); err != nil {
 		var ve validator.ValidationErrors

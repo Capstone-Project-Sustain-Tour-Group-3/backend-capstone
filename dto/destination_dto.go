@@ -355,6 +355,12 @@ type CreateDestinationRequest struct {
 	//DestinationImages  []CreateDestinationImageRequest `json:"gambar" form:"gambar"`
 }
 
+type UpdateDestinationImageRequest struct {
+	Id    uuid.UUID      `json:"id" form:"id" validate:"required"`
+	File  multipart.File `json:"file" form:"file" validate:"required"`
+	Title string         `json:"judul" form:"judul" validate:"required"`
+}
+
 type UpdateDestinationRequest struct {
 	Name               string                          `json:"nama_destinasi" form:"nama_destinasi" validate:"required"`
 	Description        string                          `json:"deskripsi" form:"deskripsi" validate:"required"`
@@ -366,6 +372,7 @@ type UpdateDestinationRequest struct {
 	Longitude          float64                         `json:"longitude" form:"longitude" validate:"required"`
 	FacilityIds        []uuid.UUID                     `json:"fasilitas" form:"fasilitas" validate:"required"`
 	DestinationAddress CreateDestinationAddressRequest `json:"alamat_destinasi" form:"alamat_destinasi" validate:"required"`
+	DestinationImages  []UpdateDestinationImageRequest `json:"gambar" form:"gambar"`
 }
 
 type CreateDestinationResponse struct {
