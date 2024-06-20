@@ -93,6 +93,7 @@ func (r *routeRepository) FindAllByCurrentUser(user_id uuid.UUID) (*[]entities.R
 		Preload("RouteDetail").
 		Preload("RouteDetail.Destination").
 		Where("user_id = ?", user_id).
+		Order("created_at DESC").
 		Find(&routes).
 		Error; err != nil {
 		return nil, err
