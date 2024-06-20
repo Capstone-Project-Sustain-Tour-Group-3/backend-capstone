@@ -60,16 +60,16 @@ func (m *MockDestinationRepository) Create(destination *entities.Destination, tx
 	return args.Error(1)
 }
 
-func (m *MockDestinationRepository) Update(destination *entities.Destination) error {
-	args := m.Called(destination)
+func (m *MockDestinationRepository) Update(destination *entities.Destination, tx *gorm.DB) error {
+	args := m.Called(destination, tx)
 	if args.Get(0) == nil {
 		return args.Error(0)
 	}
 	return args.Error(0)
 }
 
-func (m *MockDestinationRepository) Delete(destination *entities.Destination) error {
-	args := m.Called(destination)
+func (m *MockDestinationRepository) Delete(destination *entities.Destination, tx *gorm.DB) error {
+	args := m.Called(destination, tx)
 	if args.Get(0) == nil {
 		return args.Error(1)
 	}

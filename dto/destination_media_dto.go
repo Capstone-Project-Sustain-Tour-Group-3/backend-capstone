@@ -1,10 +1,23 @@
 package dto
 
 import (
+	"mime/multipart"
+
 	"capstone/entities"
 
 	"github.com/google/uuid"
 )
+
+type UploadDestinationMediaRequest struct {
+	DestinationId uuid.UUID      `json:"destination_id" form:"destination_id" validate:"required"`
+	File          multipart.File `json:"file" form:"file" validate:"required"`
+	Title         string         `json:"title" form:"title" validate:"required"`
+}
+
+type UpdateImageDestinationMediaRequest struct {
+	File  multipart.File `json:"file" form:"file" validate:"required"`
+	Title string         `json:"title" form:"title" validate:"required"`
+}
 
 type CreateDestinationMediaRequest struct {
 	DestinationId uuid.UUID `json:"destination_id" validate:"required"`

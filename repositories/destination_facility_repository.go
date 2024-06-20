@@ -11,9 +11,9 @@ type IDestinationFacilityRepository interface {
 	Create(destinationFacilities *[]entities.DestinationFacility, tx *gorm.DB) error
 	FindAll() ([]entities.DestinationFacility, error)
 	FindById(id uuid.UUID) (*entities.DestinationFacility, error)
-	Update(destinationFacility *entities.DestinationFacility) error
+	Update(destinationFacility *entities.DestinationFacility, tx *gorm.DB) error
 	Delete(destinationFacility *entities.DestinationFacility) error
-	DeleteMany(destinationFacilities *[]entities.DestinationFacility) error
+	DeleteMany(destinationFacilities *[]entities.DestinationFacility, tx *gorm.DB) error
 }
 
 type DestinationFacilityRepository struct {
@@ -47,8 +47,8 @@ func (r *DestinationFacilityRepository) FindById(id uuid.UUID) (*entities.Destin
 	return destinationFacility, nil
 }
 
-func (r *DestinationFacilityRepository) Update(destinationFacility *entities.DestinationFacility) error {
-	if err := r.db.Save(destinationFacility).Error; err != nil {
+func (r *DestinationFacilityRepository) Update(destinationFacility *entities.DestinationFacility, tx *gorm.DB) error {
+	if err := tx.Save(destinationFacility).Error; err != nil {
 		return err
 	}
 	return nil
@@ -61,7 +61,7 @@ func (r *DestinationFacilityRepository) Delete(destinationFacility *entities.Des
 	return nil
 }
 
-func (r *DestinationFacilityRepository) DeleteMany(destinationFacilities *[]entities.DestinationFacility) error {
+func (r *DestinationFacilityRepository) DeleteMany(destinationFacilities *[]entities.DestinationFacility, tx *gorm.DB) error {
 	if len(*destinationFacilities) == 0 {
 		return nil
 	}
@@ -71,7 +71,7 @@ func (r *DestinationFacilityRepository) DeleteMany(destinationFacilities *[]enti
 		ids = append(ids, destinationFacility.Id)
 	}
 
-	if err := r.db.Where("id IN ?", ids).Delete(&entities.DestinationFacility{}).Error; err != nil {
+	if err := tx.Where("id IN ?", ids).Delete(&entities.DestinationFacility{}).Error; err != nil {
 		return err
 	}
 

@@ -123,22 +123,6 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 		return fmt.Errorf("error when create destination facility: %w", err)
 	}
 
-	for _, image := range destinationReq.DestinationImages {
-		urlMedia, errFile := uc.cloudinaryClient.UploadImage(image.File, "destinations")
-
-		if errFile != nil {
-			txDestination.Rollback()
-			return fmt.Errorf("error when upload image to cloud: %w", errFile)
-		}
-
-		destinationMedia := dto.ToDestinationMedia(destination.Id, "image", urlMedia, image.Title)
-
-		if err = uc.destinationMediaRepo.Create(destinationMedia, txDestination); err != nil {
-			txDestination.Rollback()
-			return fmt.Errorf("error when create destination media: %w", err)
-		}
-	}
-
 	destinationAddress := dto.ToDestinationAddress(destination.Id, destinationReq.DestinationAddress)
 
 	// check province
@@ -196,20 +180,25 @@ func (uc *DestinationUsecase) UpdateDestination(id uuid.UUID, destinationReq *dt
 	}
 	destination.CategoryId = destinationReq.CategoryId
 
+	txDestination := uc.destinationRepo.BeginTx()
+
 	// update facilities
-	if err = uc.destinationFacilityRepo.DeleteMany(destination.DestinationFacilities); err != nil {
+	if err = uc.destinationFacilityRepo.DeleteMany(destination.DestinationFacilities, txDestination); err != nil {
+		txDestination.Rollback()
 		return fmt.Errorf("error when delete destination facility: %w", err)
 	}
 
 	destinationFacilities := dto.ToDestinationFacilities(destination.Id, destinationReq.FacilityIds)
 
 	for _, facility := range *destinationFacilities {
-		if err = uc.destinationFacilityRepo.Update(&facility); err != nil {
+		if err = uc.destinationFacilityRepo.Update(&facility, txDestination); err != nil {
+			txDestination.Rollback()
 			return fmt.Errorf("error when update destination facility: %w", err)
 		}
 	}
 
-	if err = uc.destinationRepo.Update(destination); err != nil {
+	if err = uc.destinationRepo.Update(destination, txDestination); err != nil {
+		txDestination.Rollback()
 		return fmt.Errorf("error when update destination: %w", err)
 	}
 
@@ -221,6 +210,7 @@ func (uc *DestinationUsecase) UpdateDestination(id uuid.UUID, destinationReq *dt
 	province, err := uc.provinceRepo.FindById(destinationAddress.ProvinceId)
 
 	if err != nil || province == nil {
+		txDestination.Rollback()
 		return errors.New("province not found")
 	}
 
@@ -228,6 +218,7 @@ func (uc *DestinationUsecase) UpdateDestination(id uuid.UUID, destinationReq *dt
 	city, err := uc.cityRepo.FindById(destinationAddress.CityId)
 
 	if err != nil || city == nil {
+		txDestination.Rollback()
 		return errors.New("city not found")
 	}
 
@@ -235,42 +226,16 @@ func (uc *DestinationUsecase) UpdateDestination(id uuid.UUID, destinationReq *dt
 	subdistrict, err := uc.subdistrictRepo.FindById(destinationAddress.SubdistrictId)
 
 	if err != nil || subdistrict == nil {
+		txDestination.Rollback()
 		return errors.New("subdistrict not found")
 	}
 
-	if err = uc.destinationAddressRepo.Update(destinationAddress); err != nil {
+	if err = uc.destinationAddressRepo.Update(destinationAddress, txDestination); err != nil {
+		txDestination.Rollback()
 		return fmt.Errorf("error when update destination address: %w", err)
 	}
 
-	for _, image := range destinationReq.DestinationImages {
-		urlMedia, errFile := uc.cloudinaryClient.UploadImage(image.File, "destinations")
-
-		if errFile != nil {
-			return fmt.Errorf("error when upload image to cloud: %w", errFile)
-		}
-
-		if image.Id == uuid.Nil {
-			fmt.Println("Create gambar baru")
-			destinationMedia := dto.ToDestinationMedia(destination.Id, "image", urlMedia, image.Title)
-			if err = uc.destinationMediaRepo.Create(destinationMedia, nil); err != nil {
-				return fmt.Errorf("error when create destination media: %w", err)
-			}
-		} else {
-			fmt.Println("Update gambar lama")
-			destinationMedia, errDestinationMedia := uc.destinationMediaRepo.FindById(image.Id)
-			if errDestinationMedia != nil {
-				return fmt.Errorf("error when find destination media: %w", errDestinationMedia)
-			}
-
-			destinationMedia.DestinationId = destination.Id
-			destinationMedia.Url = urlMedia
-			destinationMedia.Title = image.Title
-
-			if err = uc.destinationMediaRepo.Update(destinationMedia); err != nil {
-				return fmt.Errorf("error when update destination media: %w", err)
-			}
-		}
-	}
+	txDestination.Commit()
 
 	return nil
 }
@@ -303,21 +268,35 @@ func (uc *DestinationUsecase) DeleteDestination(id uuid.UUID) error {
 		return &errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
 	}
 
-	if err = uc.destinationRepo.Delete(destination); err != nil {
+	tx := uc.destinationRepo.BeginTx()
+
+	if err = uc.destinationRepo.Delete(destination, tx); err != nil {
+		tx.Rollback()
 		return fmt.Errorf("error when delete destination: %w", err)
 	}
 
-	if err = uc.destinationAddressRepo.Delete(destination.DestinationAddress); err != nil {
+	if err = uc.destinationAddressRepo.Delete(destination.DestinationAddress, tx); err != nil {
+		tx.Rollback()
 		return fmt.Errorf("error when delete destination address: %w", err)
 	}
 
-	if err = uc.destinationFacilityRepo.DeleteMany(destination.DestinationFacilities); err != nil {
+	if err = uc.destinationFacilityRepo.DeleteMany(destination.DestinationFacilities, tx); err != nil {
+		tx.Rollback()
 		return fmt.Errorf("error when delete destination facility: %w", err)
 	}
 
-	if err = uc.destinationMediaRepo.DeleteMany(&destination.DestinationMedias); err != nil {
-		return fmt.Errorf("error when delete destination media: %w", err)
+	for _, destinationMedia := range destination.DestinationMedias {
+		if err = uc.destinationMediaRepo.Delete(&destinationMedia, tx); err != nil {
+			tx.Rollback()
+			return fmt.Errorf("error when delete destination media: %w", err)
+		}
+
+		if err = uc.cloudinaryClient.DeleteImage(destinationMedia.Url); err != nil {
+			return &errorHandlers.InternalServerError{Message: "Gagal menghapus media destinasi"}
+		}
 	}
+
+	tx.Commit()
 
 	return nil
 }
@@ -329,7 +308,16 @@ func (uc *DestinationUsecase) IncrementVisitCount(id uuid.UUID) error {
 		return err
 	}
 	destination.VisitCount++
-	return uc.destinationRepo.Update(destination)
+	txDestination := uc.destinationRepo.BeginTx()
+
+	if err = uc.destinationRepo.Update(destination, txDestination); err != nil {
+		txDestination.Rollback()
+		return fmt.Errorf("error when increment visit count: %w", err)
+	}
+
+	txDestination.Commit()
+
+	return nil
 }
 
 func (uc *DestinationUsecase) GetCitiesWithDestinations() (*[]dto.Cities, error) {

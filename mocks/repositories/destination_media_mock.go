@@ -44,18 +44,26 @@ func (m *MockDestinationMediaRepository) Update(destinationMedia *entities.Desti
 	return args.Error(0)
 }
 
-func (m *MockDestinationMediaRepository) Delete(destinationMedia *entities.DestinationMedia) error {
-	args := m.Called(destinationMedia)
+func (m *MockDestinationMediaRepository) Delete(destinationMedia *entities.DestinationMedia, tx *gorm.DB) error {
+	args := m.Called(destinationMedia, tx)
 	if args.Error(0) == nil {
 		return nil
 	}
 	return args.Error(0)
 }
 
-func (m *MockDestinationMediaRepository) DeleteMany(destinationMedias *[]entities.DestinationMedia) error {
-	args := m.Called(destinationMedias)
+func (m *MockDestinationMediaRepository) DeleteMany(destinationMedias *[]entities.DestinationMedia, tx *gorm.DB) error {
+	args := m.Called(destinationMedias, tx)
 	if args.Error(0) == nil {
 		return nil
 	}
 	return args.Error(0)
+}
+
+func (m *MockDestinationMediaRepository) BeginTx() *gorm.DB {
+	args := m.Called()
+	if args.Get(0) == nil {
+		return nil
+	}
+	return args.Get(0).(*gorm.DB)
 }

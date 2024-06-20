@@ -36,16 +36,16 @@ func (m *MockDestinationAddressRepository) FindById(id uuid.UUID) (*entities.Des
 	return args.Get(0).(*entities.DestinationAddress), nil
 }
 
-func (m *MockDestinationAddressRepository) Update(destinationAddress *entities.DestinationAddress) error {
-	args := m.Called(destinationAddress)
+func (m *MockDestinationAddressRepository) Update(destinationAddress *entities.DestinationAddress, tx *gorm.DB) error {
+	args := m.Called(destinationAddress, tx)
 	if args.Error(0) == nil {
 		return nil
 	}
 	return args.Error(0)
 }
 
-func (m *MockDestinationAddressRepository) Delete(destinationAddress *entities.DestinationAddress) error {
-	args := m.Called(destinationAddress)
+func (m *MockDestinationAddressRepository) Delete(destinationAddress *entities.DestinationAddress, tx *gorm.DB) error {
+	args := m.Called(destinationAddress, tx)
 	if args.Error(0) == nil {
 		return nil
 	}
