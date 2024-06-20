@@ -352,7 +352,6 @@ type CreateDestinationRequest struct {
 	Longitude          float64                         `json:"longitude" form:"longitude" validate:"required"`
 	FacilityIds        []uuid.UUID                     `json:"fasilitas" form:"fasilitas" validate:"required"`
 	DestinationAddress CreateDestinationAddressRequest `json:"alamat_destinasi" form:"alamat_destinasi" validate:"required"`
-	//DestinationImages  []CreateDestinationImageRequest `json:"gambar" form:"gambar"`
 }
 
 type UpdateDestinationImageRequest struct {
@@ -372,7 +371,6 @@ type UpdateDestinationRequest struct {
 	Longitude          float64                         `json:"longitude" form:"longitude" validate:"required"`
 	FacilityIds        []uuid.UUID                     `json:"fasilitas" form:"fasilitas" validate:"required"`
 	DestinationAddress CreateDestinationAddressRequest `json:"alamat_destinasi" form:"alamat_destinasi" validate:"required"`
-	DestinationImages  []UpdateDestinationImageRequest `json:"gambar" form:"gambar"`
 }
 
 type CreateDestinationResponse struct {

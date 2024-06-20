@@ -158,3 +158,93 @@ func (h *DestinationMediaHandler) DeleteDestinationMedia(ctx echo.Context) error
 
 	return ctx.JSON(http.StatusOK, response)
 }
+
+func (h *DestinationMediaHandler) UploadImageFile(ctx echo.Context) error {
+	var req dto.UploadDestinationMediaRequest
+
+	if err := ctx.Bind(&req); err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	fileMedia, err := file.Open()
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	defer fileMedia.Close()
+
+	req.File = fileMedia
+
+	if err := helpers.ValidateRequest(req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "failed",
+			Message: "permintaan tidak valid. silakan periksa kembali data yang anda masukkan.",
+			Errors:  err,
+		})
+	}
+
+	url, err := h.usecase.UploadImage(req)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "file uploaded successfully",
+		Data:       url,
+	})
+
+	return ctx.JSON(http.StatusOK, response)
+}
+
+func (h *DestinationMediaHandler) UpdateImageFile(ctx echo.Context) error {
+	var req dto.UpdateImageDestinationMediaRequest
+
+	id := ctx.Param("id")
+	destinationMediaId, err := uuid.Parse(id)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	if err = ctx.Bind(&req); err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	file, err := ctx.FormFile("file")
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	fileMedia, err := file.Open()
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	defer fileMedia.Close()
+
+	req.File = fileMedia
+
+	if err := helpers.ValidateRequest(req); err != nil {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "failed",
+			Message: "permintaan tidak valid. silakan periksa kembali data yang anda masukkan.",
+			Errors:  err,
+		})
+	}
+
+	url, err := h.usecase.UpdateImage(destinationMediaId, req)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "file uploaded successfully",
+		Data:       url,
+	})
+
+	return ctx.JSON(http.StatusOK, response)
+}

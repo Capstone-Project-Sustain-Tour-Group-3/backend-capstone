@@ -36,8 +36,8 @@ func (m *MockDestinationFacilityRepository) FindById(id uuid.UUID) (*entities.De
 	return args.Get(0).(*entities.DestinationFacility), nil
 }
 
-func (m *MockDestinationFacilityRepository) Update(destinationFacility *entities.DestinationFacility) error {
-	args := m.Called(destinationFacility)
+func (m *MockDestinationFacilityRepository) Update(destinationFacility *entities.DestinationFacility, tx *gorm.DB) error {
+	args := m.Called(destinationFacility, tx)
 	if args.Error(0) == nil {
 		return nil
 	}
@@ -52,8 +52,8 @@ func (m *MockDestinationFacilityRepository) Delete(destinationFacility *entities
 	return args.Error(0)
 }
 
-func (m *MockDestinationFacilityRepository) DeleteMany(destinationFacilities *[]entities.DestinationFacility) error {
-	args := m.Called(destinationFacilities)
+func (m *MockDestinationFacilityRepository) DeleteMany(destinationFacilities *[]entities.DestinationFacility, tx *gorm.DB) error {
+	args := m.Called(destinationFacilities, tx)
 	if args.Error(0) == nil {
 		return nil
 	}

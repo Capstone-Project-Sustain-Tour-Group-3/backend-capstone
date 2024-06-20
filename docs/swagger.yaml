@@ -2929,6 +2929,118 @@ paths:
                     type: array
                     items:
                       $ref: '#/components/schemas/Facility'
+    put:
+      tags:
+        - Admin - Destinations
+      summary: Mengubah destinasi
+      description: API untuk mengubah destinasi.
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 1bde58e3-ef19-4daa-9df7-084ba5d3e941
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nama_destinasi:
+                  type: string
+                  description: Nama destinasi
+                  example: 'Tes Destinasi'
+                deskripsi:
+                  type: string
+                  description: Deskripsi dari destinasi
+                  example: 'Lorem ipsum dolor sit amet'
+                jam_buka:
+                  type: string
+                  description: Jam buka destinasi
+                  example: '08:00'
+                jam_tutup:
+                  type: string
+                  description: Jam tutup destinasi
+                  example: '17:00'
+                harga_masuk:
+                  type: number
+                  description: Harga tiket masuk
+                  example: 20000
+                id_kategori:
+                  type: string
+                  format: uuid
+                  description: ID Kategori
+                  example: 'eb77b590-b255-4ea1-b11a-d445a259ac63'
+                latitude:
+                  type: number
+                  description: Latitude dari destinasi
+                  example: 115.1675
+                longitude:
+                  type: number
+                  description: Longitude dari destinasi
+                  example: -54.5245
+                fasilitas:
+                  type: array
+                  items:
+                    type: string
+                  description: Array ID fasilitas
+                  example:
+                    [ '920dbb67-9aee-4c58-86ed-78e5a181da0f', 'cfd261a0-6261-42cd-9c64-26742f39dd2e' ]
+                alamat_destinasi:
+                  type: object
+                  properties:
+                    id_provinsi:
+                      type: string
+                      description: ID Provinsi
+                      example: '35'
+                    id_kota:
+                      type: string
+                      description: ID Kota
+                      example: '3511'
+                    id_kecamatan:
+                      type: string
+                      description: ID Kecamatan
+                      example: '351105'
+                    jalan:
+                      type: string
+                      description: Nama jalan
+                      example: 'Jl. Raya Bandung'
+                    kode_pos:
+                      type: string
+                      description: Kode pos
+                      example: '113322'
+      responses:
+        '200':
+          description: Successfully updated destination
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Success
+                  message:
+                    type: string
+                    example: Berhasilah mengubah media destinasi
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Error
+                  message:
+                    type: string
+                    example: Internal server error
 
   /admin/routes:
     get:
@@ -3404,6 +3516,129 @@ paths:
                   message:
                     type: string
                     example: Berhasilah mengubah media destinasi
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Error
+                  message:
+                    type: string
+                    example: Internal server error
+
+  /admin/destination-media/image:
+    post:
+      tags:
+        - Admin - Manage Content
+      summary: Menambah gambar media destinasi
+      description: API untuk menambah media destinasi.
+      security:
+        - BearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                destination_id:
+                  type: string
+                  format: uuid
+                  example: 306d305e-3359-4884-8d38-89c04e8adec2
+                file:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+                  example: We Are Going On Bullrun 3
+              required:
+                - destination_id
+                - file
+                - title
+              example:
+                destination_id: 306d305e-3359-4884-8d38-89c04e8adec2
+                title: We Are Going On Bullrun 3
+      responses:
+        '200':
+          description: Successfully created image destination media
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Success
+                  message:
+                    type: string
+                    example: file uploaded successfully
+                  data:
+                    type: string
+                    example: https://res.cloudinary.com/alta-minpro/image/upload/v1718899214/tourease/destination_media/nuo5xyzcasp5m8rayeir.png
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Error
+                  message:
+                    type: string
+                    example: Internal server error
+
+  /admin/destination-media/{id}/image:
+    put:
+      tags:
+        - Admin - Manage Content
+      summary: Mengubah image media destinasi
+      description: API untuk mengubah image media destinasi.
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 1bde58e3-ef19-4daa-9df7-084ba5d3e941
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                title:
+                  type: string
+                  example: We Are Going On Bullrun 3
+      responses:
+        '200':
+          description: Successfully updated destination media
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Success
+                  message:
+                    type: string
+                    example: file uploaded successfully
+                  data:
+                    type: string
+                    example: https://res.cloudinary.com/alta-minpro/image/upload/v1718899214/tourease/destination_media/nuo5xyzcasp5m8rayeir.png
         '500':
           description: Internal server error
           content:

@@ -4,6 +4,8 @@ import (
 	"errors"
 	"testing"
 
+	"capstone/mocks/externals"
+
 	"capstone/dto"
 	"capstone/entities"
 	"capstone/errorHandlers"
@@ -19,7 +21,9 @@ import (
 func TestCreateDestinationMedia(t *testing.T) {
 	mockDestinationMediaRepo := new(repositories.MockDestinationMediaRepository)
 	mockDestinationRepo := new(repositories.MockDestinationRepository)
-	uc := usecases.NewDestinationMediaUsecase(mockDestinationMediaRepo, mockDestinationRepo)
+	mockCloudinaryClient := new(externals.MockCloudinaryClient)
+
+	uc := usecases.NewDestinationMediaUsecase(mockDestinationMediaRepo, mockDestinationRepo, mockCloudinaryClient)
 
 	testCases := []struct {
 		name          string
@@ -92,7 +96,9 @@ func TestCreateDestinationMedia(t *testing.T) {
 func TestFindAllDestinationMedia(t *testing.T) {
 	mockDestinationMediaRepo := new(repositories.MockDestinationMediaRepository)
 	mockDestinationRepo := new(repositories.MockDestinationRepository)
-	uc := usecases.NewDestinationMediaUsecase(mockDestinationMediaRepo, mockDestinationRepo)
+	mockCloudinaryClient := new(externals.MockCloudinaryClient)
+
+	uc := usecases.NewDestinationMediaUsecase(mockDestinationMediaRepo, mockDestinationRepo, mockCloudinaryClient)
 
 	destinationMedias := []entities.DestinationMedia{
 		{
@@ -175,7 +181,9 @@ func TestFindAllDestinationMedia(t *testing.T) {
 func TestFindByIdDestinationMedia(t *testing.T) {
 	mockDestinationMediaRepo := new(repositories.MockDestinationMediaRepository)
 	mockDestinationRepo := new(repositories.MockDestinationRepository)
-	uc := usecases.NewDestinationMediaUsecase(mockDestinationMediaRepo, mockDestinationRepo)
+	mockCloudinaryClient := new(externals.MockCloudinaryClient)
+
+	uc := usecases.NewDestinationMediaUsecase(mockDestinationMediaRepo, mockDestinationRepo, mockCloudinaryClient)
 
 	destinationMedia := entities.DestinationMedia{
 		Id:            uuid.MustParse("a1b2c3d4-e5f6-7890-abcd-ef0123456789"),
@@ -238,7 +246,9 @@ func TestFindByIdDestinationMedia(t *testing.T) {
 func TestUpdateDestinationMedia(t *testing.T) {
 	mockDestinationMediaRepo := new(repositories.MockDestinationMediaRepository)
 	mockDestinationRepo := new(repositories.MockDestinationRepository)
-	uc := usecases.NewDestinationMediaUsecase(mockDestinationMediaRepo, mockDestinationRepo)
+	mockCloudinaryClient := new(externals.MockCloudinaryClient)
+
+	uc := usecases.NewDestinationMediaUsecase(mockDestinationMediaRepo, mockDestinationRepo, mockCloudinaryClient)
 
 	existingMedia := entities.DestinationMedia{
 		Id:            uuid.MustParse("a1b2c3d4-e5f6-7890-abcd-ef0123456789"),
@@ -325,7 +335,9 @@ func TestUpdateDestinationMedia(t *testing.T) {
 func TestDeleteDestinationMedia(t *testing.T) {
 	mockDestinationMediaRepo := new(repositories.MockDestinationMediaRepository)
 	mockDestinationRepo := new(repositories.MockDestinationRepository)
-	uc := usecases.NewDestinationMediaUsecase(mockDestinationMediaRepo, mockDestinationRepo)
+	mockCloudinaryClient := new(externals.MockCloudinaryClient)
+
+	uc := usecases.NewDestinationMediaUsecase(mockDestinationMediaRepo, mockDestinationRepo, mockCloudinaryClient)
 
 	existingMedia := entities.DestinationMedia{
 		Id:            uuid.MustParse("a1b2c3d4-e5f6-7890-abcd-ef0123456789"),

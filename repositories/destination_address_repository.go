@@ -11,8 +11,8 @@ type IDestinationAddressRepository interface {
 	Create(destinationAddress *entities.DestinationAddress, tx *gorm.DB) error
 	FindAll() ([]entities.DestinationAddress, error)
 	FindById(id uuid.UUID) (*entities.DestinationAddress, error)
-	Update(destinationAddress *entities.DestinationAddress) error
-	Delete(destinationAddress *entities.DestinationAddress) error
+	Update(destinationAddress *entities.DestinationAddress, tx *gorm.DB) error
+	Delete(destinationAddress *entities.DestinationAddress, tx *gorm.DB) error
 }
 
 type DestinationAddressRepository struct {
@@ -46,15 +46,15 @@ func (r *DestinationAddressRepository) FindById(id uuid.UUID) (*entities.Destina
 	return destinationAddress, nil
 }
 
-func (r *DestinationAddressRepository) Update(destinationAddress *entities.DestinationAddress) error {
-	if err := r.db.Save(destinationAddress).Error; err != nil {
+func (r *DestinationAddressRepository) Update(destinationAddress *entities.DestinationAddress, tx *gorm.DB) error {
+	if err := tx.Save(destinationAddress).Error; err != nil {
 		return err
 	}
 	return nil
 }
 
-func (r *DestinationAddressRepository) Delete(destinationAddress *entities.DestinationAddress) error {
-	if err := r.db.Delete(destinationAddress).Error; err != nil {
+func (r *DestinationAddressRepository) Delete(destinationAddress *entities.DestinationAddress, tx *gorm.DB) error {
+	if err := tx.Delete(destinationAddress).Error; err != nil {
 		return err
 	}
 	return nil

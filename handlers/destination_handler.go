@@ -1,8 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
-	"fmt"
 	"math"
 	"net/http"
 	"strconv"
@@ -184,79 +182,9 @@ func (h *DestinationHandler) UpdateDestination(ctx echo.Context) error {
 		return errorHandlers.HandleError(ctx, err)
 	}
 
-	// Bind basic fields
-	req.Name = ctx.FormValue("nama_destinasi")
-	req.Description = ctx.FormValue("deskripsi")
-	req.OpenTime = ctx.FormValue("jam_buka")
-	req.CloseTime = ctx.FormValue("jam_tutup")
-	req.EntryPrice, _ = strconv.ParseFloat(ctx.FormValue("harga_masuk"), 64)
-	req.CategoryId, _ = uuid.Parse(ctx.FormValue("id_kategori"))
-	req.Latitude, _ = strconv.ParseFloat(ctx.FormValue("latitude"), 64)
-	req.Longitude, _ = strconv.ParseFloat(ctx.FormValue("longitude"), 64)
-
-	// Unmarshal nested JSON fields
-	if err = json.Unmarshal([]byte(ctx.FormValue("fasilitas")), &req.FacilityIds); err != nil {
-		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
-			Status:  "error",
-			Message: "Invalid fasilitas",
-			Errors:  err.Error(),
-		})
+	if err = ctx.Bind(&req); err != nil {
+		return errorHandlers.HandleError(ctx, err)
 	}
-
-	if err = json.Unmarshal([]byte(ctx.FormValue("alamat_destinasi")), &req.DestinationAddress); err != nil {
-		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
-			Status:  "error",
-			Message: "Invalid alamat destinasi",
-			Errors:  err.Error(),
-		})
-	}
-
-	files, _ := ctx.MultipartForm()
-
-	fileHeaders := files.File["file_medias"]
-
-	for i, fileHeader := range fileHeaders {
-		file, errFile := fileHeader.Open()
-		if errFile != nil {
-			return errorHandlers.HandleError(ctx, err)
-		}
-		defer file.Close()
-
-		var file_juduls []string
-		if err = json.Unmarshal([]byte(ctx.FormValue("file_juduls")), &file_juduls); err != nil {
-			return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
-				Status:  "error",
-				Message: "Invalid file_juduls",
-				Errors:  err.Error(),
-			})
-		}
-
-		var file_ids []string
-		if err = json.Unmarshal([]byte(ctx.FormValue("file_ids")), &file_ids); err != nil {
-			return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
-				Status:  "error",
-				Message: "Invalid file_ids",
-				Errors:  err.Error(),
-			})
-		}
-
-		if file_ids[i] == "" {
-			req.DestinationImages = append(req.DestinationImages, dto.UpdateDestinationImageRequest{
-				File:  file, // atau simpan dalam format yang diperlukan
-				Title: file_juduls[i],
-			})
-		} else {
-			req.DestinationImages = append(req.DestinationImages, dto.UpdateDestinationImageRequest{
-				Id:    uuid.MustParse(file_ids[i]),
-				File:  file, // atau simpan dalam format yang diperlukan
-				Title: file_juduls[i],
-			})
-		}
-	}
-
-	reqJSON, _ := json.MarshalIndent(req, "", "  ")
-
-	fmt.Println(string(reqJSON))
 
 	if err := helpers.ValidateRequest(req); err != nil {
 		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
