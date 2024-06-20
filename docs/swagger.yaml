@@ -138,7 +138,7 @@ paths:
       summary: Menyimpan Rekomendasi Rute
       description: API untuk menyimpan rekomendasi rute.
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       requestBody:
         required: true
         content:
@@ -253,7 +253,7 @@ paths:
       summary: Menghapus Rekomendasi Rute
       description: API untuk menghapus rekomendasi rute.
       security:
-        - BearerAuth: [ ]
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
@@ -1200,6 +1200,182 @@ paths:
                   message:
                     type: string
                     example: 'Password lama tidak valid'
+  /mobile/profile/routes:
+    get:
+      tags:
+        - Mobile - Profile
+      summary: Mendapatkan Data Rute
+      security:
+        - BearerAuth: []
+      description: API untuk mendapatkan data rute yang tersedia.
+      responses:
+        '200':
+          description: Berhasil Mendapatkan Data Rute
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Berhasil menampilkan data rute'
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: 'aa66d401-47bc-4a73-9e7c-b7d84168954a'
+                        nama_rute:
+                          type: string
+                          example: 'Jalan Jalan'
+                        biaya:
+                          type: integer
+                          example: 100000
+        '404':
+          description: Gagal Mendapatkan Data Rute
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Gagal mendapatkan data rute'
+  /mobile/profile/routes/{id}:
+    get:
+      tags:
+        - Mobile - Profile
+      summary: Mendapatkan Detail Rute
+      security:
+        - BearerAuth: []
+      description: API untuk mendapatkan detail rute berdasarkan ID.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID rute yang ingin ditampilkan
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Berhasil Mendapatkan Detail Rute
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Berhasil menampilkan data rute'
+                  data:
+                    type: object
+                    properties:
+                      nama_rute:
+                        type: string
+                        example: 'Jalan Jalan'
+                      destinasi:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: '0a0ac7b1-df14-4b09-9f96-79670b8d3c99'
+                            nama_destinasi:
+                              type: string
+                              example: 'Pantai Tanjung Karang'
+                            waktu_kunjungan:
+                              type: string
+                              description: waktu kunjungan destinasi
+                              example: '08:00'
+                            waktu_selesai_kunjungan:
+                              type: string
+                              description: waktu selesai kunjungan destinasi
+                              example: '09:00'
+                            biaya:
+                              type: integer
+                              example: 10000
+                      estimasi_biaya:
+                        type: integer
+                        example: 100000
+        '404':
+          description: Rute Tidak Ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Rute tidak ditemukan'
+    delete:
+      tags:
+        - Mobile - Profile
+      summary: Menghapus Data Rute
+      security:
+        - BearerAuth: []
+      description: API untuk menghapus data rute berdasarkan ID.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID rute yang ingin dihapus
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Data Rute Berhasil Dihapus
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Data rute berhasil dihapus'
+        '404':
+          description: Rute Tidak Ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Rute tidak ditemukan'
+        '500':
+          description: Gagal Menghapus Rute
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Gagal menghapus rute'
   /admin/users:
     get:
       tags:
@@ -2402,6 +2578,19 @@ paths:
 
         '401':
           $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Provinsi pilihan ke-1 tidak ditemukan
         '409':
           description: Conflict
           content:
@@ -3315,10 +3504,10 @@ components:
           example: 1
         visit_start:
           type: string
-          example: "08:30"
+          example: '08:30'
         visit_end:
           type: string
-          example: "09:30"
+          example: '09:30'
 
     UrlVideo:
       type: object
@@ -3689,7 +3878,6 @@ components:
                         waktu_selesai:
                           type: string
                           example: '10:00'
-
 
   securitySchemes:
     BearerAuth:

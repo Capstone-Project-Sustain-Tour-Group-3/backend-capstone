@@ -1,7 +1,10 @@
 package tests
 
 import (
+	"errors"
 	"testing"
+
+	"github.com/stretchr/testify/mock"
 
 	"capstone/entities"
 	"capstone/errorHandlers"
@@ -80,7 +83,6 @@ func TestFindAllRoute(t *testing.T) {
 				require.Equal(t, tc.expectedRoutes, routes)
 				require.Equal(t, tc.expectedTotal, total)
 			}
-
 			routeRepo.AssertExpectations(t)
 		})
 	}
@@ -215,6 +217,141 @@ func TestDeleteRoute(t *testing.T) {
 			}
 
 			routeRepo.AssertExpectations(t)
+		})
+	}
+}
+
+func TestFindAllByCurrentUser(t *testing.T) {
+	mockRouteRepo := new(repositories.MockRouteRepository)
+
+	uc := usecases.NewRouteUsecase(nil, nil, mockRouteRepo, nil, nil)
+
+	testCases := []struct {
+		name               string
+		userId             uuid.UUID
+		mockRouteRepoSetup func()
+		expectedResponse   *[]entities.Route
+		expectedError      error
+	}{
+		{
+			name:   "Success get routes by current user",
+			userId: uuid.New(),
+			mockRouteRepoSetup: func() {
+				mockRoutes := []entities.Route{
+					{Id: uuid.New(), UserId: uuid.New(), Name: "Route 1"},
+					{Id: uuid.New(), UserId: uuid.New(), Name: "Route 2"},
+				}
+
+				mockRouteRepo.On("FindAllByCurrentUser", mock.Anything).Return(&mockRoutes, nil).Once()
+			},
+			expectedResponse: &[]entities.Route{
+				{Id: uuid.New(), UserId: uuid.New(), Name: "Route 1"},
+				{Id: uuid.New(), UserId: uuid.New(), Name: "Route 2"},
+			},
+			expectedError: nil,
+		},
+		{
+			name:   "No routes found",
+			userId: uuid.New(),
+			mockRouteRepoSetup: func() {
+				mockRouteRepo.On("FindAllByCurrentUser", mock.Anything).Return(nil, &errorHandlers.NotFoundError{Message: "Gagal mendapatkan data rute"}).Once()
+			},
+			expectedResponse: nil,
+			expectedError:    &errorHandlers.NotFoundError{Message: "Gagal mendapatkan data rute"},
+		},
+		{
+			name:   "Internal server error",
+			userId: uuid.New(),
+			mockRouteRepoSetup: func() {
+				mockRouteRepo.On("FindAllByCurrentUser", mock.Anything).Return(nil, errors.New("internal error")).Once()
+			},
+			expectedResponse: nil,
+			expectedError:    &errorHandlers.NotFoundError{Message: "Gagal mendapatkan data rute"},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.mockRouteRepoSetup()
+
+			response, err := uc.FindAllByCurrentUser(tc.userId)
+
+			if tc.expectedError != nil {
+				require.Error(t, err)
+				require.EqualError(t, err, tc.expectedError.Error())
+				require.Nil(t, response)
+			} else {
+				require.NoError(t, err)
+				require.NotEmpty(t, response)
+			}
+
+			mockRouteRepo.AssertExpectations(t)
+		})
+	}
+}
+
+func TestFindByIdCurrentUser(t *testing.T) {
+	mockRouteRepo := new(repositories.MockRouteRepository)
+
+	uc := usecases.NewRouteUsecase(nil, nil, mockRouteRepo, nil, nil)
+
+	testCases := []struct {
+		name               string
+		userId, routeId    uuid.UUID
+		mockRouteRepoSetup func()
+		expectedResponse   *entities.Route
+		expectedError      error
+	}{
+		{
+			name:    "Success get route by current user",
+			userId:  uuid.New(),
+			routeId: uuid.New(),
+			mockRouteRepoSetup: func() {
+				mockRoute := &entities.Route{Id: uuid.New(), UserId: uuid.New(), Name: "Route 1"}
+
+				mockRouteRepo.On("FindByIdCurrentUser", mock.Anything, mock.Anything).Return(mockRoute, nil).Once()
+			},
+			expectedResponse: &entities.Route{Id: uuid.New(), UserId: uuid.New(), Name: "Route 1"},
+			expectedError:    nil,
+		},
+		{
+			name:    "Route not found",
+			userId:  uuid.New(),
+			routeId: uuid.New(),
+			mockRouteRepoSetup: func() {
+				mockRouteRepo.On("FindByIdCurrentUser", mock.Anything, mock.Anything).Return(nil, &errorHandlers.NotFoundError{Message: "Rute tidak ditemukan"}).Once()
+			},
+			expectedResponse: nil,
+			expectedError:    &errorHandlers.NotFoundError{Message: "Rute tidak ditemukan"},
+		},
+		{
+			name:    "Internal server error",
+			userId:  uuid.New(),
+			routeId: uuid.New(),
+			mockRouteRepoSetup: func() {
+				mockRouteRepo.On("FindByIdCurrentUser", mock.Anything, mock.Anything).Return(nil, &errorHandlers.NotFoundError{Message: "Rute tidak ditemukan"}).Once()
+			},
+			expectedResponse: nil,
+			expectedError:    &errorHandlers.NotFoundError{Message: "Rute tidak ditemukan"},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.mockRouteRepoSetup()
+
+			response, err := uc.FindByIdCurrentUser(tc.userId, tc.routeId)
+
+			if tc.expectedError != nil {
+				require.Error(t, err)
+				require.EqualError(t, err, tc.expectedError.Error())
+				require.Nil(t, response)
+			} else {
+				require.NoError(t, err)
+				require.NotEmpty(t, response)
+			}
+
+			mockRouteRepo.AssertExpectations(t)
 		})
 	}
 }

@@ -2,6 +2,7 @@ package usecases
 
 import (
 	"errors"
+	"fmt"
 
 	"capstone/dto"
 	"capstone/entities"
@@ -75,7 +76,11 @@ func (r *personalizationUsecase) CreatePersonalization(request *dto.Personalizat
 	var persCategories []entities.PersonalizationCategory
 	var persProvinces []entities.PersonalizationProvince
 
-	for _, category := range request.CategoryIds {
+	for idx, category := range request.CategoryIds {
+		if _, err := r.categoryRepo.FindById(category); err != nil {
+			return &errorHandlers.NotFoundError{Message: fmt.Sprintf("Kategori destinasi pilihan ke-%d tidak ditemukan", idx+1)}
+		}
+
 		persCategories = append(
 			persCategories,
 			entities.PersonalizationCategory{
@@ -85,7 +90,11 @@ func (r *personalizationUsecase) CreatePersonalization(request *dto.Personalizat
 		)
 	}
 
-	for _, province := range request.ProvinceIds {
+	for idx, province := range request.ProvinceIds {
+		if _, err := r.provinceRepo.FindById(province); err != nil {
+			return &errorHandlers.NotFoundError{Message: fmt.Sprintf("Provinsi pilihan ke-%d tidak ditemukan", idx+1)}
+		}
+
 		persProvinces = append(
 			persProvinces,
 			entities.PersonalizationProvince{

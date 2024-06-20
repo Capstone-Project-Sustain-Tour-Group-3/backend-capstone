@@ -66,6 +66,58 @@ type Duration struct {
 	Full       string `json:"full"`
 }
 
+type GetAllRouteByCurrUserResponse struct {
+	Id       uuid.UUID `json:"id"`
+	NamaRute string    `json:"nama_rute"`
+	Biaya    float64   `json:"biaya"`
+}
+
+type GetDetailRouteByCurrUserRequest struct {
+	NamaRute      string                          `json:"nama_rute"`
+	Destinasi     []DetailRouteByCurrUserResponse `json:"destinasi"`
+	EstimasiBiaya float64                         `json:"estimasi_biaya"`
+}
+
+type DetailRouteByCurrUserResponse struct {
+	Id                    uuid.UUID `json:"id"`
+	NamaDestinasi         string    `json:"nama_destinasi"`
+	WaktuKunjungan        string    `json:"waktu_kunjungan"`
+	WaktuSelesaiKunjungan string    `json:"waktu_selesai_kunjungan"`
+	Biaya                 float64   `json:"biaya"`
+}
+
+func ToDetailRouteByCurrUserResponse(route *entities.Route) *GetDetailRouteByCurrUserRequest {
+	var destinasi []DetailRouteByCurrUserResponse
+	for _, routeDetail := range route.RouteDetail {
+		destinasi = append(destinasi, DetailRouteByCurrUserResponse{
+			Id:                    routeDetail.DestinationId,
+			NamaDestinasi:         routeDetail.Destination.Name,
+			WaktuKunjungan:        string(routeDetail.VisitStart)[:5],
+			WaktuSelesaiKunjungan: string(routeDetail.VisitEnd)[:5],
+			Biaya:                 routeDetail.Destination.EntryPrice,
+		})
+	}
+	response := GetDetailRouteByCurrUserRequest{
+		NamaRute:      route.Name,
+		Destinasi:     destinasi,
+		EstimasiBiaya: route.Price,
+	}
+	return &response
+}
+
+func ToGetAllRouteByCurrUserResponse(routes *[]entities.Route) *[]GetAllRouteByCurrUserResponse {
+	var responses []GetAllRouteByCurrUserResponse
+	for _, route := range *routes {
+		response := GetAllRouteByCurrUserResponse{
+			Id:       route.Id,
+			NamaRute: route.Name,
+			Biaya:    route.Price,
+		}
+		responses = append(responses, response)
+	}
+	return &responses
+}
+
 func ToSummaryRouteResponse(startLocation StartLocation, routeDetails []RouteDetail, estimationCost Currency) *RouteSummaryResponse {
 	return &RouteSummaryResponse{
 		StartLocation:  startLocation,

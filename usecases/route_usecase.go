@@ -21,6 +21,8 @@ type RouteInterface interface {
 	DeleteRoute(id uuid.UUID) error
 	SummarizeRoute(req *dto.RouteSummaryRequest) (*dto.RouteSummaryResponse, error)
 	SaveRoute(req *dto.SaveRouteRequest) error
+	FindAllByCurrentUser(user_id uuid.UUID) (*[]entities.Route, error)
+	FindByIdCurrentUser(user_id, id uuid.UUID) (*entities.Route, error)
 }
 
 type routeUsecase struct {
@@ -160,4 +162,20 @@ func (uc *routeUsecase) SaveRoute(request *dto.SaveRouteRequest) error {
 	}
 
 	return nil
+}
+
+func (uc *routeUsecase) FindAllByCurrentUser(user_id uuid.UUID) (*[]entities.Route, error) {
+	routes, err := uc.routeRepo.FindAllByCurrentUser(user_id)
+	if err != nil {
+		return nil, &errorHandlers.NotFoundError{Message: "Gagal mendapatkan data rute"}
+	}
+	return routes, nil
+}
+
+func (uc *routeUsecase) FindByIdCurrentUser(user_id, id uuid.UUID) (*entities.Route, error) {
+	route, err := uc.routeRepo.FindByIdCurrentUser(user_id, id)
+	if err != nil {
+		return nil, &errorHandlers.NotFoundError{Message: "Rute tidak ditemukan"}
+	}
+	return route, nil
 }

@@ -150,13 +150,63 @@ func (h *RouteHandler) SaveRoute(ctx echo.Context) error {
 	}
 
 	err := h.RouteUsecase.SaveRoute(&request)
-
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
 	response := helpers.Response(dto.ResponseParams{
 		StatusCode: http.StatusCreated,
 		Message:    "data rute berhasil disimpan",
+	})
+
+	return ctx.JSON(http.StatusOK, response)
+}
+
+func (h *RouteHandler) FindAllByCurrentUser(ctx echo.Context) error {
+	userId, ok := ctx.Get("userId").(*uuid.UUID)
+	if !ok {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "failed",
+			Message: "permintaan tidak valid. silakan periksa kembali data yang anda masukkan.",
+		})
+	}
+
+	routes, err := h.RouteUsecase.FindAllByCurrentUser(*userId)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	res := dto.ToGetAllRouteByCurrUserResponse(routes)
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "berhasil menampilkan data rute",
+		Data:       res,
+	})
+
+	return ctx.JSON(http.StatusOK, response)
+}
+
+func (h *RouteHandler) FindRouteByIdCurrentUser(ctx echo.Context) error {
+	userId, ok := ctx.Get("userId").(*uuid.UUID)
+	if !ok {
+		return ctx.JSON(http.StatusBadRequest, dto.ResponseError{
+			Status:  "failed",
+			Message: "permintaan tidak valid. silakan periksa kembali data yang anda masukkan.",
+		})
+	}
+
+	id := ctx.Param("id")
+	uid, err := uuid.Parse(id)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, &errorHandlers.BadRequestError{Message: "id tidak valid"})
+	}
+	route, err := h.RouteUsecase.FindByIdCurrentUser(*userId, uid)
+	if err != nil {
+		return errorHandlers.HandleError(ctx, err)
+	}
+	res := dto.ToDetailRouteByCurrUserResponse(route)
+	response := helpers.Response(dto.ResponseParams{
+		StatusCode: http.StatusOK,
+		Message:    "berhasil menampilkan data rute",
+		Data:       res,
 	})
 
 	return ctx.JSON(http.StatusOK, response)
