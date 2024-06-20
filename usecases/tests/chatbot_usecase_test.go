@@ -1,12 +1,13 @@
 package tests
 
 import (
+	"testing"
+
 	"capstone/dto"
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/mocks/externals"
 	"capstone/usecases"
-	"testing"
 
 	"github.com/google/generative-ai-go/genai"
 	"github.com/google/uuid"
