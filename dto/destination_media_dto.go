@@ -8,7 +8,7 @@ import (
 
 type CreateDestinationMediaRequest struct {
 	DestinationId uuid.UUID `json:"destination_id" validate:"required"`
-	Url           string    `json:"url" validate:"required"`
+	Url           string    `json:"url" validate:"required,fileext=mp4 mov"`
 	Type          string    `json:"type" validate:"required,oneof=image video"`
 	Title         string    `json:"title" validate:"required"`
 }
@@ -20,7 +20,7 @@ type Destination struct {
 
 type UpdateDestinationMediaRequest struct {
 	DestinationId uuid.UUID `json:"destination_id" validate:"required"`
-	Url           string    `json:"url" validate:"required"`
+	Url           string    `json:"url" validate:"required,fileext=mp4 mov"`
 	Type          string    `json:"type" validate:"required,oneof=image video"`
 	Title         string    `json:"title" validate:"required"`
 }
