@@ -22,6 +22,8 @@ type IDestinationUsecase interface {
 	UpdateDestination(id uuid.UUID, destinationReq *dto.UpdateDestinationRequest) error
 	DeleteDestination(id uuid.UUID) error
 	IncrementVisitCount(id uuid.UUID) error
+	GetCitiesWithDestinations() (*[]dto.Cities, error)
+	GetDestinationByCityId(id string) (*[]dto.DestinationsByCity, error)
 }
 
 type DestinationUsecase struct {
@@ -75,12 +77,12 @@ func (uc *DestinationUsecase) SearchDestinations(page, limit int, searchQuery, s
 func (uc *DestinationUsecase) DetailDestination(id uuid.UUID) (*dto.DetailDestinationResponse, error) {
 	destination, err := uc.destinationRepo.FindById(id)
 	if err != nil {
-		return nil, err
+		return nil, &errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
 	}
 
 	similarDestinations, err := uc.destinationRepo.FindByCategoryId(destination.CategoryId)
 	if err != nil {
-		return nil, err
+		return nil, &errorHandlers.InternalServerError{Message: "Gagal mendapatkan destinasi serupa"}
 	}
 
 	response := dto.ToDetailDestinationResponse(destination, &similarDestinations)
@@ -257,7 +259,7 @@ func (uc *DestinationUsecase) GetAllDestinations(page, limit int, searchQuery st
 func (uc *DestinationUsecase) GetDestinationById(id uuid.UUID) (*dto.GetByIdDestinationResponse, error) {
 	destination, err := uc.destinationRepo.FindById(id)
 	if err != nil {
-		return nil, err
+		return nil, &errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
 	}
 
 	response := dto.ToGetByIdDestinationResponse(destination)
@@ -268,7 +270,7 @@ func (uc *DestinationUsecase) GetDestinationById(id uuid.UUID) (*dto.GetByIdDest
 func (uc *DestinationUsecase) DeleteDestination(id uuid.UUID) error {
 	destination, err := uc.destinationRepo.FindById(id)
 	if err != nil {
-		return err
+		return &errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
 	}
 
 	if err = uc.destinationRepo.Delete(destination); err != nil {
@@ -290,7 +292,7 @@ func (uc *DestinationUsecase) DeleteDestination(id uuid.UUID) error {
 	return nil
 }
 
-// increment visit count
+// increment visit count.
 func (uc *DestinationUsecase) IncrementVisitCount(id uuid.UUID) error {
 	destination, err := uc.destinationRepo.FindById(id)
 	if err != nil {
@@ -298,4 +300,27 @@ func (uc *DestinationUsecase) IncrementVisitCount(id uuid.UUID) error {
 	}
 	destination.VisitCount++
 	return uc.destinationRepo.Update(destination)
+}
+
+func (uc *DestinationUsecase) GetCitiesWithDestinations() (*[]dto.Cities, error) {
+	cities, err := uc.cityRepo.GetCitiesWithDestinations()
+	if err != nil {
+		return nil, &errorHandlers.InternalServerError{Message: "Gagal untuk menemukan data kota"}
+	}
+
+	response := dto.ToCitiesResponse(&cities)
+
+	return response, nil
+}
+
+func (uc *DestinationUsecase) GetDestinationByCityId(id string) (*[]dto.DestinationsByCity, error) {
+	destinations, err := uc.destinationRepo.FindDestinationByCityId(id)
+	if err != nil {
+		return nil, &errorHandlers.InternalServerError{Message: "Gagal untuk menemukan data destinasi"}
+	}
+	if len(destinations) == 0 {
+		return nil, &errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
+	}
+	response := dto.ToDestinationsByCityResponse(&destinations)
+	return response, nil
 }

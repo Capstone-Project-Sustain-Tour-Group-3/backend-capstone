@@ -9,15 +9,385 @@ servers:
     description: Development Server
 tags:
   - name: Mobile - Auth
+  - name: Mobile - Homepage
   - name: Mobile - Destinations
   - name: Mobile - Profile
   - name: Mobile - Personalization
+  - name: Mobile - Routes
   - name: Admin - Auth
+  - name: Admin - Dashboard
   - name: Admin - Destinations
   - name: Admin - Routes
   - name: Admin - Users
   - name: Admin - Admins
+  - name: Admin - Manage Content
 paths:
+  /mobile/routes/summarize:
+    post:
+      tags:
+        - Mobile - Routes
+      summary: Mendapatkan Rekomendasi Rute
+      description: API untuk mendapatkan rekomendasi rute.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id_kota:
+                  type: string
+                  example: '1001'
+                lokasi_awal:
+                  type: object
+                  properties:
+                    nama:
+                      type: string
+                      example: Nama Lokasi Awal
+                    latitude:
+                      type: number
+                      format: float
+                      example: -1.23456
+                    longitude:
+                      type: number
+                      format: float
+                      example: -6.54321
+                id_destinasi_tujuan:
+                  type: array
+                  items:
+                    type: string
+                  example:
+                    - f8fad44d-e5b1-4a3b-939e-1955bf9f7c67
+                    - 80490850-db2a-468c-948c-55a5ef26c995
+                    - 2984e114-18d1-4f22-8f6b-6fd867e8d51b
+      responses:
+        '200':
+          $ref: '#/components/responses/SummarizeRouteResponseSuccess'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                        message:
+                          type: string
+                required:
+                  - message
+              examples:
+                token tidak valid:
+                  value:
+                    message: Format token tidak valid, gunakan bearer token
+                request tidak valid:
+                  value:
+                    status: Failed
+                    message: Permintaan tidak valid. Silakan periksa kembali data yang anda masukkan.
+                    errors:
+                      - field: id_kota
+                        message: id_kota tidak boleh kosong
+                      - field: lokasi_awal
+                        message: lokasi_awal tidak boleh kosong
+                      - field: id_destinasi_tujuan
+                        message: id_destinasi_tujuan tidak boleh kosong
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Destinasi ke-2 tidak ditemukan
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Gagal mendapatkan rekomendasi rute
+
+  /mobile/routes/save:
+    post:
+      tags:
+        - Mobile - Routes
+      summary: Menyimpan Rekomendasi Rute
+      description: API untuk menyimpan rekomendasi rute.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                city_id:
+                  type: string
+                  example: '1107'
+                name:
+                  type: string
+                  example: Rute 1 swagger
+                start_location:
+                  type: string
+                  example: 'Hotel Orlando'
+                start_longitude:
+                  type: number
+                  format: double
+                  example: 26.54321
+                start_latitude:
+                  type: number
+                  format: double
+                  example: -31.23456
+                price:
+                  type: integer
+                  example: 123000
+                route_details:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/RouteDetail'
+
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Success
+                  message:
+                    type: string
+                    example: data rute berhasil disimpan
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                        message:
+                          type: string
+                required:
+                  - message
+              examples:
+                token tidak valid:
+                  value:
+                    message: Format token tidak valid, gunakan bearer token
+                request tidak valid:
+                  value:
+                    status: Failed
+                    message: Permintaan tidak valid. Silakan periksa kembali data yang anda masukkan.
+                    errors:
+                      - field: CityId
+                        message: Kolom CityId harus diisi
+                      - field: Name
+                        message: Kolom Name harus diisi
+                      - field: StartLocation
+                        message: Kolom StartLocation harus diisi
+                      - field: StartLongitude
+                        message: Kolom StartLongitude harus diisi
+                      - field: StartLatitude
+                        message: Kolom StartLatitude harus diisi
+                      - field: Price
+                        message: Kolom Price harus diisi
+                      - field: RouteDetails
+                        message: Kolom RouteDetails harus diisi
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Gagal menyimpan rute
+
+  /mobile/routes/unsave/{id}:
+    delete:
+      tags:
+        - Mobile - Routes
+      summary: Menghapus Rekomendasi Rute
+      description: API untuk menghapus rekomendasi rute.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Success
+                  message:
+                    type: string
+                    example: data rute berhasil dihapus
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Format token tidak valid, gunakan bearer token
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Rute tidak ditemukan
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Gagal menghapus rute
+
+  /mobile/home:
+    get:
+      tags:
+        - Mobile - Homepage
+      summary: Mendapatkan Data pada Homepage
+      description: API untuk mendapatkan data pada homepage.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: provinsi
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/HomepageResponseSuccess'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Format token tidak valid, gunakan bearer token
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Personalisasi belum dibuat
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  message:
+                    type: string
+              examples:
+                error destinasi sekitar:
+                  value:
+                    status: Failed
+                    message: Gagal mendapatkan destinasi sekitar
+                error destinasi populer:
+                  value:
+                    status: Failed
+                    message: Gagal mendapatkan destinasi populer
+                error personalisasi:
+                  value:
+                    status: Failed
+                    message: Gagal mendapatkan data personalisasi
+                error mendapatkan rekomendasi:
+                  value:
+                    status: Failed
+                    message: Gagal mendapatkan rekomendasi destinasi
+                error simpan rekomendasi:
+                  value:
+                    status: Failed
+                    message: Gagal menyimpan rekomendasi destinasi
+
   /mobile/auth/register:
     post:
       tags:
@@ -374,7 +744,94 @@ paths:
                   message:
                     type: string
                     example: 'Logout berhasil!'
-
+  /admin/dashboard:
+    get:
+      tags:
+        - Admin - Dashboard
+      summary: Menampilkan Data Dashboard
+      description: API untuk menampilkan data dashboard admin.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Berhasil Menampilkan Data Dashboard
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Berhasil menampilkan data dashboard'
+                  data:
+                    type: object
+                    properties:
+                      total_data:
+                        type: object
+                        properties:
+                          total_admin:
+                            type: integer
+                            example: 2
+                          total_user:
+                            type: integer
+                            example: 7
+                          total_rute:
+                            type: integer
+                            example: 14
+                      pertumbuhan_pengguna:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            bulan:
+                              type: string
+                              example: 'Jan'
+                            pengguna_baru:
+                              type: integer
+                              example: 1
+                            total_pengguna:
+                              type: integer
+                              example: 1
+                      total_content_vid:
+                        type: object
+                        properties:
+                          total_content:
+                            type: integer
+                            example: 962
+                          total_destinasi:
+                            type: integer
+                            example: 322
+                      kategori_destinasi:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            nama_kategori:
+                              type: string
+                              example: 'Alam'
+                            total:
+                              type: integer
+                              example: 178
+                      route_user:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            username:
+                              type: string
+                              example: 'user1'
+                            nama_rute:
+                              type: string
+                              example: 'Route ke 12'
+                            jumlah_destinasi:
+                              type: integer
+                              example: 1
+                            biaya:
+                              type: integer
+                              example: 100000
   /admin/auth/token:
     get:
       tags:
@@ -414,6 +871,7 @@ paths:
                   message:
                     type: string
                     example: 'Token tidak ditemukan'
+
   /mobile/auth/logout:
     delete:
       tags:
@@ -742,6 +1200,182 @@ paths:
                   message:
                     type: string
                     example: 'Password lama tidak valid'
+  /mobile/profile/routes:
+    get:
+      tags:
+        - Mobile - Profile
+      summary: Mendapatkan Data Rute
+      security:
+        - BearerAuth: []
+      description: API untuk mendapatkan data rute yang tersedia.
+      responses:
+        '200':
+          description: Berhasil Mendapatkan Data Rute
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Berhasil menampilkan data rute'
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: 'aa66d401-47bc-4a73-9e7c-b7d84168954a'
+                        nama_rute:
+                          type: string
+                          example: 'Jalan Jalan'
+                        biaya:
+                          type: integer
+                          example: 100000
+        '404':
+          description: Gagal Mendapatkan Data Rute
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Gagal mendapatkan data rute'
+  /mobile/profile/routes/{id}:
+    get:
+      tags:
+        - Mobile - Profile
+      summary: Mendapatkan Detail Rute
+      security:
+        - BearerAuth: []
+      description: API untuk mendapatkan detail rute berdasarkan ID.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID rute yang ingin ditampilkan
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Berhasil Mendapatkan Detail Rute
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Berhasil menampilkan data rute'
+                  data:
+                    type: object
+                    properties:
+                      nama_rute:
+                        type: string
+                        example: 'Jalan Jalan'
+                      destinasi:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: '0a0ac7b1-df14-4b09-9f96-79670b8d3c99'
+                            nama_destinasi:
+                              type: string
+                              example: 'Pantai Tanjung Karang'
+                            waktu_kunjungan:
+                              type: string
+                              description: waktu kunjungan destinasi
+                              example: '08:00'
+                            waktu_selesai_kunjungan:
+                              type: string
+                              description: waktu selesai kunjungan destinasi
+                              example: '09:00'
+                            biaya:
+                              type: integer
+                              example: 10000
+                      estimasi_biaya:
+                        type: integer
+                        example: 100000
+        '404':
+          description: Rute Tidak Ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Rute tidak ditemukan'
+    delete:
+      tags:
+        - Mobile - Profile
+      summary: Menghapus Data Rute
+      security:
+        - BearerAuth: []
+      description: API untuk menghapus data rute berdasarkan ID.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          description: ID rute yang ingin dihapus
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Data Rute Berhasil Dihapus
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'Data rute berhasil dihapus'
+        '404':
+          description: Rute Tidak Ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Rute tidak ditemukan'
+        '500':
+          description: Gagal Menghapus Rute
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Gagal menghapus rute'
   /admin/users:
     get:
       tags:
@@ -1195,11 +1829,11 @@ paths:
                 password:
                   type: string
                   example: '12345678'
-                foto:
+                foto_profil:
                   type: string
                   format: binary
             encoding:
-              foto:
+              foto_profil:
                 contentType: image/png, image/jpg, image/jpeg
       responses:
         '201':
@@ -1435,11 +2069,11 @@ paths:
                 password:
                   type: string
                   example: '12345678'
-                foto:
+                foto_profil:
                   type: string
                   format: binary
             encoding:
-              foto:
+              foto_profil:
                 contentType: image/png, image/jpg, image/jpeg
       responses:
         '200':
@@ -1769,6 +2403,103 @@ paths:
                   message:
                     type: string
                     example: 'Destinasi tidak ditemukan'
+  /mobile/destinations/cities:
+    get:
+      tags:
+        - Mobile - Destinations
+      summary: Menampilkan kota yang memiliki destinasi
+      description: API untuk mendapatkan daftar kota yang memiliki destinasi wisata.
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Berhasil menampilkan kota
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'berhasil menampilkan kota yang memiliki destinasi'
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: '3212'
+                        nama:
+                          type: string
+                          example: 'KAB. INDRAMAYU'
+  /mobile/destinations/cities/{id}:
+    get:
+      tags:
+        - Mobile - Destinations
+      summary: Menampilkan destinasi berdasarkan kota
+      description: API untuk mendapatkan daftar destinasi wisata berdasarkan kota.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Berhasil menampilkan destinasi
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Success'
+                  message:
+                    type: string
+                    example: 'berhasil menampilkan destinasi'
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          example: '3636246c-3dd5-4140-9822-72ce76f11124'
+                        nama_destinasi:
+                          type: string
+                          example: 'Danau Lau Kawar'
+                        nama_jalan:
+                          type: string
+                          example: 'testing'
+                        kecamatan:
+                          type: string
+                          example: 'Karangampel'
+                        kota:
+                          type: string
+                          example: 'KAB. INDRAMAYU'
+                        provinsi:
+                          type: string
+                          example: 'JAWA BARAT'
+        404:
+          description: Destinasi tidak ditemukan
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Destinasi tidak ditemukan'
   /mobile/personalization:
     post:
       tags:
@@ -1847,6 +2578,19 @@ paths:
 
         '401':
           $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Failed
+                  message:
+                    type: string
+                    example: Provinsi pilihan ke-1 tidak ditemukan
         '409':
           description: Conflict
           content:
@@ -2345,6 +3089,348 @@ paths:
                   message:
                     type: string
                     example: 'Rute tidak ditemukan'
+
+  /admin/destination-media:
+    get:
+      tags:
+        - Admin - Manage Content
+      summary: Mendapatkan semua media destinasi
+      description: API untuk mendapatkan semua media destinasi.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: search
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successfully retrieved destination medias
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Success
+                  message:
+                    type: string
+                    example: berhasil menampilkan media destinasi
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          example: 1bde58e3-ef19-4daa-9df7-084ba5d3e933
+                        destination_id:
+                          type: string
+                          format: uuid
+                          example: 306d305e-3359-4884-8d38-89c04e8adec2
+                        url:
+                          type: string
+                          example: http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.video
+                        type:
+                          type: string
+                          example: video
+                        title:
+                          type: string
+                          example: We Are Going On Bullrun 3
+                        destination:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              format: uuid
+                              example: 306d305e-3359-4884-8d38-89c04e8adec2
+                            name:
+                              type: string
+                              example: Pantai Kuta
+                  pagination:
+                    type: object
+                    properties:
+                      total:
+                        type: integer
+                        example: 20
+                      per_page:
+                        type: integer
+                        example: 5
+                      current_page:
+                        type: integer
+                        example: 1
+                      last_page:
+                        type: integer
+                        example: 4
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Error
+                  message:
+                    type: string
+                    example: Invalid input
+    post:
+      tags:
+        - Admin - Manage Content
+      summary: Menambah media destinasi
+      description: API untuk menambah media destinasi.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                destination_id:
+                  type: string
+                  format: uuid
+                  example: 306d305e-3359-4884-8d38-89c04e8adec2
+                url:
+                  type: string
+                  example: http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.video
+                type:
+                  type: string
+                  example: video
+                title:
+                  type: string
+                  example: We Are Going On Bullrun 3
+              required:
+                - destination_id
+                - url
+                - type
+                - title
+              example:
+                destination_id: 306d305e-3359-4884-8d38-89c04e8adec2
+                url: http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.video
+                type: video
+                title: We Are Going On Bullrun 3
+      responses:
+        '200':
+          description: Successfully created destination media
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Success
+                  message:
+                    type: string
+                    example: Berhasilah menambahkan media destinasi
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Error
+                  message:
+                    type: string
+                    example: Internal server error
+
+  /admin/destination-media/{id}:
+    delete:
+      tags:
+        - Admin - Manage Content
+      summary: Menghapus media destinasi
+      description: API untuk menghapus media destinasi.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 1bde58e3-ef19-4daa-9df7-084ba5d3e941
+      responses:
+        '200':
+          description: Successfully deleted destination media
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Success
+                  message:
+                    type: string
+                    example: Berhasilah menghapus media destinasi
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Error
+                  message:
+                    type: string
+                    example: Internal server error
+    get:
+      tags:
+        - Admin - Manage Content
+      summary: Mengambil media destinasi
+      description: API untuk mengambil media destinasi.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 1bde58e3-ef19-4daa-9df7-084ba5d3e941
+      responses:
+        '200':
+          description: Successfully get destination media
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Success
+                  message:
+                    type: string
+                    example: Berhasilah mengambil media destinasi
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        format: uuid
+                        example: 1bde58e3-ef19-4daa-9df7-084ba5d3e933
+                      destination_id:
+                        type: string
+                        format: uuid
+                        example: 306d305e-3359-4884-8d38-89c04e8adec2
+                      url:
+                        type: string
+                        example: http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.video
+                      type:
+                        type: string
+                        example: video
+                      title:
+                        type: string
+                        example: We Are Going On Bullrun 3
+                      destination:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            format: uuid
+                            example: 306d305e-3359-4884-8d38-89c04e8adec2
+                          name:
+                            type: string
+                            example: Pantai Kuta
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Error
+                  message:
+                    type: string
+                    example: Internal server error
+    put:
+      tags:
+        - Admin - Manage Content
+      summary: Mengubah media destinasi
+      description: API untuk mengubah media destinasi.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: 1bde58e3-ef19-4daa-9df7-084ba5d3e941
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                destination_id:
+                  type: string
+                  format: uuid
+                  example: 306d305e-3359-4884-8d38-89c04e8adec2
+                url:
+                  type: string
+                  example: http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/WeAreGoingOnBullrun.video
+                type:
+                  type: string
+                  example: video
+                title:
+                  type: string
+                  example: We Are Going On Bullrun 3
+      responses:
+        '200':
+          description: Successfully updated destination media
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Success
+                  message:
+                    type: string
+                    example: Berhasilah mengubah media destinasi
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: Error
+                  message:
+                    type: string
+                    example: Internal server error
+
 components:
   schemas:
     Pagination:
@@ -2394,6 +3480,34 @@ components:
         tipe:
           type: string
           example: 'image'
+
+    RouteDetail:
+      type: object
+      properties:
+        destination_id:
+          type: string
+          format: uuid
+          example: 00f46a9b-81ce-4b2e-aac9-0cd5543d74d3
+        longitude:
+          type: number
+          format: double
+          example: -76.54321
+        latitude:
+          type: number
+          format: double
+          example: 983.54321
+        duration:
+          type: integer
+          example: 60
+        order:
+          type: integer
+          example: 1
+        visit_start:
+          type: string
+          example: '08:30'
+        visit_end:
+          type: string
+          example: '09:30'
 
     UrlVideo:
       type: object
@@ -2500,7 +3614,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SimilarDestination'
-
   responses:
     UnauthorizedResponse:
       description: Unauthorized
@@ -2527,6 +3640,15 @@ components:
                 example: 'Berhasil mendapatkan kategori destinasi'
               data:
                 type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    nama:
+                      type: string
+                    url:
+                      type: string
                 example:
                   - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
                     nama: Alam
@@ -2552,6 +3674,15 @@ components:
                 example: 'Berhasil mendapatkan provinsi'
               data:
                 type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                    nama:
+                      type: string
+                    url:
+                      type: string
                 example:
                   - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
                     nama: Jawa Timur
@@ -2559,6 +3690,194 @@ components:
                   - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
                     nama: Jawa Barat
                     url: https://picsum.photos/300/200
+    HomepageResponseSuccess:
+      description: OK
+      content:
+        application/json:
+          schema:
+            properties:
+              status:
+                type: string
+                example: Success
+              message:
+                type: string
+                example: Berhasil mendapatkan data pada homepage
+              data:
+                type: object
+                properties:
+                  destinasi_rekomendasi:
+                    type: array
+                    items:
+                      properties:
+                        id:
+                          type: string
+                        nama:
+                          type: string
+                        url_gambar:
+                          type: string
+                    example:
+                      - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                        nama: Kawah Ijen
+                        url_gambar: https://picsum.photos/300/200
+                      - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                        nama: Kawah Ijen
+                        url_gambar: https://picsum.photos/300/200
+                  destinasi_sekitar:
+                    type: array
+                    items:
+                      properties:
+                        id:
+                          type: string
+                        nama:
+                          type: string
+                        lokasi:
+                          type: object
+                          properties:
+                            kota:
+                              type: object
+                              properties:
+                                nama:
+                                  type: string
+                                  example: Nama Kota
+                            provinsi:
+                              type: object
+                              properties:
+                                nama:
+                                  type: string
+                                  example: Nama Provinsi
+                        url_gambar:
+                          type: string
+                    example:
+                      - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                        nama: Kawah Ijen
+                        lokasi:
+                          kota:
+                            nama: Nama Kota
+                          provinsi:
+                            nama: Nama Provinsi
+                        url_gambar: https://picsum.photos/300/200
+                      - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                        nama: Kawah Ijen
+                        lokasi:
+                          kota:
+                            nama: Nama Kota
+                          provinsi:
+                            nama: Nama Provinsi
+                        url_gambar: https://picsum.photos/300/200
+                  destinasi_populer:
+                    type: array
+                    items:
+                      properties:
+                        id:
+                          type: string
+                        nama:
+                          type: string
+                        konten:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            judul:
+                              type: string
+                            url:
+                              type: string
+                    example:
+                      - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                        nama: Kawah Ijen
+                        konten:
+                          id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                          judul: Kawah Ijen Keren
+                          url: https://video.mp4
+                      - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                        nama: Kawah Ijen
+                        konten:
+                          id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                          judul: Kawah Ijen Indah
+                          url: https://video.mp4
+    SummarizeRouteResponseSuccess:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: Success
+              message:
+                type: string
+                example: Berhasil mendapatkan rekomendasi rute
+              data:
+                type: object
+                properties:
+                  lokasi_awal:
+                    type: object
+                    properties:
+                      nama:
+                        type: string
+                        example: Nama Lokasi Awal
+                      latitude:
+                        type: number
+                        format: float
+                        example: -1.23456
+                      longitude:
+                        type: number
+                        format: float
+                        example: -6.54321
+                  detail_rute:
+                    type: array
+                    items:
+                      properties:
+                        destinasi:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: '18d8624a-4e83-4354-83fb-fb11aed4fdc4'
+                            nama:
+                              type: string
+                              example: 'Kawah Ijen'
+                            latitude:
+                              type: number
+                              format: float
+                              example: -1.23456
+                            longitude:
+                              type: number
+                              format: float
+                              example: -6.54321
+                            url_gambar:
+                              type: string
+                              example: 'https://picsum.photos/300/200'
+                            biaya_masuk:
+                              type: object
+                              properties:
+                                raw:
+                                  type: number
+                                  example: 20000
+                                format:
+                                  type: string
+                                  example: Rp. 20.000
+                        durasi:
+                          type: object
+                          properties:
+                            raw:
+                              type: number
+                              example: 120
+                            simple:
+                              type: string
+                              example: 2m
+                            full:
+                              type: string
+                              example: 2menit
+                        urutan:
+                          type: number
+                          example: 1
+                        waktu_kunjungan:
+                          type: string
+                          example: '08:00'
+                        waktu_selesai:
+                          type: string
+                          example: '10:00'
 
   securitySchemes:
     BearerAuth:

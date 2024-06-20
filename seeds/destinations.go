@@ -1,7 +1,13 @@
 package seeds
 
 import (
+	"encoding/csv"
 	"log"
+	"math/rand"
+	"os"
+	"strconv"
+	"strings"
+	"time"
 
 	"capstone/entities"
 
@@ -9,41 +15,262 @@ import (
 )
 
 func (s Seed) SeedDestinations() {
-	openTime := "08:00"
-	closeTime := "17:00"
+	file, err := os.Open("storage/merged_data_destination.csv")
+	if err != nil {
+		log.Printf("failed to open file: %v", err)
+		return
+	}
+	defer file.Close()
 
-	destinations := []entities.Destination{
-		{Id: uuid.MustParse("306d305e-3359-4884-8d38-89c04e8adec6"), Name: "Goa Pindul", Description: "Gua tempat Joko terbentur tersebut dinamai Gua Pindul yang berasal dari kata dalam bahasa Jawa pipi gebendul yang berarti pipi yang terbentur.", OpenTime: openTime, CloseTime: closeTime, EntryPrice: 25000, Longitude: 123.456, Latitude: 456.789, VisitCount: 0}, //nolint:lll
-		{Id: uuid.MustParse("306d305e-3359-4884-8d38-89c04e8adec1"), Name: "Candi Borobudur", Description: "Candi Borobudur adalah sebuah candi Buddha yang terletak di Magelang, Jawa Tengah.", OpenTime: openTime, CloseTime: closeTime, EntryPrice: 50000, Longitude: 110.2038, Latitude: -7.6079, VisitCount: 0},                                                       //nolint:lll
-		{Id: uuid.MustParse("306d305e-3359-4884-8d38-89c04e8adec2"), Name: "Pantai Kuta", Description: "Pantai Kuta adalah salah satu pantai yang terkenal di Bali, Indonesia.", OpenTime: openTime, CloseTime: closeTime, EntryPrice: 0, Longitude: 115.1675, Latitude: -8.7174, VisitCount: 0},                                                                           //nolint:lll
-		{Id: uuid.MustParse("306d305e-3359-4884-8d38-89c04e8adec3"), Name: "Danau Toba", Description: "Danau Toba adalah danau terbesar di Indonesia dan Asia Tenggara.", OpenTime: openTime, CloseTime: closeTime, EntryPrice: 0, Longitude: 99.0852, Latitude: 2.6696, VisitCount: 0},                                                                                    //nolint:lll
-		{Id: uuid.MustParse("306d305e-3359-4884-8d38-89c04e8adec4"), Name: "Taman Mini Indonesia Indah", Description: "Taman Mini Indonesia Indah adalah sebuah taman wisata bertema budaya Indonesia yang terletak di Jakarta Timur.", OpenTime: openTime, CloseTime: closeTime, EntryPrice: 20000, Longitude: 106.8956, Latitude: -6.3027, VisitCount: 0},                //nolint:lll
-		{Id: uuid.MustParse("306d305e-3359-4884-8d38-89c04e8adec5"), Name: "Gunung Bromo", Description: "Gunung Bromo adalah sebuah gunung berapi aktif yang terletak di Jawa Timur, Indonesia.", OpenTime: openTime, CloseTime: closeTime, EntryPrice: 30000, Longitude: 112.9528, Latitude: -7.9425, VisitCount: 0},                                                      //nolint:lll
-		{Id: uuid.MustParse("306d305e-3359-4884-8d38-89c04e8adec7"), Name: "Pulau Komodo", Description: "Pulau Komodo adalah sebuah pulau yang terletak di Kepulauan Nusa Tenggara, Indonesia.", OpenTime: openTime, CloseTime: closeTime, EntryPrice: 150000, Longitude: 119.4986, Latitude: -8.5833, VisitCount: 0},                                                      //nolint:lll
-		{Id: uuid.MustParse("306d305e-3359-4884-8d38-89c04e8adec8"), Name: "Raja Ampat", Description: "Raja Ampat adalah kepulauan yang terletak di bagian barat Papua, Indonesia.", OpenTime: openTime, CloseTime: closeTime, EntryPrice: 500000, Longitude: 130.5036, Latitude: -1.0562, VisitCount: 0},                                                                  //nolint:lll
-		{Id: uuid.MustParse("306d305e-3359-4884-8d38-89c04e8adec9"), Name: "Tanah Lot", Description: "Tanah Lot adalah sebuah formasi batuan di lepas pantai pulau Bali, Indonesia.", OpenTime: openTime, CloseTime: closeTime, EntryPrice: 20000, Longitude: 115.0865, Latitude: -8.6211, VisitCount: 0},                                                                  //nolint:lll
-		{Id: uuid.MustParse("306d305e-3359-4884-8d38-89c04e8adea6"), Name: "Kawah Ijen", Description: "Kawah Ijen adalah sebuah kompleks gunung berapi di Banyuwangi, Jawa Timur, Indonesia.", OpenTime: openTime, CloseTime: closeTime, EntryPrice: 100000, Longitude: 114.2423, Latitude: -8.0582, VisitCount: 0},                                                        //nolint:lll
+	reader := csv.NewReader(file)
+
+	// Baca baris pertama (header) dan abaikan
+	if _, err = reader.Read(); err != nil {
+		log.Printf("failed to read header row: %v", err)
+		return
 	}
 
-	for _, destination := range destinations {
-		category, err := getRandomCategory(s)
-		if err != nil {
-			log.Fatalf("failed to get random category: %v", err)
+	records, err := reader.ReadAll()
+	if err != nil {
+		log.Printf("failed to read CSV file: %v", err)
+		return
+	}
+
+	// Seed untuk angka acak
+	randSource := rand.NewSource(time.Now().UnixNano())
+	randGenerator := rand.New(randSource)
+
+	// Dapatkan peta fasilitas dan alamat
+	facilities, err := getAllFacilities(s)
+	if err != nil {
+		log.Printf("failed to get facilities: %v", err)
+		return
+	}
+
+	for _, record := range records {
+		destination, err2 := createDestination(s, record, randGenerator)
+		if err2 != nil {
+			log.Printf("failed to create destination: %v", err2)
+			continue
 		}
 
-		destination.CategoryId = category.Id
-		if err = s.db.Where(entities.Destination{Name: destination.Name}).FirstOrCreate(&destination).Error; err != nil {
-			log.Fatalf("failed to create destination: %v", err)
+		if err = processFacilities(s, destination, record[14], facilities); err != nil {
+			log.Printf("failed to process facilities: %v", err)
+			continue
+		}
+
+		if err = processMedia(s, destination, record); err != nil {
+			log.Printf("failed to process media: %v", err)
+			continue
+		}
+
+		if err = processAddress(s, destination, record); err != nil {
+			log.Printf("failed to process address: %v", err)
+			continue
 		}
 	}
 }
 
-func getAllDestinations(s Seed) ([]entities.Destination, error) {
-	var destinations []entities.Destination
+func createDestination(s Seed, record []string, randGenerator *rand.Rand) (entities.Destination, error) {
+	entryPrice, _ := strconv.ParseFloat(record[4], 64)
+	longitude, _ := strconv.ParseFloat(record[6], 64)
+	latitude, _ := strconv.ParseFloat(record[5], 64)
 
-	if err := s.db.Find(&destinations).Error; err != nil {
+	visitCount := randGenerator.Intn(201) + 100 // Menghasilkan angka acak antara 100 dan 300
+	destination := entities.Destination{
+		Id:          uuid.New(),
+		CategoryId:  uuid.MustParse(record[13]),
+		Name:        record[0],
+		Description: record[1],
+		OpenTime:    record[2],
+		CloseTime:   record[3],
+		EntryPrice:  entryPrice,
+		Longitude:   longitude,
+		Latitude:    latitude,
+		VisitCount:  visitCount,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+
+	var temp entities.Destination
+	if err := s.db.Where(entities.Destination{Name: destination.Name}).
+		FirstOrInit(&temp).
+		Error; err != nil {
+		return entities.Destination{}, err
+	}
+
+	if temp.Id != uuid.Nil {
+		return temp, nil
+	}
+
+	if err := s.db.Create(&destination).Error; err != nil {
+		return destination, err
+	}
+
+	return destination, nil
+}
+
+func processFacilities(s Seed, destination entities.Destination, facilitiesStr string, facilities []entities.Facility) error {
+	facilitiesItems := strings.Split(facilitiesStr, ", ")
+	for _, facilityItem := range facilitiesItems {
+		for _, facility := range facilities {
+			if facility.Name == facilityItem {
+				destinationFacility := entities.DestinationFacility{
+					Id:            uuid.New(),
+					DestinationId: destination.Id,
+					FacilityId:    facility.Id,
+				}
+
+				var temp entities.DestinationFacility
+				if err := s.db.
+					Where(entities.DestinationFacility{DestinationId: destination.Id, FacilityId: facility.Id}).
+					FirstOrInit(&temp).
+					Error; err != nil {
+					return err
+				}
+
+				if temp.Id != uuid.Nil {
+					continue
+				}
+
+				if err := s.db.Create(&destinationFacility).Error; err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func processMedia(s Seed, destination entities.Destination, record []string) error {
+	mediaColumns := []struct {
+		Url   string
+		Type  string
+		Title string
+	}{
+		{record[16], "image", record[15]},
+		{record[17], "image", record[15]},
+		{record[18], "image", record[15]},
+		{record[19], "video", record[15]},
+		{record[20], "video", record[15]},
+		{record[21], "video", record[15]},
+	}
+
+	for _, media := range mediaColumns {
+		if media.Url != "" {
+			destinationMedia := entities.DestinationMedia{
+				Id:            uuid.New(),
+				DestinationId: destination.Id,
+				Url:           media.Url,
+				Type:          media.Type,
+				Title:         media.Title,
+				CreatedAt:     time.Now(),
+				UpdatedAt:     time.Now(),
+			}
+
+			var temp entities.DestinationMedia
+			if err := s.db.
+				Where(entities.DestinationMedia{DestinationId: destination.Id, Url: media.Url}).
+				FirstOrInit(&temp).
+				Error; err != nil {
+				return err
+			}
+
+			if temp.Id != uuid.Nil {
+				continue
+			}
+
+			if err := s.db.Create(&destinationMedia).Error; err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func processAddress(s Seed, destination entities.Destination, record []string) error {
+	provinceName := record[8]
+	cityName := record[9]
+	subdistrictName := record[10]
+	streetName := record[11]
+	postalCode := record[12]
+
+	province, err := getProvinceByName(s, provinceName)
+	if err != nil {
+		return err
+	}
+
+	city, err := getCityByName(s, cityName)
+	if err != nil {
+		return err
+	}
+
+	subdistrict, err := getSubdistrictByName(s, subdistrictName)
+	if err != nil {
+		return err
+	}
+
+	destinationAddress := entities.DestinationAddress{
+		Id:            uuid.New(),
+		DestinationId: destination.Id,
+		ProvinceId:    province.Id,
+		CityId:        city.Id,
+		SubdistrictId: subdistrict.Id,
+		StreetName:    streetName,
+		PostalCode:    postalCode,
+		CreatedAt:     time.Now(),
+		UpdatedAt:     time.Now(),
+	}
+
+	var temp entities.DestinationAddress
+	if err = s.db.
+		Where(entities.DestinationAddress{DestinationId: destination.Id}).
+		FirstOrInit(&temp).
+		Error; err != nil {
+		return err
+	}
+
+	if temp.Id != uuid.Nil {
+		return nil
+	}
+
+	if err = s.db.Create(&destinationAddress).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func getAllFacilities(s Seed) ([]entities.Facility, error) {
+	var facilities []entities.Facility
+
+	if err := s.db.Find(&facilities).Error; err != nil {
 		return nil, err
 	}
 
-	return destinations, nil
+	return facilities, nil
+}
+
+func getProvinceByName(s Seed, name string) (*entities.Province, error) {
+	var province entities.Province
+	if err := s.db.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(name)+"%").First(&province).Error; err != nil {
+		return nil, err
+	}
+	return &province, nil
+}
+
+func getCityByName(s Seed, name string) (*entities.City, error) {
+	var city entities.City
+	if err := s.db.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(name)+"%").First(&city).Error; err != nil {
+		return nil, err
+	}
+	return &city, nil
+}
+
+func getSubdistrictByName(s Seed, name string) (*entities.Subdistrict, error) {
+	var subdistrict entities.Subdistrict
+	if err := s.db.Where("LOWER(name) LIKE ?", "%"+strings.ToLower(name)+"%").First(&subdistrict).Error; err != nil {
+		return nil, err
+	}
+	return &subdistrict, nil
 }

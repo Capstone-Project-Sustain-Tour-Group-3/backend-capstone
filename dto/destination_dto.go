@@ -156,6 +156,50 @@ type GetByIdDestinationResponse struct {
 	Facilities         *[]Facility         `json:"fasilitas"`
 }
 
+type Cities struct {
+	Id   string `json:"id"`
+	Nama string `json:"nama"`
+}
+
+type DestinationsByCity struct {
+	Id            string `json:"id"`
+	NamaDestinasi string `json:"nama_destinasi"`
+	NamaJalan     string `json:"nama_jalan"`
+	Kecamatan     string `json:"kecamatan"`
+	Kota          string `json:"kota"`
+	Provinsi      string `json:"provinsi"`
+}
+
+func ToDestinationsByCityResponse(destinations *[]entities.Destination) *[]DestinationsByCity {
+	responses := make([]DestinationsByCity, len(*destinations))
+
+	for idx, destination := range *destinations {
+		responses[idx] = DestinationsByCity{
+			Id:            destination.Id.String(),
+			NamaDestinasi: destination.Name,
+			NamaJalan:     destination.DestinationAddress.StreetName,
+			Kecamatan:     destination.DestinationAddress.Subdistrict.Name,
+			Kota:          destination.DestinationAddress.City.Name,
+			Provinsi:      destination.DestinationAddress.Province.Name,
+		}
+	}
+
+	return &responses
+}
+
+func ToCitiesResponse(cities *[]entities.City) *[]Cities {
+	responses := make([]Cities, len(*cities))
+
+	for idx, city := range *cities {
+		responses[idx] = Cities{
+			Id:   city.Id,
+			Nama: city.Name,
+		}
+	}
+
+	return &responses
+}
+
 func ToUrlImages(destination *entities.Destination) *[]UrlImage {
 	var images []UrlImage
 	for _, media := range destination.DestinationMedias {

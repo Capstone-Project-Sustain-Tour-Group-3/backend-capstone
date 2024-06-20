@@ -12,6 +12,7 @@ type ICityRepository interface {
 	FindById(id string) (*entities.City, error)
 	Update(city *entities.City) error
 	Delete(city *entities.City) error
+	GetCitiesWithDestinations() ([]entities.City, error)
 }
 
 type CityRepository struct {
@@ -57,4 +58,20 @@ func (r *CityRepository) Delete(city *entities.City) error {
 		return err
 	}
 	return nil
+}
+
+func (r *CityRepository) GetCitiesWithDestinations() ([]entities.City, error) {
+	var cities []entities.City
+
+	err := r.db.Preload("Province").
+		Joins("JOIN destination_addresses da ON da.city_id = cities.id").
+		Joins("JOIN destinations d ON d.id = da.destination_id").
+		Where("d.id IS NOT NULL").
+		Group("cities.id").
+		Order("cities.name ASC").
+		Find(&cities).Error
+	if err != nil {
+		return nil, err
+	}
+	return cities, nil
 }

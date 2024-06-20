@@ -19,15 +19,23 @@ type UserUsecase interface {
 	Create(request *dto.UserRequest) error
 	Update(id uuid.UUID, request *dto.UserRequest) error
 	Delete(id uuid.UUID) error
+	HandleProfilePictureUpdate(request *dto.UserRequest, user *entities.User) error
 }
 
 type userUsecase struct {
 	repository       repositories.UserRepository
 	cloudinaryClient cloudinary.ICloudinaryClient
+	passwordHelper   helpers.PasswordHelper
+	imageValidation  helpers.IValidationHelper
 }
 
-func NewUserUsecase(repository repositories.UserRepository, client cloudinary.ICloudinaryClient) *userUsecase {
-	return &userUsecase{repository: repository, cloudinaryClient: client}
+func NewUserUsecase(
+	repository repositories.UserRepository,
+	client cloudinary.ICloudinaryClient,
+	passwordHelper helpers.PasswordHelper,
+	imageValidation helpers.IValidationHelper,
+) *userUsecase {
+	return &userUsecase{repository: repository, cloudinaryClient: client, passwordHelper: passwordHelper, imageValidation: imageValidation}
 }
 
 func (uc *userUsecase) FindById(id uuid.UUID) (*entities.User, error) {
@@ -57,7 +65,7 @@ func (uc *userUsecase) Create(request *dto.UserRequest) error {
 		return &errorHandlers.ConflictError{Message: "Email sudah digunakan"}
 	}
 
-	password, err := helpers.HashPassword(request.Password)
+	password, err := uc.passwordHelper.HashPassword(request.Password)
 	if err != nil {
 		return &errorHandlers.InternalServerError{Message: "Gagal hashing password"}
 	}
@@ -75,7 +83,7 @@ func (uc *userUsecase) Create(request *dto.UserRequest) error {
 		EmailVerifiedAt: nil,
 	}
 
-	if err = uc.handleProfilePictureUpdate(request, user); err != nil {
+	if err = uc.HandleProfilePictureUpdate(request, user); err != nil {
 		return err
 	}
 
@@ -105,7 +113,7 @@ func (uc *userUsecase) Update(id uuid.UUID, request *dto.UserRequest) error {
 		}
 	}
 
-	password, err := helpers.HashPassword(request.Password)
+	password, err := uc.passwordHelper.HashPassword(request.Password)
 	if err != nil {
 		return &errorHandlers.InternalServerError{Message: "Gagal hashing password"}
 	}
@@ -120,7 +128,7 @@ func (uc *userUsecase) Update(id uuid.UUID, request *dto.UserRequest) error {
 	user.City = request.Kota
 	user.Province = request.Provinsi
 
-	if err = uc.handleProfilePictureUpdate(request, user); err != nil {
+	if err = uc.HandleProfilePictureUpdate(request, user); err != nil {
 		return err
 	}
 
@@ -148,15 +156,15 @@ func (uc *userUsecase) Delete(id uuid.UUID) error {
 	return nil
 }
 
-func (uc *userUsecase) handleProfilePictureUpdate(request *dto.UserRequest, user *entities.User) error {
+func (uc *userUsecase) HandleProfilePictureUpdate(request *dto.UserRequest, user *entities.User) error {
 	if request.FotoProfil == nil {
 		return nil
 	}
 
-	if !helpers.IsValidImageType(request.FotoProfil) {
+	if !uc.imageValidation.IsValidImageType(request.FotoProfil) {
 		return &errorHandlers.BadRequestError{Message: "Tipe foto profil tidak valid"}
 	}
-	if !helpers.IsValidImageSize(request.FotoProfil) {
+	if !uc.imageValidation.IsValidImageSize(request.FotoProfil) {
 		return &errorHandlers.BadRequestError{Message: "Ukuran foto profil tidak valid"}
 	}
 

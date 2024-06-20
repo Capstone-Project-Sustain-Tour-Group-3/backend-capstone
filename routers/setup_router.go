@@ -1,8 +1,8 @@
 package routers
 
 import (
-	admin "capstone/routers/admin"
-	mobile "capstone/routers/mobile"
+	"capstone/routers/admin"
+	"capstone/routers/mobile"
 
 	"github.com/labstack/echo/v4"
 )
@@ -24,6 +24,12 @@ func SetupRouter(e *echo.Echo) {
 
 		recommendation := v1Mobile.Group("/personalization")
 		mobile.PersonalizationRoute(recommendation)
+
+		homepage := v1Mobile.Group("/home")
+		mobile.HomepageRouter(homepage)
+
+		route := v1Mobile.Group("/routes")
+		mobile.RouteRouter(route)
 	}
 
 	v1Admin := e.Group("/v1/admin")
@@ -42,5 +48,11 @@ func SetupRouter(e *echo.Echo) {
 
 		admins := v1Admin.Group("/admins")
 		admin.ManageAdminRouter(admins)
+
+		destinationMedia := v1Admin.Group("/destination-media")
+		admin.DestinationMediaRouter(destinationMedia)
+
+		dashboard := v1Admin.Group("/dashboard")
+		admin.DashboardRouter(dashboard)
 	}
 }

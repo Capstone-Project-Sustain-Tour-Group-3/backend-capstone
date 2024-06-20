@@ -11,6 +11,16 @@ import (
 	"gopkg.in/gomail.v2"
 )
 
+type EmailSender interface {
+	SendOTP(to, name, otpCode string) error
+}
+
+type emailSender struct{}
+
+func NewEmailSender() EmailSender {
+	return &emailSender{}
+}
+
 func init() {
 	rand.New(rand.NewSource(time.Now().UnixNano()))
 }
@@ -38,7 +48,7 @@ func GenerateOTP() string {
 	return string(otp)
 }
 
-func SendOTP(to, name, otpCode string) error {
+func (e *emailSender) SendOTP(to, name, otpCode string) error {
 	templatePath := filepath.Join("helpers", "email_template.html")
 	tmpl, err := template.ParseFiles(templatePath)
 	if err != nil {
