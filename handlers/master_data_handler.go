@@ -1,11 +1,12 @@
 package handlers
 
 import (
+	"net/http"
+
 	"capstone/dto"
 	"capstone/errorHandlers"
 	"capstone/helpers"
 	"capstone/usecases"
-	"net/http"
 
 	"github.com/labstack/echo/v4"
 )
