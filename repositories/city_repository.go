@@ -8,7 +8,7 @@ import (
 
 type ICityRepository interface {
 	Create(city *entities.City) error
-	FindAll() ([]entities.City, error)
+	FindAll(provinceId string) ([]entities.City, error)
 	FindById(id string) (*entities.City, error)
 	Update(city *entities.City) error
 	Delete(city *entities.City) error
@@ -30,9 +30,16 @@ func (r *CityRepository) Create(city *entities.City) error {
 	return nil
 }
 
-func (r *CityRepository) FindAll() ([]entities.City, error) {
+func (r *CityRepository) FindAll(provinceId string) ([]entities.City, error) {
 	var cities []entities.City
-	if err := r.db.Find(&cities).Error; err != nil {
+
+	db := r.db.Model(&entities.City{})
+
+	if provinceId != "" {
+		db = db.Where("province_id = ?", provinceId)
+	}
+
+	if err := db.Find(&cities).Error; err != nil {
 		return nil, err
 	}
 	return cities, nil
