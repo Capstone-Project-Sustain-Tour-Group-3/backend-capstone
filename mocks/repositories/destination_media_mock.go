@@ -67,3 +67,19 @@ func (m *MockDestinationMediaRepository) BeginTx() *gorm.DB {
 	}
 	return args.Get(0).(*gorm.DB)
 }
+
+func (m *MockDestinationMediaRepository) CommitTx(tx *gorm.DB) error {
+	args := m.Called(tx)
+	if args.Error(0) == nil {
+		return nil
+	}
+	return args.Error(0)
+}
+
+func (m *MockDestinationMediaRepository) RollbackTx(tx *gorm.DB) error {
+	args := m.Called(tx)
+	if args.Error(0) == nil {
+		return nil
+	}
+	return args.Error(0)
+}
