@@ -54,5 +54,8 @@ func SetupRouter(e *echo.Echo) {
 
 		dashboard := v1Admin.Group("/dashboard")
 		admin.DashboardRouter(dashboard)
+
+		masterData := v1Admin.Group("/master-data")
+		admin.MasterDataRouter(masterData)
 	}
 }

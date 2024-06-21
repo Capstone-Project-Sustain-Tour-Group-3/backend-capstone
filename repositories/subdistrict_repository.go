@@ -8,7 +8,7 @@ import (
 
 type ISubdistrictRepository interface {
 	Create(subdistrict *entities.Subdistrict) error
-	FindAll() ([]entities.Subdistrict, error)
+	FindAll(cityId string) ([]entities.Subdistrict, error)
 	FindById(id string) (*entities.Subdistrict, error)
 	Update(subdistrict *entities.Subdistrict) error
 	Delete(subdistrict *entities.Subdistrict) error
@@ -29,9 +29,16 @@ func (r *SubdistrictRepository) Create(subdistrict *entities.Subdistrict) error 
 	return nil
 }
 
-func (r *SubdistrictRepository) FindAll() ([]entities.Subdistrict, error) {
+func (r *SubdistrictRepository) FindAll(cityId string) ([]entities.Subdistrict, error) {
 	var subdistricts []entities.Subdistrict
-	if err := r.db.Find(&subdistricts).Error; err != nil {
+
+	db := r.db.Model(&entities.Subdistrict{})
+
+	if cityId != "" {
+		db = db.Where("city_id = ?", cityId)
+	}
+
+	if err := db.Find(&subdistricts).Error; err != nil {
 		return nil, err
 	}
 	return subdistricts, nil
