@@ -357,10 +357,14 @@ func TestDeleteDestinationMedia(t *testing.T) {
 			name: "Success delete destination media",
 			id:   uuid.MustParse("a1b2c3d4-e5f6-7890-abcd-ef0123456789"),
 			mockSetup: func() {
+				tx := new(gorm.DB)
 				mockDestinationMediaRepo.On("FindById", mock.Anything).
 					Return(&existingMedia, nil).Once()
-				mockDestinationMediaRepo.On("Delete", &existingMedia).
+				mockDestinationMediaRepo.On("BeginTx").Return(tx)
+				mockDestinationMediaRepo.On("Delete", &existingMedia, tx).
 					Return(nil).Once()
+				mockCloudinaryClient.On("DeleteImage", mock.Anything).Return(nil).Once()
+				mockDestinationRepo.On("CommitTx", tx).Return(nil).Once()
 			},
 			expectedError: nil,
 		},
