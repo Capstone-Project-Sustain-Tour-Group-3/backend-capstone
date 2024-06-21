@@ -1,15 +1,17 @@
 package tests
 
 import (
+	"testing"
+
 	"capstone/dto"
 	"capstone/entities"
 	"capstone/errorHandlers"
 	"capstone/mocks/repositories"
 	"capstone/usecases"
+
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestGetCategoriesMasterData(t *testing.T) {
