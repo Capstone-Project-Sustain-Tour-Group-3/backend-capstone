@@ -4,6 +4,8 @@ import (
 	"errors"
 	"testing"
 
+	"capstone/dto"
+
 	"github.com/stretchr/testify/mock"
 
 	"capstone/entities"
@@ -352,6 +354,137 @@ func TestFindByIdCurrentUser(t *testing.T) {
 			}
 
 			mockRouteRepo.AssertExpectations(t)
+		})
+	}
+}
+
+func TestSaveRoute(t *testing.T) {
+	mockRouteRepo := new(repositories.MockRouteRepository)
+	mockRouteDetailRepo := new(repositories.MockRouteDetailRepository)
+
+	uc := usecases.NewRouteUsecase(nil, nil, mockRouteRepo, mockRouteDetailRepo, nil)
+
+	testCases := []struct {
+		name          string
+		request       *dto.SaveRouteRequest
+		mockRepoSetup func()
+		expectedError error
+	}{
+		{
+			name: "Success save route and route details",
+			request: &dto.SaveRouteRequest{
+				UserId:         uuid.New(),
+				CityId:         "ABC",
+				Name:           "Route 1",
+				StartLocation:  "Start Location",
+				StartLongitude: 100.0,
+				StartLatitude:  10.0,
+				Price:          50000,
+				RouteDetails: []dto.DetailRouteRequest{
+					{
+						DestinationId: uuid.New(),
+						Longitude:     100.1,
+						Latitude:      10.1,
+						Duration:      30,
+						Order:         1,
+						VisitStart:    "2024-06-22T08:00:00Z",
+						VisitEnd:      "2024-06-22T09:00:00Z",
+					},
+				},
+			},
+			mockRepoSetup: func() {
+				mockRouteRepo.On("Create", mock.Anything).Return(nil).Once()
+				mockRouteDetailRepo.On("Create", mock.Anything).Return(nil).Once()
+			},
+			expectedError: nil,
+		},
+		{
+			name: "Invalid route details",
+			request: &dto.SaveRouteRequest{
+				UserId:         uuid.New(),
+				CityId:         "ABC",
+				Name:           "Route 1",
+				StartLocation:  "Start Location",
+				StartLongitude: 100.0,
+				StartLatitude:  10.0,
+				Price:          50000,
+				RouteDetails:   nil,
+			},
+			mockRepoSetup: func() {},
+			expectedError: &errorHandlers.BadRequestError{Message: "data detail rute tidak valid"},
+		},
+		{
+			name: "Failed to save route",
+			request: &dto.SaveRouteRequest{
+				UserId:         uuid.New(),
+				CityId:         "ABC",
+				Name:           "Route 1",
+				StartLocation:  "Start Location",
+				StartLongitude: 100.0,
+				StartLatitude:  10.0,
+				Price:          50000,
+				RouteDetails: []dto.DetailRouteRequest{
+					{
+						DestinationId: uuid.New(),
+						Longitude:     100.1,
+						Latitude:      10.1,
+						Duration:      30,
+						Order:         1,
+						VisitStart:    "2024-06-22T08:00:00Z",
+						VisitEnd:      "2024-06-22T09:00:00Z",
+					},
+				},
+			},
+			mockRepoSetup: func() {
+				mockRouteRepo.On("Create", mock.Anything).Return(&errorHandlers.InternalServerError{Message: "Gagal menyimpan detail rute"}).Once()
+			},
+			expectedError: &errorHandlers.InternalServerError{Message: "Gagal menyimpan rute"},
+		},
+		{
+			name: "Failed to save route detail",
+			request: &dto.SaveRouteRequest{
+				UserId:         uuid.New(),
+				CityId:         "ABC",
+				Name:           "Route 1",
+				StartLocation:  "Start Location",
+				StartLongitude: 100.0,
+				StartLatitude:  10.0,
+				Price:          50000,
+				RouteDetails: []dto.DetailRouteRequest{
+					{
+						DestinationId: uuid.New(),
+						Longitude:     100.1,
+						Latitude:      10.1,
+						Duration:      30,
+						Order:         1,
+						VisitStart:    "2024-06-22T08:00:00Z",
+						VisitEnd:      "2024-06-22T09:00:00Z",
+					},
+				},
+			},
+			mockRepoSetup: func() {
+				mockRouteRepo.On("Create", mock.Anything).Return(nil).Once()
+				mockRouteDetailRepo.On("Create", mock.Anything).Return(&errorHandlers.InternalServerError{Message: "Gagal menyimpan detail rute"}).Once()
+			},
+			expectedError: &errorHandlers.InternalServerError{Message: "Gagal menyimpan detail rute"},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.mockRepoSetup()
+
+			err := uc.SaveRoute(tc.request)
+
+			if tc.expectedError != nil {
+				require.Error(t, err)
+				require.EqualError(t, err, tc.expectedError.Error())
+			} else {
+				require.NoError(t, err)
+			}
+
+			mockRouteRepo.AssertExpectations(t)
+			mockRouteDetailRepo.AssertExpectations(t)
 		})
 	}
 }
