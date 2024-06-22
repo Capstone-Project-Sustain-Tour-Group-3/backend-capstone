@@ -18,8 +18,8 @@ func (m *MockCityRepository) Create(city *entities.City) error {
 	return args.Error(0)
 }
 
-func (m *MockCityRepository) FindAll() ([]entities.City, error) {
-	args := m.Called()
+func (m *MockCityRepository) FindAll(provinceId string) ([]entities.City, error) {
+	args := m.Called(provinceId)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}

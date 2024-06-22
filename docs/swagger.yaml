@@ -21,6 +21,7 @@ tags:
   - name: Admin - Users
   - name: Admin - Admins
   - name: Admin - Manage Content
+  - name: Admin - Master Data
 paths:
   /mobile/routes/summarize:
     post:
@@ -245,73 +246,6 @@ paths:
                   message:
                     type: string
                     example: Gagal menyimpan rute
-
-  /mobile/routes/unsave/{id}:
-    delete:
-      tags:
-        - Mobile - Routes
-      summary: Menghapus Rekomendasi Rute
-      description: API untuk menghapus rekomendasi rute.
-      security:
-        - BearerAuth: []
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: Success
-                  message:
-                    type: string
-                    example: data rute berhasil dihapus
-        '400':
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Format token tidak valid, gunakan bearer token
-        '401':
-          $ref: '#/components/responses/UnauthorizedResponse'
-        '404':
-          description: Not Found
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: Failed
-                  message:
-                    type: string
-                    example: Rute tidak ditemukan
-        '500':
-          description: Internal Server Error
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: Failed
-                  message:
-                    type: string
-                    example: Gagal menghapus rute
 
   /mobile/home:
     get:
@@ -3653,6 +3587,199 @@ paths:
                     type: string
                     example: Internal server error
 
+  /admin/master-data/categories:
+    get:
+      tags:
+        - Admin - Master Data
+      summary: Mendapatkan kategori
+      description: API untuk mendapatkan kategori
+      security:
+        - BearerAuth: [ ]
+      responses:
+        '200':
+          $ref: '#/components/responses/CategoriesResponseSuccess'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Format token tidak valid, gunakan bearer token
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Invalid input'
+  /admin/master-data/facilities:
+    get:
+      tags:
+        - Admin - Master Data
+      summary: Mendapatkan fasilitas
+      description: API untuk mendapatkan fasilitas
+      security:
+        - BearerAuth: [ ]
+      responses:
+        '200':
+          $ref: '#/components/responses/FacilitiesResponseSuccess'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Format token tidak valid, gunakan bearer token
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Invalid input'
+  /admin/master-data/provinces:
+    get:
+      tags:
+        - Admin - Master Data
+      summary: Mendapatkan provinsi
+      description: API untuk mendapatkan provinsi
+      security:
+        - BearerAuth: [ ]
+      responses:
+        '200':
+          $ref: '#/components/responses/ProvinceResponseSuccess'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Format token tidak valid, gunakan bearer token
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Invalid input'
+  /admin/master-data/cities:
+    get:
+      tags:
+        - Admin - Master Data
+      summary: Mendapatkan kota
+      description: API untuk mendapatkan kota
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: province_id
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/CityResponseSuccess'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Format token tidak valid, gunakan bearer token
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Invalid input'
+  /admin/master-data/subdistricts:
+    get:
+      tags:
+        - Admin - Master Data
+      summary: Mendapatkan kecamatan
+      description: API untuk mendapatkan kecamatan
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: city_id
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          $ref: '#/components/responses/SubdistrictResponseSuccess'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Format token tidak valid, gunakan bearer token
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: 'Failed'
+                  message:
+                    type: string
+                    example: 'Invalid input'
+
 components:
   schemas:
     Pagination:
@@ -3881,6 +4008,40 @@ components:
                   - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
                     nama: Sejarah
                     url: https://picsum.photos/300/200
+    FacilitiesResponseSuccess:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: 'Success'
+              message:
+                type: string
+                example: 'Berhasil mendapatkan fasilitas'
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    fasilitas_id:
+                      type: string
+                    nama:
+                      type: string
+                    url:
+                      type: string
+                example:
+                  - fasilitas_id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                    nama: Tempat Sampah
+                    url: https://picsum.photos/300/200
+                  - fasilitas_id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                    nama: Area Parkir
+                    url: https://picsum.photos/300/200
+                  - fasilitas_id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                    nama: Wahana Permainan
+                    url: https://picsum.photos/300/200
     ProvinceResponseSuccess:
       description: OK
       content:
@@ -3899,19 +4060,81 @@ components:
                 items:
                   type: object
                   properties:
-                    id:
+                    provinsi_id:
                       type: string
                     nama:
                       type: string
                     url:
                       type: string
                 example:
-                  - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                  - provinsi_id: 1
                     nama: Jawa Timur
                     url: https://picsum.photos/300/200
-                  - id: 18d8624a-4e83-4354-83fb-fb11aed4fdc4
+                  - provinsi_id: 2
                     nama: Jawa Barat
                     url: https://picsum.photos/300/200
+    CityResponseSuccess:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: 'Success'
+              message:
+                type: string
+                example: 'Berhasil mendapatkan kota'
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    kota_id:
+                      type: string
+                    provinsi_id:
+                      type: string
+                    nama:
+                      type: string
+                example:
+                  - kota_id: 1101
+                    provinsi_id: 11
+                    nama: KAB. MERANGIN
+                  - kota_id: 2201
+                    provinsi_id: 22
+                    nama: KAB. KERINCI
+    SubdistrictResponseSuccess:
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: 'Success'
+              message:
+                type: string
+                example: 'Berhasil mendapatkan kecamatan'
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    kecamatan_id:
+                      type: string
+                    kota_id:
+                      type: string
+                    nama:
+                      type: string
+                example:
+                  - kecamatan_id: 110102
+                    kota_id: 1101
+                    nama: Margo Tabir
+                  - kecamatan_id: 220102
+                    kota_id: 2201
+                    nama: Tabir Lintas
     HomepageResponseSuccess:
       description: OK
       content:

@@ -17,5 +17,8 @@ func (m *MockCloudinaryClient) UploadImage(file multipart.File, folder string) (
 
 func (m *MockCloudinaryClient) DeleteImage(mediaUrl string) error {
 	args := m.Called(mediaUrl)
+	if args.Error(0) == nil {
+		return nil
+	}
 	return args.Error(0)
 }
