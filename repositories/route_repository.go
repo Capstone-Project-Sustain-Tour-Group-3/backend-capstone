@@ -108,7 +108,9 @@ func (r *routeRepository) FindByIdCurrentUser(user_id, id uuid.UUID) (*entities.
 		Preload("User").
 		Preload("City").
 		Preload("RouteDetail").
+		Preload("RouteDetail.Route").
 		Preload("RouteDetail.Destination").
+		Preload("RouteDetail.Destination.DestinationMedias", "type = ?", "image").
 		Where("id = ? AND user_id = ?", id, user_id).
 		First(&route).
 		Error; err != nil {
