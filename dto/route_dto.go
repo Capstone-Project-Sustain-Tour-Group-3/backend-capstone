@@ -74,6 +74,7 @@ type GetAllRouteByCurrUserResponse struct {
 
 type GetDetailRouteByCurrUserRequest struct {
 	NamaRute      string                          `json:"nama_rute"`
+	LokasiAwal    string                          `json:"lokasi_awal"`
 	Destinasi     []DetailRouteByCurrUserResponse `json:"destinasi"`
 	EstimasiBiaya float64                         `json:"estimasi_biaya"`
 }
@@ -81,7 +82,6 @@ type GetDetailRouteByCurrUserRequest struct {
 type DetailRouteByCurrUserResponse struct {
 	Id                    uuid.UUID `json:"id"`
 	NamaDestinasi         string    `json:"nama_destinasi"`
-	LokasiAwal            string    `json:"lokasi_awal"`
 	UrlMedia              string    `json:"url_media"`
 	WaktuKunjungan        string    `json:"waktu_kunjungan"`
 	WaktuSelesaiKunjungan string    `json:"waktu_selesai_kunjungan"`
@@ -94,7 +94,6 @@ func ToDetailRouteByCurrUserResponse(route *entities.Route) *GetDetailRouteByCur
 		destinasi = append(destinasi, DetailRouteByCurrUserResponse{
 			Id:                    routeDetail.DestinationId,
 			NamaDestinasi:         routeDetail.Destination.Name,
-			LokasiAwal:            routeDetail.Route.StartLocation,
 			UrlMedia:              routeDetail.Destination.DestinationMedias[0].Url,
 			WaktuKunjungan:        string(routeDetail.VisitStart)[:5],
 			WaktuSelesaiKunjungan: string(routeDetail.VisitEnd)[:5],
@@ -103,6 +102,7 @@ func ToDetailRouteByCurrUserResponse(route *entities.Route) *GetDetailRouteByCur
 	}
 	response := GetDetailRouteByCurrUserRequest{
 		NamaRute:      route.Name,
+		LokasiAwal:    route.StartLocation,
 		Destinasi:     destinasi,
 		EstimasiBiaya: route.Price,
 	}
