@@ -13,8 +13,11 @@ import (
 	"capstone/usecases"
 
 	"github.com/google/uuid"
+	goredis "github.com/redis/go-redis/v9"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
 )
 
 type nearbyDestinationTestCase struct {
@@ -205,6 +208,55 @@ func TestGetRecommendations(t *testing.T) {
 				},
 			},
 		},
+		{
+			Id:         uuid.New(),
+			Name:       "Destination 1",
+			CategoryId: uuid.New(),
+			DestinationMedias: []entities.DestinationMedia{
+				{
+					Id:    uuid.New(),
+					Title: "image 1",
+					Url:   "https://www.google.com",
+				},
+			},
+			DestinationAddress: &entities.DestinationAddress{
+				Province: entities.Province{
+					Name: "Province 1",
+				},
+			},
+		},
+		{
+			Id:   uuid.New(),
+			Name: "Destination 2",
+			DestinationMedias: []entities.DestinationMedia{
+				{
+					Id:    uuid.New(),
+					Title: "image 2",
+					Url:   "https://www.google.com",
+				},
+			},
+			DestinationAddress: &entities.DestinationAddress{
+				Province: entities.Province{
+					Name: "Province 2",
+				},
+			},
+		},
+		{
+			Id:   uuid.New(),
+			Name: "Destination 2",
+			DestinationMedias: []entities.DestinationMedia{
+				{
+					Id:    uuid.New(),
+					Title: "image 2",
+					Url:   "https://www.google.com",
+				},
+			},
+			DestinationAddress: &entities.DestinationAddress{
+				Province: entities.Province{
+					Name: "Province 2",
+				},
+			},
+		},
 	}
 
 	recommendationDestination := []dto.RecommendDestination{
@@ -220,21 +272,39 @@ func TestGetRecommendations(t *testing.T) {
 			ImageUrl: &destinations[1].DestinationMedias[0].Url,
 			Province: dto.Province{Name: destinations[1].DestinationAddress.Province.Name},
 		},
+		{
+			Id:       destinations[2].Id,
+			Name:     destinations[2].Name,
+			ImageUrl: &destinations[2].DestinationMedias[0].Url,
+			Province: dto.Province{Name: destinations[2].DestinationAddress.Province.Name},
+		},
+		{
+			Id:       destinations[3].Id,
+			Name:     destinations[3].Name,
+			ImageUrl: &destinations[3].DestinationMedias[0].Url,
+			Province: dto.Province{Name: destinations[3].DestinationAddress.Province.Name},
+		},
+		{
+			Id:       destinations[4].Id,
+			Name:     destinations[4].Name,
+			ImageUrl: &destinations[4].DestinationMedias[0].Url,
+			Province: dto.Province{Name: destinations[4].DestinationAddress.Province.Name},
+		},
 	}
-	ids := &[]string{"1", "2"}
-	// personalizations := entities.UserPersonalization{
-	// 	Id: uuid.New(),
-	// 	PersonalizationProvinces: []entities.PersonalizationProvince{
-	// 		{
-	// 			ProvinceId: destinations[0].DestinationAddress.Province.Id,
-	// 		},
-	// 	},
-	// 	PersonalizationCategories: []entities.PersonalizationCategory{
-	// 		{
-	// 			CategoryId: destinations[0].CategoryId,
-	// 		},
-	// 	},
-	// }
+	ids := &[]string{"1", "2", "3", "4", "5"}
+	personalizations := entities.UserPersonalization{
+		Id: uuid.New(),
+		PersonalizationProvinces: []entities.PersonalizationProvince{
+			{
+				ProvinceId: destinations[0].DestinationAddress.Province.Id,
+			},
+		},
+		PersonalizationCategories: []entities.PersonalizationCategory{
+			{
+				CategoryId: destinations[0].CategoryId,
+			},
+		},
+	}
 
 	testCases := []recommendatonTestCase{
 		{
@@ -264,23 +334,23 @@ func TestGetRecommendations(t *testing.T) {
 			expectedResp:  nil,
 			expectedError: &errorHandlers.InternalServerError{Message: "Gagal mendapatkan rekomendasi destinasi"},
 		},
-		// {
-		// 	name: "Success get recommendations using personalization data",
-		// 	mockSetup: func(redisClient *externals.MockRedisClient, destinationRepo *repositories.MockDestinationRepository, userPersonalizationRepo *repositories.MockUserPersonalizationRepository, routeRepo *repositories.MockRouteRepository, openAIClient *externals.MockOpenAIClient) {
-		// 		subquery := new(gorm.DB)
+		{
+			name: "Success get recommendations using personalization data",
+			mockSetup: func(redisClient *externals.MockRedisClient, destinationRepo *repositories.MockDestinationRepository, userPersonalizationRepo *repositories.MockUserPersonalizationRepository, routeRepo *repositories.MockRouteRepository, openAIClient *externals.MockOpenAIClient) {
+				subquery := new(gorm.DB)
 
-		// 		redisClient.On("GetRecommendedDestinationsIds", fmt.Sprintf("rec_%s", encodedKey)).Return(nil, goredis.Nil)
-		// 		userPersonalizationRepo.On("FindByUserId", uid).Return(&personalizations, nil)
-		// 		routeRepo.On("FindVisitedByUserSubquery", uid).Return(subquery)
-		// 		destinationRepo.On("FindBySubqueryRoute", mock.Anything, true, mock.Anything, mock.Anything).Return(&[]entities.Destination{}, nil)
-		// 		destinationRepo.On("FindBySubqueryRoute", mock.Anything, false, mock.Anything, mock.Anything).Return(&destinations, nil)
-		// 		openAIClient.On("GenerateAnswer", mock.Anything, mock.Anything).Return("1\n2", nil)
-		// 		redisClient.On("SetRecommendedDestinationsIds", fmt.Sprintf("rec_%s", encodedKey), mock.Anything).Return(nil)
-		// 		destinationRepo.On("FindByManyIds", ids).Return(&destinations, nil)
-		// 	},
-		// 	expectedResp:  recommendationDestination,
-		// 	expectedError: nil,
-		// },
+				redisClient.On("GetRecommendedDestinationsIds", fmt.Sprintf("rec_%s", encodedKey)).Return(nil, goredis.Nil)
+				userPersonalizationRepo.On("FindByUserId", uid).Return(&personalizations, nil)
+				routeRepo.On("FindVisitedByUserSubquery", uid).Return(subquery)
+				destinationRepo.On("FindBySubqueryRoute", mock.Anything, true, mock.Anything, mock.Anything).Return(&[]entities.Destination{}, nil)
+				destinationRepo.On("FindBySubqueryRoute", mock.Anything, false, mock.Anything, mock.Anything).Return(&destinations, nil)
+				openAIClient.On("GenerateAnswer", mock.Anything, mock.Anything).Return("1\n2\n3\n4\n5", nil)
+				redisClient.On("SetRecommendedDestinationsIds", fmt.Sprintf("rec_%s", encodedKey), mock.Anything).Return(nil)
+				destinationRepo.On("FindByManyIds", *ids).Return(&destinations, nil)
+			},
+			expectedResp:  recommendationDestination,
+			expectedError: nil,
+		},
 		// {
 		// 	name: "Failed to get personalization data",
 		// 	mockSetup: func(redisClient *externals.MockRedisClient, destinationRepo *repositories.MockDestinationRepository, userPersonalizationRepo *repositories.MockUserPersonalizationRepository, routeRepo *repositories.MockRouteRepository, openAIClient *externals.MockOpenAIClient) {
