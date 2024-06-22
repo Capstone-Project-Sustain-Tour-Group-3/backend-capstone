@@ -28,7 +28,8 @@ func NewDashboardRepository(db *gorm.DB) *dashboardRepository {
 
 func (r *dashboardRepository) GetTotalAdmin() (int64, error) {
 	var total int64
-	if err := r.db.Model(&entities.Admin{}).Count(&total).Error; err != nil {
+	if err := r.db.Debug().Model(&entities.Admin{}).Where("role", "admin").Count(&total).
+		Error; err != nil {
 		return 0, err
 	}
 	return total, nil

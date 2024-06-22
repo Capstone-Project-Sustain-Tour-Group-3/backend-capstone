@@ -1,207 +1,224 @@
 package seeds
 
 import (
+	"encoding/csv"
 	"log"
+	"os"
 
 	"capstone/entities"
 )
 
 func (s Seed) SeedProvinces() {
+	file, err := os.Open("storage/data_url_provinces.csv")
+	if err != nil {
+		log.Fatalf("failed to open file: %v", err)
+	}
+
+	reader := csv.NewReader(file)
+	// Skip header row
+	if _, err = reader.Read(); err != nil {
+		log.Fatalf("failed to read header row: %v", err)
+	}
+	records, err := reader.ReadAll()
+	if err != nil {
+		log.Fatalf("failed to read CSV file: %v", err)
+	}
+
 	provinces := []entities.Province{
 		{
 			Id:   "11",
-			Name: "Nanggroe Aceh Darussalam",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500661/i1ewbj47dsetsvxwu82n.png",
+			Name: records[0][0],
+			Url:  records[0][1],
 		},
 		{
 			Id:   "12",
-			Name: "SUMATERA UTARA",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500696/byqnc7hv8jnbukayf5a0.jpg",
+			Name: records[1][0],
+			Url:  records[1][1],
 		},
 		{
 			Id:   "13",
-			Name: "SUMATERA BARAT",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500694/ybvw9ek9mb7wpbsnza6e.jpg",
+			Name: records[2][0],
+			Url:  records[2][1],
 		},
 		{
 			Id:   "14",
-			Name: "RIAU",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500688/o2pgbcqebmekozp5qh9x.jpg",
+			Name: records[3][0],
+			Url:  records[3][1],
 		},
 		{
 			Id:   "21",
-			Name: "KEPULAUAN RIAU",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500678/iwbrdbtr4hiuv3hkyvq7.jpg",
+			Name: records[4][0],
+			Url:  records[4][1],
 		},
 		{
 			Id:   "15",
-			Name: "JAMBI",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500669/sfpphdljanprgou9ozfw.jpg",
+			Name: records[5][0],
+			Url:  records[5][1],
 		},
 		{
 			Id:   "16",
-			Name: "SUMATERA SELATAN",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500695/qou9dl3mili92tkbjgxu.jpg",
+			Name: records[6][0],
+			Url:  records[6][1],
 		},
 		{
 			Id:   "19",
-			Name: "BANGKA BELITUNG",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500664/h85b2uqjhy9hdstqe9ez.jpg",
+			Name: records[7][0],
+			Url:  records[7][1],
 		},
 		{
 			Id:   "17",
-			Name: "BENGKULU",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500666/exxxdni2rsl0ffrnruub.jpg",
+			Name: records[8][0],
+			Url:  records[8][1],
 		},
 		{
 			Id:   "18",
-			Name: "LAMPUNG",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500679/xlyvm67zkknueqqwuyf4.jpg",
+			Name: records[9][0],
+			Url:  records[9][1],
 		},
 		{
 			Id:   "31",
-			Name: "DKI JAKARTA",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500669/zary2el8xl7h3e8ptilv.jpg",
+			Name: records[10][0],
+			Url:  records[10][1],
 		},
 		{
 			Id:   "32",
-			Name: "JAWA BARAT",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500668/b7dukeshrzdacmos7htd.png",
+			Name: records[11][0],
+			Url:  records[11][1],
 		},
 		{
 			Id:   "33",
-			Name: "JAWA TENGAH",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500670/ahfsrklckzqu1ifteoxw.jpg",
+			Name: records[12][0],
+			Url:  records[12][1],
 		},
 		{
 			Id:   "34",
-			Name: "DI YOGYAKARTA",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500672/qbq4nagbiwwoyq8xfiax.jpg",
+			Name: records[13][0],
+			Url:  records[13][1],
 		},
 		{
 			Id:   "35",
-			Name: "JAWA TIMUR",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500671/jfcmcj6v9gsvdjn7a4hw.jpg",
+			Name: records[14][0],
+			Url:  records[14][1],
 		},
 		{
 			Id:   "36",
-			Name: "BANTEN",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500665/cypsonvjjsiko0u78uxr.jpg",
+			Name: records[15][0],
+			Url:  records[15][1],
 		},
 		{
 			Id:   "51",
-			Name: "BALI",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500663/qbpre0kqd5r39hpeeaqm.jpg",
+			Name: records[16][0],
+			Url:  records[16][1],
 		},
 		{
 			Id:   "52",
-			Name: "NUSA TENGGARA BARAT",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500681/lil2xezqeryid7xverc0.jpg",
+			Name: records[17][0],
+			Url:  records[17][1],
 		},
 		{
 			Id:   "53",
-			Name: "NUSA TENGGARA TIMUR",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500682/iw2szz2b3vj7kv9clksq.jpg",
+			Name: records[18][0],
+			Url:  records[18][1],
 		},
 		{
 			Id:   "61",
-			Name: "KALIMANTAN BARAT",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500673/thmgquqyw56ku6qqa4ii.png",
+			Name: records[19][0],
+			Url:  records[19][1],
 		},
 		{
 			Id:   "62",
-			Name: "KALIMANTAN TENGAH",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500676/m93zhjbv1vvxlssnymkz.jpg",
+			Name: records[20][0],
+			Url:  records[20][1],
 		},
 		{
 			Id:   "63",
-			Name: "KALIMANTAN SELATAN",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500674/shhdyvaji5w1moczwzzl.jpg",
+			Name: records[21][0],
+			Url:  records[21][1],
 		},
 		{
 			Id:   "64",
-			Name: "KALIMANTAN TIMUR",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500677/c9ugqgnp26njckcdagsq.jpg",
+			Name: records[22][0],
+			Url:  records[22][1],
 		},
 		{
 			Id:   "65",
-			Name: "KALIMANTAN UTARA",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500675/xv0rz7ocrmzzerbhdmj3.jpg",
+			Name: records[23][0],
+			Url:  records[23][1],
 		},
 		{
 			Id:   "71",
-			Name: "SULAWESI UTARA",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500693/xgrv53rwy18zqllusl1t.jpg",
+			Name: records[24][0],
+			Url:  records[24][1],
 		},
 		{
 			Id:   "72",
-			Name: "SULAWESI TENGAH",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500690/hsjgaviw00glavracf03.png",
+			Name: records[25][0],
+			Url:  records[25][1],
 		},
 		{
 			Id:   "73",
-			Name: "SULAWESI SELATAN",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500692/npt2n3a9q9y4vqbmxpt7.png",
+			Name: records[26][0],
+			Url:  records[26][1],
 		},
 		{
 			Id:   "74",
-			Name: "SULAWESI TENGGARA",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500689/bojakznjjguta4gb1oxr.jpg",
+			Name: records[27][0],
+			Url:  records[27][1],
 		},
 		{
 			Id:   "75",
-			Name: "GORONTALO",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500667/gno3upr5qrqjry9bpkdn.png",
+			Name: records[28][0],
+			Url:  records[28][1],
 		},
 		{
 			Id:   "76",
-			Name: "SULAWESI BARAT",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500691/ndqlzaz96t79aztslogp.jpg",
+			Name: records[29][0],
+			Url:  records[29][1],
 		},
 		{
 			Id:   "81",
-			Name: "MALUKU",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500680/thg83qidu82ginztiwk9.jpg",
+			Name: records[30][0],
+			Url:  records[30][1],
 		},
 		{
 			Id:   "82",
-			Name: "MALUKU UTARA",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500680/kzka3kshanam7ofq1xhd.jpg",
+			Name: records[31][0],
+			Url:  records[31][1],
 		},
 		{
 			Id:   "91",
-			Name: "PAPUA",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500687/oud4plqxloysj8658z9v.jpg",
+			Name: records[32][0],
+			Url:  records[32][1],
 		},
 		{
 			Id:   "92",
-			Name: "PAPUA BARAT",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500684/ix7acvkzooy2aoh7og9l.jpg",
+			Name: records[33][0],
+			Url:  records[33][1],
 		},
 		{
 			Id:   "93",
-			Name: "PAPUA SELATAN",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500686/tekxeryuzmkoiydqghq6.jpg",
+			Name: records[34][0],
+			Url:  records[34][1],
 		},
 		{
 			Id:   "94",
-			Name: "PAPUA TENGAH",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500686/dwyh0ccnmlucgc4kjwst.jpg",
+			Name: records[35][0],
+			Url:  records[35][1],
 		},
 		{
 			Id:   "95",
-			Name: "PAPUA PEGUNUNGAN",
-			Url:  "https://res.cloudinary.com/alta-minpro/image/upload/v1717500685/qefq7zxevvhlsgelti8g.jpg",
+			Name: records[36][0],
+			Url:  records[36][1],
 		},
 		{
 			Id:   "96",
-			Name: "PAPUA BARAT DAYA",
-			Url:  "https://storage.googleapis.com/provinces_url/papua-barat-daya.jpeg",
+			Name: records[37][0],
+			Url:  records[37][1],
 		},
 	}
 
 	for _, province := range provinces {
-		if err := s.db.Where(entities.Province{Name: province.Name}).
+		if err = s.db.Where(entities.Province{Name: province.Name}).
 			FirstOrCreate(&province).Error; err != nil {
 			log.Fatalf("failed to create province: %v", err)
 		}

@@ -1,14 +1,14 @@
 name,url
-Aceh,https://storage.googleapis.com/provinces_url/aceh.png
+Nanggroe Aceh Darussalam,https://storage.googleapis.com/provinces_url/aceh.png
 Sumatera Utara,https://storage.googleapis.com/provinces_url/sumatra-utara.jpeg
 Sumatera Barat,https://storage.googleapis.com/provinces_url/sumatra-barat.jpeg
 Riau,https://storage.googleapis.com/provinces_url/riau.jpeg
+Kepulauan Riau,https://storage.googleapis.com/provinces_url/kep-riau.jpeg
 Jambi,https://storage.googleapis.com/provinces_url/jambi.jpeg
 Sumatera Selatan,https://storage.googleapis.com/provinces_url/sumatra-selatan.jpeg
+Kepulauan Bangka Belitung,https://storage.googleapis.com/provinces_url/bangka-belitung.jpeg
 Bengkulu,https://storage.googleapis.com/provinces_url/bengkulu.jpeg
 Lampung,https://storage.googleapis.com/provinces_url/lampung.jpeg
-Kepulauan Bangka Belitung,https://storage.googleapis.com/provinces_url/bangka-belitung.jpeg
-Kepulauan Riau,https://storage.googleapis.com/provinces_url/kep-riau.jpeg
 DKI Jakarta,https://storage.googleapis.com/provinces_url/jakarta.jpeg
 Jawa Barat,https://storage.googleapis.com/provinces_url/jawa-barat.png
 Jawa Tengah,https://storage.googleapis.com/provinces_url/jawa-tengah.jpeg
@@ -23,17 +23,17 @@ Kalimantan Tengah,https://storage.googleapis.com/provinces_url/kalimantan-tengah
 Kalimantan Selatan,https://storage.googleapis.com/provinces_url/kalimantan-selatan.jpeg
 Kalimantan Timur,https://storage.googleapis.com/provinces_url/kalimantan-timur.jpeg
 Kalimantan Utara,https://storage.googleapis.com/provinces_url/kalimantan-utara.jpeg
-Gorontalo,https://storage.googleapis.com/provinces_url/gorontalo.png
-Sulawesi Barat,https://storage.googleapis.com/provinces_url/sulawesi-barat.jpeg
+Sulawesi Utara,https://storage.googleapis.com/provinces_url/sulawesi-utara.jpeg
+Sulawesi Tengah,https://storage.googleapis.com/provinces_url/sulawesi-tengah.png
 Sulawesi Selatan,https://storage.googleapis.com/provinces_url/sulawesi-selatan.jpeg
 Sulawesi Tenggara,https://storage.googleapis.com/provinces_url/sulawesi-tenggara.jpeg
-Sulawesi Tengah,https://storage.googleapis.com/provinces_url/sulawesi-tengah.png
-Sulawesi Utara,https://storage.googleapis.com/provinces_url/sulawesi-utara.jpeg
+Gorontalo,https://storage.googleapis.com/provinces_url/gorontalo.png
+Sulawesi Barat,https://storage.googleapis.com/provinces_url/sulawesi-barat.jpeg
 Maluku,https://storage.googleapis.com/provinces_url/maluku.jpeg
 Maluku Utara,https://storage.googleapis.com/provinces_url/maluku-utara.jpeg
-Papua Barat,https://storage.googleapis.com/provinces_url/papua-barat.jpeg
 Papua,https://storage.googleapis.com/provinces_url/papua.jpeg
-Papua Barat Daya,https://storage.googleapis.com/provinces_url/papua-barat-daya.jpeg
-Papua Pegunungan,https://storage.googleapis.com/provinces_url/papua-pegunungan.jpeg
+Papua Barat,https://storage.googleapis.com/provinces_url/papua-barat.jpeg
 Papua Selatan,https://storage.googleapis.com/provinces_url/papua-selatan.jpeg
 Papua Tengah,https://storage.googleapis.com/provinces_url/papua-tengah.jpeg
+Papua Pegunungan,https://storage.googleapis.com/provinces_url/papua-pegunungan.jpeg
+Papua Barat Daya,https://storage.googleapis.com/provinces_url/papua-barat-daya.jpeg
