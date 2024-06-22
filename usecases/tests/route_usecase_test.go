@@ -1,9 +1,10 @@
 package tests
 
 import (
-	"capstone/dto"
 	"errors"
 	"testing"
+
+	"capstone/dto"
 
 	"github.com/stretchr/testify/mock"
 
