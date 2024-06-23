@@ -12,7 +12,10 @@ type MockCloudinaryClient struct {
 
 func (m *MockCloudinaryClient) UploadImage(file multipart.File, folder string) (string, error) {
 	args := m.Called(file, folder)
-	return args.String(0), args.Error(1)
+	if args.Get(0) == "" {
+		return "", args.Error(1)
+	}
+	return args.String(0), nil
 }
 
 func (m *MockCloudinaryClient) DeleteImage(mediaUrl string) error {

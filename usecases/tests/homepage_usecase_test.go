@@ -351,27 +351,6 @@ func TestGetRecommendations(t *testing.T) {
 			expectedResp:  recommendationDestination,
 			expectedError: nil,
 		},
-		// {
-		// 	name: "Failed to get personalization data",
-		// 	mockSetup: func(redisClient *externals.MockRedisClient, destinationRepo *repositories.MockDestinationRepository, userPersonalizationRepo *repositories.MockUserPersonalizationRepository, routeRepo *repositories.MockRouteRepository, openAIClient *externals.MockOpenAIClient) {
-		// 		redisClient.On("GetRecommendedDestinationsIds", fmt.Sprintf("rec_%s", encodedKey)).Return(nil, redis.Nil)
-		// 		userPersonalizationRepo.On("FindByUserId", uid).Return(nil, &errorHandlers.InternalServerError{Message: "Gagal mendapatkan data personalisasi"})
-		// 	},
-		// 	expectedResp:  nil,
-		// 	expectedError: &errorHandlers.InternalServerError{Message: "Gagal mendapatkan data personalisasi"},
-		// },
-		// {
-		// 	name: "Failed to generate recommendations from OpenAI",
-		// 	mockSetup: func(redisClient *externals.MockRedisClient, destinationRepo *externals.MockDestinationRepo, userPersonalizationRepo *externals.MockUserPersonalizationRepo, routeRepo *externals.MockRouteRepo, openAIClient *externals.MockOpenAIClient) {
-		// 		redisClient.On("GetRecommendedDestinationsIds", fmt.Sprintf("rec_%s", encodedKey)).Return(nil, redis.Nil)
-		// 		userPersonalizationRepo.On("FindByUserId", uid).Return(&entities.UserPersonalization{}, nil)
-		// 		destinationRepo.On("FindBySubqueryRoute", mock.Anything, true, mock.Anything, mock.Anything).Return(&mockRecommendations, nil)
-		// 		destinationRepo.On("FindBySubqueryRoute", mock.Anything, false, mock.Anything, mock.Anything).Return(&mockRecommendations, nil)
-		// 		openAIClient.On("GenerateAnswer", mock.Anything, mock.Anything).Return("", &errorHandlers.InternalServerError{Message: "Gagal mendapatkan rekomendasi destinasi"})
-		// 	},
-		// 	expectedResp:  nil,
-		// 	expectedError: &errorHandlers.InternalServerError{Message: "Gagal mendapatkan rekomendasi destinasi"},
-		// },
 	}
 
 	for _, tc := range testCases {
