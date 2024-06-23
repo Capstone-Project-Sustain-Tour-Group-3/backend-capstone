@@ -29,6 +29,25 @@ type GetAllDestination struct {
 	DestinationAddress *DestinationAddress `json:"alamat"`
 }
 
+func ToOneDestinationResponse(destination *entities.Destination) GetAllDestination {
+	return GetAllDestination{
+		Id:         destination.Id,
+		Name:       destination.Name,
+		OpenTime:   destination.OpenTime,
+		CloseTime:  destination.CloseTime,
+		EntryPrice: destination.EntryPrice,
+		VisitCount: destination.VisitCount,
+		Category:   *ToCategory(destination),
+		DestinationAddress: &DestinationAddress{
+			Province:    destination.DestinationAddress.Province.Name,
+			City:        destination.DestinationAddress.City.Name,
+			Subdistrict: destination.DestinationAddress.Subdistrict.Name,
+			StreetName:  destination.DestinationAddress.StreetName,
+			PostalCode:  destination.DestinationAddress.PostalCode,
+		},
+	}
+}
+
 func ToSearchDestinationsResponse(destinations *[]entities.Destination) *[]SearchDestination {
 	responses := make([]SearchDestination, len(*destinations))
 

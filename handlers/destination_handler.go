@@ -159,7 +159,7 @@ func (h *DestinationHandler) CreateDestination(ctx echo.Context) error {
 		})
 	}
 
-	err := h.usecase.CreateDestination(&req)
+	destination, err := h.usecase.CreateDestination(&req)
 	if err != nil {
 		return errorHandlers.HandleError(ctx, err)
 	}
@@ -167,7 +167,7 @@ func (h *DestinationHandler) CreateDestination(ctx echo.Context) error {
 	response := helpers.Response(dto.ResponseParams{
 		StatusCode: http.StatusCreated,
 		Message:    "data destinasi berhasil ditambah",
-		Data:       req,
+		Data:       destination,
 	})
 
 	return ctx.JSON(http.StatusCreated, response)

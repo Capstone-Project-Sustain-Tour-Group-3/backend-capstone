@@ -2716,7 +2716,29 @@ paths:
                     example: 'Success'
                   message:
                     type: string
-                    example: 'Destination created successfully'
+                    example: 'Destination created successfully.'
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: 'eb77b590-b255-4ea1-b11a-d445a259ac63'
+                      nama_destinasi:
+                        type: string
+                        example: 'Tes Destinasi'
+                      jam_buka:
+                        type: string
+                        example: '08:00'
+                      jam_tutup:
+                        type: string
+                        example: '17:00'
+                      harga_masuk:
+                        type: number
+                        example: 20000
+                      kategori:
+                        $ref: '#/components/schemas/Category'
+                      alamat:
+                        $ref: '#/components/schemas/DestinationAddress'
         '400':
           description: Bad request
           content:
