@@ -2,6 +2,7 @@ package tests
 
 import (
 	"errors"
+	"mime/multipart"
 	"testing"
 
 	"capstone/dto"
@@ -414,6 +415,205 @@ func TestDeleteDestinationMedia(t *testing.T) {
 			}
 
 			// mockDestinationMediaRepo.AssertExpectations(t)
+		})
+	}
+}
+
+func TestUploadImage(t *testing.T) {
+	tests := []struct {
+		name                string
+		mockCloudinarySetup func(*externals.MockCloudinaryClient)
+		mockRepoSetup       func(*repositories.MockDestinationMediaRepository)
+		expectedURL         string
+		expectedError       string
+	}{
+		{
+			name: "success",
+			mockCloudinarySetup: func(mockCloudinaryClient *externals.MockCloudinaryClient) {
+				mockCloudinaryClient.On("UploadImage", mock.Anything, "destination_media").Return("http://example.com/image.jpg", nil)
+			},
+			mockRepoSetup: func(mockDestinationMediaRepo *repositories.MockDestinationMediaRepository) {
+				mockDestinationMediaRepo.On("Create", mock.AnythingOfType("*entities.DestinationMedia"), (*gorm.DB)(nil)).Return(nil)
+			},
+			expectedURL:   "http://example.com/image.jpg",
+			expectedError: "",
+		},
+		{
+			name: "upload image error",
+			mockCloudinarySetup: func(mockCloudinaryClient *externals.MockCloudinaryClient) {
+				mockCloudinaryClient.On("UploadImage", mock.Anything, "destination_media").Return("", errors.New("upload error"))
+			},
+			mockRepoSetup: func(mockDestinationMediaRepo *repositories.MockDestinationMediaRepository) {},
+			expectedURL:   "",
+			expectedError: "upload error",
+		},
+		{
+			name: "create media error",
+			mockCloudinarySetup: func(mockCloudinaryClient *externals.MockCloudinaryClient) {
+				mockCloudinaryClient.On("UploadImage", mock.Anything, "destination_media").Return("http://example.com/image.jpg", nil)
+			},
+			mockRepoSetup: func(mockDestinationMediaRepo *repositories.MockDestinationMediaRepository) {
+				mockDestinationMediaRepo.On("Create", mock.AnythingOfType("*entities.DestinationMedia"), (*gorm.DB)(nil)).Return(errors.New("create error"))
+			},
+			expectedURL:   "",
+			expectedError: "create error",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockCloudinaryClient := new(externals.MockCloudinaryClient)
+			mockDestinationMediaRepo := new(repositories.MockDestinationMediaRepository)
+			usecase := usecases.NewDestinationMediaUsecase(mockDestinationMediaRepo, nil, mockCloudinaryClient)
+
+			file := new(multipart.FileHeader)
+			open, _ := file.Open()
+			destinationId := uuid.New()
+			title := "Test Title"
+			uploadRequest := dto.UploadDestinationMediaRequest{
+				DestinationId: destinationId,
+				File:          open,
+				Title:         title,
+			}
+
+			tt.mockCloudinarySetup(mockCloudinaryClient)
+			tt.mockRepoSetup(mockDestinationMediaRepo)
+
+			url, err := usecase.UploadImage(uploadRequest)
+
+			if tt.expectedError == "" {
+				require.NoError(t, err)
+				require.Equal(t, tt.expectedURL, url)
+			} else {
+				require.Error(t, err)
+				require.Empty(t, url)
+				require.Equal(t, tt.expectedError, err.Error())
+			}
+
+			mockCloudinaryClient.AssertExpectations(t)
+			mockDestinationMediaRepo.AssertExpectations(t)
+		})
+	}
+}
+
+func TestUpdateImage(t *testing.T) {
+	tests := []struct {
+		name                 string
+		mockRepoFindById     func(mockDestinationMediaRepo *repositories.MockDestinationMediaRepository)
+		mockCloudinaryUpload func(mockCloudinaryClient *externals.MockCloudinaryClient)
+		mockRepoUpdate       func(mockDestinationMediaRepo *repositories.MockDestinationMediaRepository)
+		mockCloudinaryDelete func(mockCloudinaryClient *externals.MockCloudinaryClient)
+		expectedURL          string
+		expectedError        string
+	}{
+		{
+			name: "success",
+			mockRepoFindById: func(mockDestinationMediaRepo *repositories.MockDestinationMediaRepository) {
+				mockDestinationMediaRepo.On("FindById", mock.Anything).Return(&entities.DestinationMedia{Url: "http://example.com/oldimage.jpg"}, nil)
+			},
+			mockCloudinaryUpload: func(mockCloudinaryClient *externals.MockCloudinaryClient) {
+				mockCloudinaryClient.On("UploadImage", mock.Anything, "destination_media").Return("http://example.com/newimage.jpg", nil)
+			},
+			mockRepoUpdate: func(mockDestinationMediaRepo *repositories.MockDestinationMediaRepository) {
+				mockDestinationMediaRepo.On("Update", mock.AnythingOfType("*entities.DestinationMedia")).Return(nil)
+			},
+			mockCloudinaryDelete: func(mockCloudinaryClient *externals.MockCloudinaryClient) {
+				mockCloudinaryClient.On("DeleteImage", "http://example.com/oldimage.jpg").Return(nil)
+			},
+			expectedURL:   "http://example.com/newimage.jpg",
+			expectedError: "",
+		},
+		{
+			name: "find by id error",
+			mockRepoFindById: func(mockDestinationMediaRepo *repositories.MockDestinationMediaRepository) {
+				mockDestinationMediaRepo.On("FindById", mock.Anything).Return(nil, errors.New("not found"))
+			},
+			mockCloudinaryUpload: func(mockCloudinaryClient *externals.MockCloudinaryClient) {},
+			mockRepoUpdate:       func(mockDestinationMediaRepo *repositories.MockDestinationMediaRepository) {},
+			mockCloudinaryDelete: func(mockCloudinaryClient *externals.MockCloudinaryClient) {},
+			expectedURL:          "",
+			expectedError:        "Destinasi tidak ditemukan",
+		},
+		{
+			name: "upload image error",
+			mockRepoFindById: func(mockDestinationMediaRepo *repositories.MockDestinationMediaRepository) {
+				mockDestinationMediaRepo.On("FindById", mock.Anything).Return(&entities.DestinationMedia{Url: "http://example.com/oldimage.jpg"}, nil)
+			},
+			mockCloudinaryUpload: func(mockCloudinaryClient *externals.MockCloudinaryClient) {
+				mockCloudinaryClient.On("UploadImage", mock.Anything, "destination_media").Return("", errors.New("upload error"))
+			},
+			mockRepoUpdate:       func(mockDestinationMediaRepo *repositories.MockDestinationMediaRepository) {},
+			mockCloudinaryDelete: func(mockCloudinaryClient *externals.MockCloudinaryClient) {},
+			expectedURL:          "",
+			expectedError:        "upload error",
+		},
+		{
+			name: "update media error",
+			mockRepoFindById: func(mockDestinationMediaRepo *repositories.MockDestinationMediaRepository) {
+				mockDestinationMediaRepo.On("FindById", mock.Anything).Return(&entities.DestinationMedia{Url: "http://example.com/oldimage.jpg"}, nil)
+			},
+			mockCloudinaryUpload: func(mockCloudinaryClient *externals.MockCloudinaryClient) {
+				mockCloudinaryClient.On("UploadImage", mock.Anything, "destination_media").Return("http://example.com/newimage.jpg", nil)
+			},
+			mockRepoUpdate: func(mockDestinationMediaRepo *repositories.MockDestinationMediaRepository) {
+				mockDestinationMediaRepo.On("Update", mock.AnythingOfType("*entities.DestinationMedia")).Return(errors.New("update error"))
+			},
+			mockCloudinaryDelete: func(mockCloudinaryClient *externals.MockCloudinaryClient) {},
+			expectedURL:          "",
+			expectedError:        "update error",
+		},
+		{
+			name: "delete image error",
+			mockRepoFindById: func(mockDestinationMediaRepo *repositories.MockDestinationMediaRepository) {
+				mockDestinationMediaRepo.On("FindById", mock.Anything).Return(&entities.DestinationMedia{Url: "http://example.com/oldimage.jpg"}, nil)
+			},
+			mockCloudinaryUpload: func(mockCloudinaryClient *externals.MockCloudinaryClient) {
+				mockCloudinaryClient.On("UploadImage", mock.Anything, "destination_media").Return("http://example.com/newimage.jpg", nil)
+			},
+			mockRepoUpdate: func(mockDestinationMediaRepo *repositories.MockDestinationMediaRepository) {
+				mockDestinationMediaRepo.On("Update", mock.AnythingOfType("*entities.DestinationMedia")).Return(nil)
+			},
+			mockCloudinaryDelete: func(mockCloudinaryClient *externals.MockCloudinaryClient) {
+				mockCloudinaryClient.On("DeleteImage", "http://example.com/oldimage.jpg").Return(errors.New("delete error"))
+			},
+			expectedURL:   "",
+			expectedError: "Gagal menghapus media destinasi",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockCloudinaryClient := new(externals.MockCloudinaryClient)
+			mockDestinationMediaRepo := new(repositories.MockDestinationMediaRepository)
+			usecase := usecases.NewDestinationMediaUsecase(mockDestinationMediaRepo, nil, mockCloudinaryClient)
+
+			id := uuid.New()
+			file := new(multipart.FileHeader)
+			open, _ := file.Open()
+			title := "Updated Title"
+			updateRequest := dto.UpdateImageDestinationMediaRequest{
+				File:  open,
+				Title: title,
+			}
+
+			tt.mockRepoFindById(mockDestinationMediaRepo)
+			tt.mockCloudinaryUpload(mockCloudinaryClient)
+			tt.mockRepoUpdate(mockDestinationMediaRepo)
+			tt.mockCloudinaryDelete(mockCloudinaryClient)
+
+			url, err := usecase.UpdateImage(id, updateRequest)
+
+			if tt.expectedError == "" {
+				require.NoError(t, err)
+				require.Equal(t, tt.expectedURL, url)
+			} else {
+				require.Error(t, err)
+				require.Empty(t, url)
+				require.Equal(t, tt.expectedError, err.Error())
+			}
+
+			mockCloudinaryClient.AssertExpectations(t)
+			mockDestinationMediaRepo.AssertExpectations(t)
 		})
 	}
 }
