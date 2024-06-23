@@ -16,7 +16,7 @@ import (
 type IDestinationUsecase interface {
 	SearchDestinations(page, limit int, searchQuery, sortQuery, filterQuery string) (string, *int64, *[]dto.SearchDestination, error)
 	DetailDestination(id uuid.UUID) (*dto.DetailDestinationResponse, error)
-	CreateDestination(destinationReq *dto.CreateDestinationRequest) error
+	CreateDestination(destinationReq *dto.CreateDestinationRequest) (*dto.GetAllDestination, error)
 	GetAllDestinations(page, limit int, searchQuery string) (*int64, *[]dto.GetAllDestination, error)
 	GetDestinationById(id uuid.UUID) (*dto.GetByIdDestinationResponse, error)
 	UpdateDestination(id uuid.UUID, destinationReq *dto.UpdateDestinationRequest) error
@@ -90,10 +90,10 @@ func (uc *DestinationUsecase) DetailDestination(id uuid.UUID) (*dto.DetailDestin
 	return response, nil
 }
 
-func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestinationRequest) error {
+func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestinationRequest) (*dto.GetAllDestination, error) {
 	category, err := uc.categoryRepo.FindById(destinationReq.CategoryId)
 	if err != nil || category == nil {
-		return errors.New("category not found")
+		return nil, errors.New("category not found")
 	}
 
 	destination := &entities.Destination{
@@ -113,14 +113,14 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 
 	if err = uc.destinationRepo.Create(destination, txDestination); err != nil {
 		txDestination.Rollback()
-		return fmt.Errorf("error when create destination: %w", err)
+		return nil, fmt.Errorf("error when create destination: %w", err)
 	}
 
 	destinationFacilities := dto.ToDestinationFacilities(destination.Id, destinationReq.FacilityIds)
 
 	if err = uc.destinationFacilityRepo.Create(destinationFacilities, txDestination); err != nil {
 		txDestination.Rollback()
-		return fmt.Errorf("error when create destination facility: %w", err)
+		return nil, fmt.Errorf("error when create destination facility: %w", err)
 	}
 
 	destinationAddress := dto.ToDestinationAddress(destination.Id, destinationReq.DestinationAddress)
@@ -130,7 +130,7 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 
 	if err != nil || province == nil {
 		txDestination.Rollback()
-		return errors.New("province not found")
+		return nil, errors.New("province not found")
 	}
 
 	// check city
@@ -138,7 +138,7 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 
 	if err != nil || city == nil {
 		txDestination.Rollback()
-		return errors.New("city not found")
+		return nil, errors.New("city not found")
 	}
 
 	// check subdistrict
@@ -146,17 +146,24 @@ func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestin
 
 	if err != nil || subdistrict == nil {
 		txDestination.Rollback()
-		return errors.New("subdistrict not found")
+		return nil, errors.New("subdistrict not found")
 	}
 
 	if err = uc.destinationAddressRepo.Create(destinationAddress, txDestination); err != nil {
 		txDestination.Rollback()
-		return fmt.Errorf("error when create destination address: %w", err)
+		return nil, fmt.Errorf("error when create destination address: %w", err)
 	}
 
 	txDestination.Commit()
 
-	return nil
+	destination, err = uc.destinationRepo.FindById(destination.Id)
+	if err != nil {
+		return nil, &errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
+	}
+
+	response := dto.ToOneDestinationResponse(destination)
+
+	return &response, nil
 }
 
 func (uc *DestinationUsecase) UpdateDestination(id uuid.UUID, destinationReq *dto.UpdateDestinationRequest) error {
