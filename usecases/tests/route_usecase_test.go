@@ -5,8 +5,10 @@ import (
 	"testing"
 
 	"capstone/dto"
+	"capstone/helpers"
 
 	"github.com/stretchr/testify/mock"
+	"gorm.io/gorm"
 
 	"capstone/entities"
 	"capstone/errorHandlers"
@@ -18,6 +20,13 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+type summarizeRouteTestCase struct {
+	name          string
+	mockSetup     func(destinationRepo *repositories.MockDestinationRepository, openAIClient *externals.MockOpenAIClient)
+	expectedResp  *dto.RouteSummaryResponse
+	expectedError error
+}
 
 func TestFindAllRoute(t *testing.T) {
 	page := 1
@@ -485,6 +494,105 @@ func TestSaveRoute(t *testing.T) {
 
 			mockRouteRepo.AssertExpectations(t)
 			mockRouteDetailRepo.AssertExpectations(t)
+		})
+	}
+}
+
+func TestSummarizeRoute(t *testing.T) {
+	destinationId := uuid.New()
+	req := &dto.RouteSummaryRequest{
+		CityId: "1001",
+		StartLocation: dto.StartLocation{
+			Lat:  10.0,
+			Long: 100.0,
+			Name: "Start Location",
+		},
+		DestinationIds: []uuid.UUID{destinationId},
+	}
+	destinations := []entities.Destination{
+		{
+			Id:         destinationId,
+			Name:       "Destination 1",
+			Longitude:  100.0,
+			Latitude:   10.0,
+			OpenTime:   "08:00",
+			CloseTime:  "17:00",
+			EntryPrice: 50000,
+		},
+	}
+	destination := destinations[0]
+	recommendationRoute := "1,100.0,10.0,Destination 1,08:00,17:00\nTotal Biaya:50000"
+	routeDetails, estimationCost := helpers.ExtractRouteInformation(
+		recommendationRoute,
+		destinations,
+	)
+	expectedResp := dto.ToSummaryRouteResponse(
+		dto.ToStartLocation(req.StartLocation.Name, req.StartLocation.Lat, req.StartLocation.Long),
+		routeDetails,
+		estimationCost,
+	)
+
+	testCases := []summarizeRouteTestCase{
+		{
+			name: "Success summarize route",
+			mockSetup: func(destinationRepo *repositories.MockDestinationRepository, openAIClient *externals.MockOpenAIClient) {
+				destinationRepo.On("FindByIdInCityId", mock.Anything, mock.Anything).Return(&destination, nil).Once()
+				openAIClient.On("GenerateAnswer", mock.Anything, mock.Anything).Return(recommendationRoute, nil).Once()
+			},
+			expectedResp:  expectedResp,
+			expectedError: nil,
+		},
+		{
+			name: "Destination not found",
+			mockSetup: func(destinationRepo *repositories.MockDestinationRepository, openAIClient *externals.MockOpenAIClient) {
+				destinationRepo.On("FindByIdInCityId", mock.Anything, mock.Anything).Return(nil, gorm.ErrRecordNotFound).Once()
+			},
+			expectedResp:  nil,
+			expectedError: &errorHandlers.NotFoundError{Message: "Destinasi ke-1 tidak ditemukan"},
+		},
+		{
+			name: "Failed get destination detail",
+			mockSetup: func(destinationRepo *repositories.MockDestinationRepository, openAIClient *externals.MockOpenAIClient) {
+				destinationRepo.On("FindByIdInCityId", mock.Anything, mock.Anything).Return(nil, assert.AnError).Once()
+			},
+			expectedResp:  nil,
+			expectedError: &errorHandlers.NotFoundError{Message: "Gagal mendapatkan detail destinasi"},
+		},
+		{
+			name: "Failed get summarization",
+			mockSetup: func(destinationRepo *repositories.MockDestinationRepository, openAIClient *externals.MockOpenAIClient) {
+				destinationRepo.On("FindByIdInCityId", mock.Anything, mock.Anything).Return(&destination, nil).Once()
+				openAIClient.On("GenerateAnswer", mock.Anything, mock.Anything).Return("", assert.AnError).Once()
+			},
+			expectedResp:  nil,
+			expectedError: &errorHandlers.InternalServerError{Message: "Gagal mendapatkan rekomendasi rute"},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			mockDestinationRepo := new(repositories.MockDestinationRepository)
+			mockOpenAIClient := new(externals.MockOpenAIClient)
+
+			uc := usecases.NewRouteUsecase(
+				nil,
+				mockDestinationRepo,
+				nil,
+				nil,
+				mockOpenAIClient,
+			)
+
+			tc.mockSetup(mockDestinationRepo, mockOpenAIClient)
+
+			resp, err := uc.SummarizeRoute(req)
+
+			if tc.expectedError != nil {
+				require.Error(t, err)
+				require.EqualError(t, err, tc.expectedError.Error())
+			} else {
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedResp, resp)
+			}
 		})
 	}
 }
