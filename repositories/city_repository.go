@@ -70,10 +70,11 @@ func (r *CityRepository) Delete(city *entities.City) error {
 func (r *CityRepository) GetCitiesWithDestinations() ([]entities.City, error) {
 	var cities []entities.City
 
-	err := r.db.Preload("Province").
+	err := r.db.Debug().
+		Preload("Province").
 		Joins("JOIN destination_addresses da ON da.city_id = cities.id").
 		Joins("JOIN destinations d ON d.id = da.destination_id").
-		Where("d.id IS NOT NULL").
+		Where("d.deleted_at IS NULL").
 		Group("cities.id").
 		Order("cities.name ASC").
 		Find(&cities).Error
