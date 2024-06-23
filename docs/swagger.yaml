@@ -46,22 +46,22 @@ paths:
                   properties:
                     nama:
                       type: string
-                      example: '28, Kecamatan Lowokwaru, Kota Malang, Jawa Timur, Indonesia'
+                      example: 'Jl. Diponegoro No.22, Citarum, Kec. Bandung Wetan, Kota Bandung, Jawa Barat 4011'
                     latitude:
                       type: number
                       format: float
-                      example: -7.9300287
+                      example: -6.902237169389848
                     longitude:
                       type: number
                       format: float
-                      example: 112.6349073
+                      example: 107.61890564273135
                 id_destinasi_tujuan:
                   type: array
                   items:
                     type: string
                   example:
-                    - 5fb0bedc-f1fa-4197-814f-f97155092473
                     - ee06a47e-f264-40e9-b9c8-1a3a78492d84
+                    - 5fb0bedc-f1fa-4197-814f-f97155092473
                     - 44dc96a4-5f1f-4dfb-a55f-311ab26053d8
       responses:
         '200':
