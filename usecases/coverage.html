@@ -1,0 +1,2158 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>usecases: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">capstone/usecases/admin_usecase.go (81.0%)</option>
+				
+				<option value="file1">capstone/usecases/auth_usecase.go (97.1%)</option>
+				
+				<option value="file2">capstone/usecases/chatbot_usecase.go (100.0%)</option>
+				
+				<option value="file3">capstone/usecases/dashboard_usecase.go (100.0%)</option>
+				
+				<option value="file4">capstone/usecases/destination_media_usecase.go (98.3%)</option>
+				
+				<option value="file5">capstone/usecases/destination_usecase.go (91.5%)</option>
+				
+				<option value="file6">capstone/usecases/homepage_usecase.go (82.4%)</option>
+				
+				<option value="file7">capstone/usecases/master_data_usecase.go (87.8%)</option>
+				
+				<option value="file8">capstone/usecases/profile_usecase.go (91.4%)</option>
+				
+				<option value="file9">capstone/usecases/route_usecase.go (100.0%)</option>
+				
+				<option value="file10">capstone/usecases/user_personalization_usecase.go (94.3%)</option>
+				
+				<option value="file11">capstone/usecases/user_usecase.go (91.2%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package usecases
+
+import (
+        "errors"
+
+        "capstone/dto"
+        "capstone/errorHandlers"
+        "capstone/externals/cloudinary"
+        "capstone/helpers"
+        "capstone/repositories"
+
+        "github.com/google/uuid"
+        "gorm.io/gorm"
+)
+
+type AdminUsecase interface {
+        Login(request *dto.LoginAdminRequest) (*dto.LoginAdminResponse, error)
+        Logout(token string) error
+        GetNewAccessToken(refreshToken string) (*dto.NewToken, error)
+        GetAllAdmins(page, limit int, search string) (*[]dto.GetAllAdminResponse, *int64, error)
+        GetAdminDetail(id uuid.UUID) (*dto.GetDetailAdminResponse, error)
+        CreateAdmin(request *dto.AdminRequest) error
+        UpdateAdmin(request *dto.UpdateAdminRequest, id uuid.UUID) error
+        DeleteAdmin(id uuid.UUID) error
+}
+
+type adminUsecase struct {
+        repository       repositories.AdminRepository
+        cloudinaryClient cloudinary.ICloudinaryClient
+        passwordHelper   helpers.PasswordHelper
+        tokenHelper      helpers.TokenHelper
+}
+
+func NewAdminUsecase(
+        repository repositories.AdminRepository,
+        cloudinaryClient cloudinary.ICloudinaryClient,
+        passwordHelper helpers.PasswordHelper,
+        tokenHelper helpers.TokenHelper,
+) *adminUsecase <span class="cov8" title="1">{
+        return &amp;adminUsecase{
+                repository:       repository,
+                cloudinaryClient: cloudinaryClient,
+                passwordHelper:   passwordHelper,
+                tokenHelper:      tokenHelper,
+        }
+}</span>
+
+func (uc *adminUsecase) Login(request *dto.LoginAdminRequest) (*dto.LoginAdminResponse, error) <span class="cov8" title="1">{
+        admin, err := uc.repository.FindByUsername(request.Username)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
+        }</span>
+        <span class="cov8" title="1">if err = uc.passwordHelper.VerifyPassword(admin.Password, request.Password); err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.ConflictError{Message: "Email atau password salah"}
+        }</span>
+
+        <span class="cov8" title="1">accessToken, err := uc.tokenHelper.GenerateAccessToken(admin)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: err.Error()}
+        }</span>
+        <span class="cov8" title="1">refreshToken, err := uc.tokenHelper.GenerateRefreshToken(admin)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: err.Error()}
+        }</span>
+        <span class="cov8" title="1">admin.RefreshToken = refreshToken
+        if err = uc.repository.Update(admin); err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: err.Error()}
+        }</span>
+        <span class="cov8" title="1">response := &amp;dto.LoginAdminResponse{
+                Username:     admin.Username,
+                ProfileImage: admin.ProfileImageURL,
+                Role:         admin.Role,
+                AccessToken:  accessToken,
+                RefreshToken: refreshToken,
+        }
+
+        return response, nil</span>
+}
+
+func (uc *adminUsecase) Logout(token string) error <span class="cov8" title="1">{
+        admin, err := uc.repository.GetUserByRefreshToken(token)
+        if err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.UnAuthorizedError{Message: "Token tidak valid"}
+        }</span>
+        <span class="cov8" title="1">admin.RefreshToken = ""
+        if err = uc.repository.Update(admin); err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.InternalServerError{Message: err.Error()}
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (uc *adminUsecase) GetNewAccessToken(refreshToken string) (*dto.NewToken, error) <span class="cov8" title="1">{
+        admin, err := uc.repository.GetUserByRefreshToken(refreshToken)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.UnAuthorizedError{Message: "Token tidak valid"}
+        }</span>
+        <span class="cov8" title="1">if admin.RefreshToken != refreshToken </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.UnAuthorizedError{Message: "Token tidak valid"}
+        }</span>
+        <span class="cov8" title="1">accessToken, err := uc.tokenHelper.GenerateAccessToken(admin)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: err.Error()}
+        }</span>
+        <span class="cov8" title="1">token := &amp;dto.NewToken{
+                AccessToken: accessToken,
+        }
+        return token, nil</span>
+}
+
+func (uc *adminUsecase) GetAllAdmins(page, limit int, search string) (*[]dto.GetAllAdminResponse, *int64, error) <span class="cov8" title="1">{
+        admins, total, err := uc.repository.FindAll((page-1)*limit, limit, search)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, nil, &amp;errorHandlers.InternalServerError{Message: "Gagal mendapatkan data admin"}
+        }</span>
+
+        <span class="cov8" title="1">res := dto.ToGetAllAdminResponse(admins)
+
+        return res, total, nil</span>
+}
+
+func (uc *adminUsecase) GetAdminDetail(id uuid.UUID) (*dto.GetDetailAdminResponse, error) <span class="cov8" title="1">{
+        admin, err := uc.repository.FindById(id)
+        if err != nil </span><span class="cov8" title="1">{
+                switch </span>{
+                case errors.Is(err, gorm.ErrRecordNotFound):<span class="cov8" title="1">
+                        return nil, &amp;errorHandlers.NotFoundError{Message: "Data admin tidak ditemukan"}</span>
+                default:<span class="cov8" title="1">
+                        return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal mendapatkan detail admin"}</span>
+                }
+        }
+
+        <span class="cov8" title="1">res := dto.ToGetDetailAdminResponse(admin)
+
+        return res, nil</span>
+}
+
+func (uc *adminUsecase) CreateAdmin(request *dto.AdminRequest) error <span class="cov8" title="1">{
+        var profileImageURL *string
+
+        if request.ProfileImage != nil </span><span class="cov0" title="0">{
+                url, err := uc.cloudinaryClient.UploadImage(request.ProfileImage, "admin")
+                if err != nil </span><span class="cov0" title="0">{
+                        return &amp;errorHandlers.InternalServerError{Message: "Gagal menambah data admin"}
+                }</span>
+                <span class="cov0" title="0">profileImageURL = &amp;url</span>
+        }
+
+        <span class="cov8" title="1">hashedPassword, err := uc.passwordHelper.HashPassword(request.Password)
+        if err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal menambah data admin"}
+        }</span>
+
+        <span class="cov8" title="1">request.Password = hashedPassword
+        admin := dto.ToCreateAdminRequest(request, profileImageURL)
+
+        if err = uc.repository.Create(admin); err != nil </span><span class="cov8" title="1">{
+                switch </span>{
+                case errors.Is(err, gorm.ErrDuplicatedKey):<span class="cov8" title="1">
+                        return &amp;errorHandlers.ConflictError{Message: "Username sudah digunakan"}</span>
+                default:<span class="cov8" title="1">
+                        return &amp;errorHandlers.InternalServerError{Message: "Gagal menambah data admin"}</span>
+                }
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (uc *adminUsecase) UpdateAdmin(request *dto.UpdateAdminRequest, id uuid.UUID) error <span class="cov8" title="1">{
+        var profileImageURL *string
+
+        admin, err := uc.repository.FindById(id)
+        if err != nil </span><span class="cov8" title="1">{
+                switch </span>{
+                case errors.Is(err, gorm.ErrRecordNotFound):<span class="cov8" title="1">
+                        return &amp;errorHandlers.NotFoundError{Message: "Data admin tidak ditemukan"}</span>
+                default:<span class="cov0" title="0">
+                        return &amp;errorHandlers.InternalServerError{Message: "Gagal mengupdate data admin"}</span>
+                }
+        }
+
+        <span class="cov8" title="1">if request.Password == "" </span><span class="cov0" title="0">{
+                request.Password = admin.Password
+        }</span> else<span class="cov8" title="1"> {
+                hashedPassword, hashErr := uc.passwordHelper.HashPassword(request.Password)
+                if hashErr != nil </span><span class="cov8" title="1">{
+                        return &amp;errorHandlers.InternalServerError{Message: "Gagal mengubah data admin"}
+                }</span>
+
+                <span class="cov8" title="1">request.Password = hashedPassword</span>
+        }
+
+        <span class="cov8" title="1">if admin.ProfileImageURL != nil </span><span class="cov0" title="0">{
+                if err = uc.cloudinaryClient.DeleteImage(*admin.ProfileImageURL); err != nil </span><span class="cov0" title="0">{
+                        return &amp;errorHandlers.InternalServerError{Message: "Gagal mengupdate data admin"}
+                }</span>
+        }
+
+        <span class="cov8" title="1">if request.ProfileImage != nil </span><span class="cov0" title="0">{
+                var url string
+                url, err = uc.cloudinaryClient.UploadImage(request.ProfileImage, "admin")
+                if err != nil </span><span class="cov0" title="0">{
+                        return &amp;errorHandlers.InternalServerError{Message: "Gagal mengubah data admin"}
+                }</span>
+                <span class="cov0" title="0">profileImageURL = &amp;url</span>
+        }
+
+        <span class="cov8" title="1">adminReq := dto.ToUpdateAdminRequest(request, admin, profileImageURL)
+
+        if err = uc.repository.Update(adminReq); err != nil </span><span class="cov0" title="0">{
+                switch </span>{
+                case errors.Is(err, gorm.ErrDuplicatedKey):<span class="cov0" title="0">
+                        return &amp;errorHandlers.ConflictError{Message: "Username sudah digunakan"}</span>
+                default:<span class="cov0" title="0">
+                        return &amp;errorHandlers.InternalServerError{Message: "Gagal mengubah data admin"}</span>
+                }
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (uc *adminUsecase) DeleteAdmin(id uuid.UUID) error <span class="cov8" title="1">{
+        admin, err := uc.repository.FindById(id)
+        if err != nil </span><span class="cov8" title="1">{
+                switch </span>{
+                case errors.Is(err, gorm.ErrRecordNotFound):<span class="cov8" title="1">
+                        return &amp;errorHandlers.NotFoundError{Message: "Data admin tidak ditemukan"}</span>
+                default:<span class="cov0" title="0">
+                        return &amp;errorHandlers.InternalServerError{Message: "Gagal menghapus data admin"}</span>
+                }
+        }
+
+        <span class="cov8" title="1">if admin.ProfileImageURL != nil </span><span class="cov0" title="0">{
+                if err = uc.cloudinaryClient.DeleteImage(*admin.ProfileImageURL); err != nil </span><span class="cov0" title="0">{
+                        return &amp;errorHandlers.InternalServerError{Message: "Gagal menghapus data admin"}
+                }</span>
+        }
+
+        <span class="cov8" title="1">if err = uc.repository.Delete(admin); err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal menghapus data admin"}
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package usecases
+
+import (
+        "strings"
+        "time"
+
+        "capstone/dto"
+        "capstone/entities"
+        "capstone/errorHandlers"
+        "capstone/helpers"
+        "capstone/repositories"
+
+        "github.com/google/uuid"
+)
+
+type AuthUsecase interface {
+        Register(request *dto.RegisterRequest) (*dto.RegisterResponse, error)
+        ResendOTP(email string) (*dto.RegisterResponse, error)
+        VerifyEmail(request *dto.VerifyEmailRequest) error
+        Login(request *dto.LoginRequest) (*dto.LoginResponse, error)
+        Logout(token string) error
+        GetNewAccessToken(refreshToken string) (*dto.NewToken, error)
+        ForgotPassword(request *dto.ForgotPasswordRequest) error
+}
+
+type authUsecase struct {
+        userRepo       repositories.AuthRepository
+        cacheRepo      repositories.CacheRepository
+        emailSender    helpers.EmailSender
+        passwordHelper helpers.PasswordHelper
+        tokenHelper    helpers.TokenHelper
+}
+
+func NewAuthUsecase(
+        userRepo repositories.AuthRepository,
+        cacheRepo repositories.CacheRepository,
+        emailSender helpers.EmailSender,
+        passwordHelper helpers.PasswordHelper,
+        tokenHelper helpers.TokenHelper,
+) *authUsecase <span class="cov8" title="1">{
+        return &amp;authUsecase{
+                userRepo:       userRepo,
+                cacheRepo:      cacheRepo,
+                emailSender:    emailSender,
+                passwordHelper: passwordHelper,
+                tokenHelper:    tokenHelper,
+        }
+}</span>
+
+func (uc *authUsecase) Register(request *dto.RegisterRequest) (*dto.RegisterResponse, error) <span class="cov8" title="1">{
+        ifExistUsername, _ := uc.userRepo.FindByUsername(request.Username)
+        if ifExistUsername != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.ConflictError{Message: "username sudah ada, silahkan username lain"}
+        }</span>
+        <span class="cov8" title="1">isExistEmail, _ := uc.userRepo.FindByEmail(request.Email)
+        if isExistEmail != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.ConflictError{Message: "email sudah terdaftar"}
+        }</span>
+
+        <span class="cov8" title="1">if strings.Contains(request.Username, " ") </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.BadRequestError{Message: "username tidak boleh mengandung spasi"}
+        }</span>
+
+        <span class="cov8" title="1">password, err := uc.passwordHelper.HashPassword(request.Password)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal hashing password"}
+        }</span>
+        <span class="cov8" title="1">user := &amp;entities.User{
+                Id:          uuid.New(),
+                Email:       request.Email,
+                Password:    password,
+                Username:    request.Username,
+                Fullname:    request.NamaLengkap,
+                PhoneNumber: request.NoTelepon,
+        }
+        ref := helpers.GenerateReferenceId()
+        otp := helpers.GenerateOTP()
+
+        uc.cacheRepo.Set(ref, otp)
+        uc.cacheRepo.Set(ref+"_email", request.Email)
+        err = uc.userRepo.Create(user)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk mendaftar"}
+        }</span>
+        <span class="cov8" title="1">if err = uc.emailSender.SendOTP(user.Email, user.Fullname, otp); err != nil </span><span class="cov0" title="0">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal mengirimkan email"}
+        }</span>
+        <span class="cov8" title="1">response := dto.RegisterResponse{ReferenceId: ref}
+        return &amp;response, nil</span>
+}
+
+func (uc *authUsecase) ResendOTP(email string) (*dto.RegisterResponse, error) <span class="cov8" title="1">{
+        user, _ := uc.userRepo.FindByEmail(email)
+        if user == nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
+        }</span>
+        <span class="cov8" title="1">otp := helpers.GenerateOTP()
+        referenceId := helpers.GenerateReferenceId()
+        uc.cacheRepo.Set(referenceId, otp)
+        uc.cacheRepo.Set(referenceId+"_email", user.Email)
+
+        if err := uc.emailSender.SendOTP(user.Email, user.Fullname, otp); err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal mengirimkan email"}
+        }</span>
+        <span class="cov8" title="1">response := dto.RegisterResponse{ReferenceId: referenceId}
+        return &amp;response, nil</span>
+}
+
+func (uc *authUsecase) VerifyEmail(request *dto.VerifyEmailRequest) error <span class="cov8" title="1">{
+        cachedOTP, exists := uc.cacheRepo.Get(request.RefId)
+        if !exists </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
+        }</span>
+
+        <span class="cov8" title="1">if cachedOTP != request.OTP </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.BadRequestError{Message: "Kode OTP tidak cocok. Mohon periksa kembali dan masukkan dengan benar."}
+        }</span>
+
+        <span class="cov8" title="1">now := time.Now()
+        email, _ := uc.cacheRepo.Get(request.RefId + "_email")
+        uc.cacheRepo.Set(request.RefId+"_success", "success")
+        user, _ := uc.userRepo.FindByEmail(email)
+        if user == nil </span><span class="cov0" title="0">{
+                return &amp;errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
+        }</span>
+
+        <span class="cov8" title="1">user.EmailVerifiedAt = &amp;now
+        err := uc.userRepo.Update(user)
+        if err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal memperbarui data user"}
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (uc *authUsecase) Login(request *dto.LoginRequest) (*dto.LoginResponse, error) <span class="cov8" title="1">{
+        user, _ := uc.userRepo.FindByEmail(request.Email)
+        if user == nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
+        }</span>
+        <span class="cov8" title="1">if user.EmailVerifiedAt == nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.BadRequestError{Message: "Email belum terverifikasi"}
+        }</span>
+        <span class="cov8" title="1">if err := uc.passwordHelper.VerifyPassword(user.Password, request.Password); err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.BadRequestError{Message: "Email atau password salah"}
+        }</span>
+
+        <span class="cov8" title="1">accessToken, err := uc.tokenHelper.GenerateAccessToken(user)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: err.Error()}
+        }</span>
+        <span class="cov8" title="1">refreshToken, err := uc.tokenHelper.GenerateRefreshToken(user)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: err.Error()}
+        }</span>
+        <span class="cov8" title="1">user.RefreshToken = refreshToken
+        err = uc.userRepo.Update(user)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: err.Error()}
+        }</span>
+        <span class="cov8" title="1">response := &amp;dto.LoginResponse{
+                AccessToken:  accessToken,
+                RefreshToken: refreshToken,
+        }
+        return response, nil</span>
+}
+
+func (uc *authUsecase) ForgotPassword(request *dto.ForgotPasswordRequest) error <span class="cov8" title="1">{
+        email, _ := uc.cacheRepo.Get(request.RefId + "_email")
+
+        user, _ := uc.userRepo.FindByEmail(email)
+        if user == nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.ConflictError{Message: "Akun tidak ditemukan"}
+        }</span>
+        <span class="cov8" title="1">if request.Password != request.KonfirmasiPassword </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.BadRequestError{Message: "Password tidak cocok"}
+        }</span>
+        <span class="cov8" title="1">password, err := uc.passwordHelper.HashPassword(request.Password)
+        if err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal hashing password"}
+        }</span>
+        <span class="cov8" title="1">user.Password = password
+        err = uc.userRepo.Update(user)
+        if err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal mengubah password"}
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (uc *authUsecase) Logout(token string) error <span class="cov8" title="1">{
+        user, err := uc.userRepo.GetUserByRefreshToken(token)
+        if err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.UnAuthorizedError{Message: "Token tidak valid"}
+        }</span>
+        <span class="cov8" title="1">if token == "" </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.BadRequestError{Message: "Token tidak boleh kosong"}
+        }</span>
+        <span class="cov8" title="1">user.RefreshToken = ""
+        err = uc.userRepo.Update(user)
+        if err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal logout"}
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (uc *authUsecase) GetNewAccessToken(refreshToken string) (*dto.NewToken, error) <span class="cov8" title="1">{
+        user, err := uc.userRepo.GetUserByRefreshToken(refreshToken)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.UnAuthorizedError{Message: "Token tidak valid"}
+        }</span>
+        <span class="cov8" title="1">if refreshToken == "" </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.BadRequestError{Message: "Token tidak boleh kosong"}
+        }</span>
+
+        <span class="cov8" title="1">accessToken, err := uc.tokenHelper.GenerateAccessToken(user)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: err.Error()}
+        }</span>
+        <span class="cov8" title="1">token := &amp;dto.NewToken{
+                AccessToken: accessToken,
+        }
+        return token, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package usecases
+
+import (
+        "capstone/dto"
+        "capstone/externals/gemini"
+        "capstone/externals/redis"
+        "capstone/helpers"
+
+        "github.com/google/uuid"
+        "github.com/labstack/gommon/log"
+)
+
+type ChatbotUsecase interface {
+        GenerateAnswer(question *dto.ChatbotRequest, uid uuid.UUID) *dto.ChatbotResponse
+        FlushChatHistory(uid uuid.UUID) error
+}
+
+type chatbotUsecase struct {
+        gemini gemini.GeminiClient
+        redis  redis.RedisClient
+}
+
+func NewChatbotUsecase(gemini gemini.GeminiClient, redis redis.RedisClient) *chatbotUsecase <span class="cov8" title="1">{
+        return &amp;chatbotUsecase{
+                gemini: gemini,
+                redis:  redis,
+        }
+}</span>
+
+func (u *chatbotUsecase) GenerateAnswer(request *dto.ChatbotRequest, uid uuid.UUID) *dto.ChatbotResponse <span class="cov8" title="1">{
+        hashedKey := helpers.EncodeRedisKey(uid.String())
+        rawHistory, err := u.redis.GetChatHistory(hashedKey)
+        if err != nil </span><span class="cov8" title="1">{
+                log.Error(err)
+        }</span>
+
+        <span class="cov8" title="1">convertedHistory := helpers.ToChatbotHistory(rawHistory)
+        ans, err := u.gemini.AnswerChat(request.Message, convertedHistory)
+        if err != nil </span><span class="cov8" title="1">{
+                log.Error(err)
+        }</span>
+
+        <span class="cov8" title="1">err = u.redis.UpdateChatHistory(hashedKey, request.Message)
+        if err != nil </span><span class="cov8" title="1">{
+                log.Error(err)
+        }</span>
+
+        <span class="cov8" title="1">err = u.redis.UpdateChatHistory(hashedKey, ans)
+        if err != nil </span><span class="cov8" title="1">{
+                log.Error(err)
+        }</span>
+
+        <span class="cov8" title="1">return &amp;dto.ChatbotResponse{Answer: ans}</span>
+}
+
+func (u *chatbotUsecase) FlushChatHistory(uid uuid.UUID) error <span class="cov8" title="1">{
+        return u.redis.DeleteChatHistory(helpers.EncodeRedisKey(uid.String()))
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package usecases
+
+import (
+        "capstone/dto"
+        "capstone/errorHandlers"
+        "capstone/repositories"
+)
+
+type DashboardUsecase interface {
+        GetAllData() (dto.DashboardResponse, error)
+}
+
+type dashboardUsecase struct {
+        repository repositories.DashboardRepository
+}
+
+func NewDashboardUsecase(repository repositories.DashboardRepository) *dashboardUsecase <span class="cov8" title="1">{
+        return &amp;dashboardUsecase{repository: repository}
+}</span>
+
+func (uc *dashboardUsecase) GetAllData() (dto.DashboardResponse, error) <span class="cov8" title="1">{
+        totalAdmin, err := uc.repository.GetTotalAdmin()
+        if err != nil </span><span class="cov8" title="1">{
+                return dto.DashboardResponse{}, &amp;errorHandlers.InternalServerError{Message: err.Error()}
+        }</span>
+
+        <span class="cov8" title="1">totalUser, err := uc.repository.GetTotalUser()
+        if err != nil </span><span class="cov8" title="1">{
+                return dto.DashboardResponse{}, &amp;errorHandlers.InternalServerError{Message: err.Error()}
+        }</span>
+
+        <span class="cov8" title="1">totalRoute, err := uc.repository.GetTotalRoute()
+        if err != nil </span><span class="cov8" title="1">{
+                return dto.DashboardResponse{}, &amp;errorHandlers.InternalServerError{Message: err.Error()}
+        }</span>
+
+        <span class="cov8" title="1">totalDestination, err := uc.repository.GetTotalDestination()
+        if err != nil </span><span class="cov8" title="1">{
+                return dto.DashboardResponse{}, &amp;errorHandlers.InternalServerError{Message: err.Error()}
+        }</span>
+
+        <span class="cov8" title="1">totalVidContent, err := uc.repository.GetTotalVidContent()
+        if err != nil </span><span class="cov8" title="1">{
+                return dto.DashboardResponse{}, &amp;errorHandlers.InternalServerError{Message: err.Error()}
+        }</span>
+
+        <span class="cov8" title="1">totalDestinationWithCategory, err := uc.repository.GetTotalDestinationWithCategory()
+        if err != nil </span><span class="cov8" title="1">{
+                return dto.DashboardResponse{}, &amp;errorHandlers.InternalServerError{Message: err.Error()}
+        }</span>
+
+        <span class="cov8" title="1">monthlyUsers, err := uc.repository.GetMonthlyUsers()
+        if err != nil </span><span class="cov8" title="1">{
+                return dto.DashboardResponse{}, &amp;errorHandlers.InternalServerError{Message: err.Error()}
+        }</span>
+
+        <span class="cov8" title="1">routeUser, err := uc.repository.GetRouteUser()
+        if err != nil </span><span class="cov8" title="1">{
+                return dto.DashboardResponse{}, &amp;errorHandlers.InternalServerError{Message: err.Error()}
+        }</span>
+
+        <span class="cov8" title="1">response := dto.DashboardResponse{
+                TotalData: dto.TotalData{
+                        TotalAdmin: totalAdmin,
+                        TotalUser:  totalUser,
+                        TotalRute:  totalRoute,
+                },
+                PertumbuhanPengguna: monthlyUsers,
+                TotalKontenVideo: dto.TotalContentVid{
+                        TotalContent:   totalVidContent,
+                        TotalDestinasi: totalDestination,
+                },
+                KategoriDestinasi: totalDestinationWithCategory,
+                RuteUser:          routeUser,
+        }
+
+        return response, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package usecases
+
+import (
+        "capstone/dto"
+        "capstone/entities"
+        "capstone/errorHandlers"
+        "capstone/externals/cloudinary"
+        "capstone/repositories"
+
+        "github.com/google/uuid"
+)
+
+type IDestinationMediaUsecase interface {
+        Create(request dto.CreateDestinationMediaRequest) error
+        FindAll(page, limit int, searchQuery string) (*int64, []dto.GetDetailDestinationMediaResponse, error)
+        FindById(id uuid.UUID) (*dto.GetDetailDestinationMediaResponse, error)
+        Update(id uuid.UUID, request dto.UpdateDestinationMediaRequest) error
+        Delete(id uuid.UUID) error
+        UploadImage(request dto.UploadDestinationMediaRequest) (string, error)
+        UpdateImage(id uuid.UUID, request dto.UpdateImageDestinationMediaRequest) (string, error)
+}
+
+type DestinationMediaUsecase struct {
+        destinationMediaRepo repositories.IDestinationMediaRepository
+        destinationRepo      repositories.IDestinationRepository
+        cloudinaryClient     cloudinary.ICloudinaryClient
+}
+
+func NewDestinationMediaUsecase(destinationMediaRepo repositories.IDestinationMediaRepository, destinationRepo repositories.IDestinationRepository, cloudinaryClient cloudinary.ICloudinaryClient) *DestinationMediaUsecase <span class="cov8" title="1">{
+        return &amp;DestinationMediaUsecase{
+                destinationMediaRepo: destinationMediaRepo,
+                destinationRepo:      destinationRepo,
+                cloudinaryClient:     cloudinaryClient,
+        }
+}</span>
+
+func (uc *DestinationMediaUsecase) Create(request dto.CreateDestinationMediaRequest) error <span class="cov8" title="1">{
+        if _, err := uc.destinationRepo.FindById(request.DestinationId); err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
+        }</span>
+
+        <span class="cov8" title="1">destinationMedia := entities.DestinationMedia{
+                Id:            uuid.New(),
+                DestinationId: request.DestinationId,
+                Url:           request.Url,
+                Type:          request.Type,
+                Title:         request.Title,
+        }
+
+        if err := uc.destinationMediaRepo.Create(&amp;destinationMedia, nil); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (uc *DestinationMediaUsecase) FindAll(page, limit int, searchQuery string) (*int64, []dto.GetDetailDestinationMediaResponse, error) <span class="cov8" title="1">{
+        total, destinationMedias, err := uc.destinationMediaRepo.FindAll(page, limit, searchQuery)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, nil, err
+        }</span>
+
+        <span class="cov8" title="1">response := dto.ToGetAllDestinationMediaResponse(destinationMedias)
+
+        return total, response, nil</span>
+}
+
+func (uc *DestinationMediaUsecase) FindById(id uuid.UUID) (*dto.GetDetailDestinationMediaResponse, error) <span class="cov8" title="1">{
+        destinationMedia, err := uc.destinationMediaRepo.FindById(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.NotFoundError{Message: "Konten media destinasi tidak ditemukan"}
+        }</span>
+
+        <span class="cov8" title="1">response := dto.ToGetDetailDestinationMediaResponse(*destinationMedia)
+
+        return &amp;response, nil</span>
+}
+
+func (uc *DestinationMediaUsecase) Update(id uuid.UUID, request dto.UpdateDestinationMediaRequest) error <span class="cov8" title="1">{
+        destinationMedia, err := uc.destinationMediaRepo.FindById(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
+        }</span>
+
+        <span class="cov8" title="1">destinationMedia.DestinationId = request.DestinationId
+        destinationMedia.Url = request.Url
+        destinationMedia.Type = request.Type
+        destinationMedia.Title = request.Title
+
+        if err = uc.destinationMediaRepo.Update(destinationMedia); err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (uc *DestinationMediaUsecase) Delete(id uuid.UUID) error <span class="cov8" title="1">{
+        destinationMedia, err := uc.destinationMediaRepo.FindById(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
+        }</span>
+        <span class="cov8" title="1">tx := uc.destinationMediaRepo.BeginTx()
+        if err = uc.destinationMediaRepo.Delete(destinationMedia, tx); err != nil </span><span class="cov8" title="1">{
+                tx.Rollback()
+                return err
+        }</span>
+
+        <span class="cov8" title="1">if err = uc.cloudinaryClient.DeleteImage(destinationMedia.Url); err != nil </span><span class="cov0" title="0">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal menghapus media destinasi"}
+        }</span>
+
+        <span class="cov8" title="1">tx.Commit()
+
+        return nil</span>
+}
+
+func (uc *DestinationMediaUsecase) UploadImage(request dto.UploadDestinationMediaRequest) (string, error) <span class="cov8" title="1">{
+        url, err := uc.cloudinaryClient.UploadImage(request.File, "destination_media")
+        if err != nil </span><span class="cov8" title="1">{
+                return "", err
+        }</span>
+
+        <span class="cov8" title="1">destinationMedia := dto.ToDestinationMedia(request.DestinationId, "image", url, request.Title)
+
+        if err = uc.destinationMediaRepo.Create(destinationMedia, nil); err != nil </span><span class="cov8" title="1">{
+                return "", err
+        }</span>
+
+        <span class="cov8" title="1">return url, nil</span>
+}
+
+func (uc *DestinationMediaUsecase) UpdateImage(id uuid.UUID, request dto.UpdateImageDestinationMediaRequest) (string, error) <span class="cov8" title="1">{
+        destinationMedia, err := uc.destinationMediaRepo.FindById(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return "", &amp;errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
+        }</span>
+
+        <span class="cov8" title="1">var oldUrl string = destinationMedia.Url
+
+        url, err := uc.cloudinaryClient.UploadImage(request.File, "destination_media")
+        if err != nil </span><span class="cov8" title="1">{
+                return "", err
+        }</span>
+
+        <span class="cov8" title="1">destinationMedia.Url = url
+        destinationMedia.Title = request.Title
+
+        if err = uc.destinationMediaRepo.Update(destinationMedia); err != nil </span><span class="cov8" title="1">{
+                return "", err
+        }</span>
+
+        <span class="cov8" title="1">if err = uc.cloudinaryClient.DeleteImage(oldUrl); err != nil </span><span class="cov8" title="1">{
+                return "", &amp;errorHandlers.InternalServerError{Message: "Gagal menghapus media destinasi"}
+        }</span>
+
+        <span class="cov8" title="1">return url, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package usecases
+
+import (
+        "errors"
+        "fmt"
+
+        "capstone/dto"
+        "capstone/entities"
+        "capstone/errorHandlers"
+        "capstone/externals/cloudinary"
+        "capstone/repositories"
+
+        "github.com/google/uuid"
+)
+
+type IDestinationUsecase interface {
+        SearchDestinations(page, limit int, searchQuery, sortQuery, filterQuery string) (string, *int64, *[]dto.SearchDestination, error)
+        DetailDestination(id uuid.UUID) (*dto.DetailDestinationResponse, error)
+        CreateDestination(destinationReq *dto.CreateDestinationRequest) error
+        GetAllDestinations(page, limit int, searchQuery string) (*int64, *[]dto.GetAllDestination, error)
+        GetDestinationById(id uuid.UUID) (*dto.GetByIdDestinationResponse, error)
+        UpdateDestination(id uuid.UUID, destinationReq *dto.UpdateDestinationRequest) error
+        DeleteDestination(id uuid.UUID) error
+        IncrementVisitCount(id uuid.UUID) error
+        GetCitiesWithDestinations() (*[]dto.Cities, error)
+        GetDestinationByCityId(id string) (*[]dto.DestinationsByCity, error)
+}
+
+type DestinationUsecase struct {
+        destinationRepo         repositories.IDestinationRepository
+        destinationFacilityRepo repositories.IDestinationFacilityRepository
+        destinationMediaRepo    repositories.IDestinationMediaRepository
+        destinationAddressRepo  repositories.IDestinationAddressRepository
+        categoryRepo            repositories.ICategoryRepository
+        facilityRepo            repositories.IFacilityRepository
+        provinceRepo            repositories.IProvinceRepository
+        cityRepo                repositories.ICityRepository
+        subdistrictRepo         repositories.ISubdistrictRepository
+        cloudinaryClient        cloudinary.ICloudinaryClient
+}
+
+func NewDestinationUsecase(
+        destinationRepo repositories.IDestinationRepository,
+        destinationFacilityRepo repositories.IDestinationFacilityRepository,
+        destinationMediaRepo repositories.IDestinationMediaRepository,
+        destinationAddressRepo repositories.IDestinationAddressRepository,
+        categoryRepo repositories.ICategoryRepository,
+        facilityRepo repositories.IFacilityRepository,
+        provinceRepo repositories.IProvinceRepository,
+        cityRepo repositories.ICityRepository,
+        subdistrictRepo repositories.ISubdistrictRepository,
+        cloudinaryClient cloudinary.ICloudinaryClient,
+) *DestinationUsecase <span class="cov8" title="1">{
+        return &amp;DestinationUsecase{
+                destinationRepo,
+                destinationFacilityRepo,
+                destinationMediaRepo,
+                destinationAddressRepo,
+                categoryRepo,
+                facilityRepo,
+                provinceRepo,
+                cityRepo,
+                subdistrictRepo,
+                cloudinaryClient,
+        }
+}</span>
+
+func (uc *DestinationUsecase) SearchDestinations(page, limit int, searchQuery, sortQuery, filterQuery string) (string, *int64, *[]dto.SearchDestination, error) <span class="cov8" title="1">{
+        categoryName, total, destinations, err := uc.destinationRepo.FindAll(page, limit, searchQuery, sortQuery, filterQuery)
+        if err != nil </span><span class="cov8" title="1">{
+                return categoryName, nil, nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk menemukan data destinasi"}
+        }</span>
+        <span class="cov8" title="1">response := dto.ToSearchDestinationsResponse(&amp;destinations)
+        return categoryName, total, response, nil</span>
+}
+
+func (uc *DestinationUsecase) DetailDestination(id uuid.UUID) (*dto.DetailDestinationResponse, error) <span class="cov8" title="1">{
+        destination, err := uc.destinationRepo.FindById(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
+        }</span>
+
+        <span class="cov8" title="1">similarDestinations, err := uc.destinationRepo.FindByCategoryId(destination.CategoryId)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal mendapatkan destinasi serupa"}
+        }</span>
+
+        <span class="cov8" title="1">response := dto.ToDetailDestinationResponse(destination, &amp;similarDestinations)
+
+        return response, nil</span>
+}
+
+func (uc *DestinationUsecase) CreateDestination(destinationReq *dto.CreateDestinationRequest) error <span class="cov8" title="1">{
+        category, err := uc.categoryRepo.FindById(destinationReq.CategoryId)
+        if err != nil || category == nil </span><span class="cov8" title="1">{
+                return errors.New("category not found")
+        }</span>
+
+        <span class="cov8" title="1">destination := &amp;entities.Destination{
+                Id:          uuid.New(),
+                CategoryId:  destinationReq.CategoryId,
+                Name:        destinationReq.Name,
+                Description: destinationReq.Description,
+                OpenTime:    destinationReq.OpenTime,
+                CloseTime:   destinationReq.CloseTime,
+                EntryPrice:  destinationReq.EntryPrice,
+                Latitude:    destinationReq.Latitude,
+                Longitude:   destinationReq.Longitude,
+                VisitCount:  0,
+        }
+
+        txDestination := uc.destinationRepo.BeginTx()
+
+        if err = uc.destinationRepo.Create(destination, txDestination); err != nil </span><span class="cov8" title="1">{
+                txDestination.Rollback()
+                return fmt.Errorf("error when create destination: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">destinationFacilities := dto.ToDestinationFacilities(destination.Id, destinationReq.FacilityIds)
+
+        if err = uc.destinationFacilityRepo.Create(destinationFacilities, txDestination); err != nil </span><span class="cov8" title="1">{
+                txDestination.Rollback()
+                return fmt.Errorf("error when create destination facility: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">destinationAddress := dto.ToDestinationAddress(destination.Id, destinationReq.DestinationAddress)
+
+        // check province
+        province, err := uc.provinceRepo.FindById(destinationAddress.ProvinceId)
+
+        if err != nil || province == nil </span><span class="cov8" title="1">{
+                txDestination.Rollback()
+                return errors.New("province not found")
+        }</span>
+
+        // check city
+        <span class="cov8" title="1">city, err := uc.cityRepo.FindById(destinationAddress.CityId)
+
+        if err != nil || city == nil </span><span class="cov8" title="1">{
+                txDestination.Rollback()
+                return errors.New("city not found")
+        }</span>
+
+        // check subdistrict
+        <span class="cov8" title="1">subdistrict, err := uc.subdistrictRepo.FindById(destinationAddress.SubdistrictId)
+
+        if err != nil || subdistrict == nil </span><span class="cov8" title="1">{
+                txDestination.Rollback()
+                return errors.New("subdistrict not found")
+        }</span>
+
+        <span class="cov8" title="1">if err = uc.destinationAddressRepo.Create(destinationAddress, txDestination); err != nil </span><span class="cov8" title="1">{
+                txDestination.Rollback()
+                return fmt.Errorf("error when create destination address: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">txDestination.Commit()
+
+        return nil</span>
+}
+
+func (uc *DestinationUsecase) UpdateDestination(id uuid.UUID, destinationReq *dto.UpdateDestinationRequest) error <span class="cov8" title="1">{
+        destination, err := uc.destinationRepo.FindById(id)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">destination.Name = destinationReq.Name
+        destination.Description = destinationReq.Description
+        destination.OpenTime = destinationReq.OpenTime
+        destination.CloseTime = destinationReq.CloseTime
+        destination.EntryPrice = destinationReq.EntryPrice
+        destination.Latitude = destinationReq.Latitude
+        destination.Longitude = destinationReq.Longitude
+
+        // update category
+        category, err := uc.categoryRepo.FindById(destinationReq.CategoryId)
+        if err != nil || category == nil </span><span class="cov0" title="0">{
+                return errors.New("category not found")
+        }</span>
+        <span class="cov8" title="1">destination.CategoryId = destinationReq.CategoryId
+
+        txDestination := uc.destinationRepo.BeginTx()
+
+        // update facilities
+        if err = uc.destinationFacilityRepo.DeleteMany(destination.DestinationFacilities, txDestination); err != nil </span><span class="cov0" title="0">{
+                txDestination.Rollback()
+                return fmt.Errorf("error when delete destination facility: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">destinationFacilities := dto.ToDestinationFacilities(destination.Id, destinationReq.FacilityIds)
+
+        for _, facility := range *destinationFacilities </span><span class="cov8" title="1">{
+                if err = uc.destinationFacilityRepo.Update(&amp;facility, txDestination); err != nil </span><span class="cov0" title="0">{
+                        txDestination.Rollback()
+                        return fmt.Errorf("error when update destination facility: %w", err)
+                }</span>
+        }
+
+        <span class="cov8" title="1">if err = uc.destinationRepo.Update(destination, txDestination); err != nil </span><span class="cov0" title="0">{
+                txDestination.Rollback()
+                return fmt.Errorf("error when update destination: %w", err)
+        }</span>
+
+        // update address
+        <span class="cov8" title="1">destinationAddress := dto.ToDestinationAddress(destination.Id, destinationReq.DestinationAddress)
+        destinationAddress.Id = destination.DestinationAddress.Id
+
+        // check province
+        province, err := uc.provinceRepo.FindById(destinationAddress.ProvinceId)
+
+        if err != nil || province == nil </span><span class="cov8" title="1">{
+                txDestination.Rollback()
+                return errors.New("province not found")
+        }</span>
+
+        // check city
+        <span class="cov8" title="1">city, err := uc.cityRepo.FindById(destinationAddress.CityId)
+
+        if err != nil || city == nil </span><span class="cov8" title="1">{
+                txDestination.Rollback()
+                return errors.New("city not found")
+        }</span>
+
+        // check subdistrict
+        <span class="cov8" title="1">subdistrict, err := uc.subdistrictRepo.FindById(destinationAddress.SubdistrictId)
+
+        if err != nil || subdistrict == nil </span><span class="cov0" title="0">{
+                txDestination.Rollback()
+                return errors.New("subdistrict not found")
+        }</span>
+
+        <span class="cov8" title="1">if err = uc.destinationAddressRepo.Update(destinationAddress, txDestination); err != nil </span><span class="cov0" title="0">{
+                txDestination.Rollback()
+                return fmt.Errorf("error when update destination address: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">txDestination.Commit()
+
+        return nil</span>
+}
+
+func (uc *DestinationUsecase) GetAllDestinations(page, limit int, searchQuery string) (*int64, *[]dto.GetAllDestination, error) <span class="cov8" title="1">{
+        _, total, destinations, err := uc.destinationRepo.FindAll(page, limit, searchQuery, "", "")
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, nil, err
+        }</span>
+
+        <span class="cov8" title="1">response := dto.ToGetAllDestinationsResponse(&amp;destinations)
+
+        return total, response, nil</span>
+}
+
+func (uc *DestinationUsecase) GetDestinationById(id uuid.UUID) (*dto.GetByIdDestinationResponse, error) <span class="cov8" title="1">{
+        destination, err := uc.destinationRepo.FindById(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
+        }</span>
+
+        <span class="cov8" title="1">response := dto.ToGetByIdDestinationResponse(destination)
+
+        return response, nil</span>
+}
+
+func (uc *DestinationUsecase) DeleteDestination(id uuid.UUID) error <span class="cov8" title="1">{
+        destination, err := uc.destinationRepo.FindById(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
+        }</span>
+
+        <span class="cov8" title="1">tx := uc.destinationRepo.BeginTx()
+
+        if err = uc.destinationRepo.Delete(destination, tx); err != nil </span><span class="cov8" title="1">{
+                tx.Rollback()
+                return fmt.Errorf("error when delete destination: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if err = uc.destinationAddressRepo.Delete(destination.DestinationAddress, tx); err != nil </span><span class="cov8" title="1">{
+                tx.Rollback()
+                return fmt.Errorf("error when delete destination address: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">if err = uc.destinationFacilityRepo.DeleteMany(destination.DestinationFacilities, tx); err != nil </span><span class="cov8" title="1">{
+                tx.Rollback()
+                return fmt.Errorf("error when delete destination facility: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">for _, destinationMedia := range destination.DestinationMedias </span><span class="cov8" title="1">{
+                if err = uc.destinationMediaRepo.Delete(&amp;destinationMedia, tx); err != nil </span><span class="cov8" title="1">{
+                        tx.Rollback()
+                        return fmt.Errorf("error when delete destination media: %w", err)
+                }</span>
+
+                <span class="cov8" title="1">if err = uc.cloudinaryClient.DeleteImage(destinationMedia.Url); err != nil </span><span class="cov8" title="1">{
+                        return &amp;errorHandlers.InternalServerError{Message: "Gagal menghapus media destinasi"}
+                }</span>
+        }
+
+        <span class="cov8" title="1">tx.Commit()
+
+        return nil</span>
+}
+
+// increment visit count.
+func (uc *DestinationUsecase) IncrementVisitCount(id uuid.UUID) error <span class="cov8" title="1">{
+        destination, err := uc.destinationRepo.FindById(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+        <span class="cov8" title="1">destination.VisitCount++
+        txDestination := uc.destinationRepo.BeginTx()
+
+        if err = uc.destinationRepo.Update(destination, txDestination); err != nil </span><span class="cov8" title="1">{
+                txDestination.Rollback()
+                return fmt.Errorf("error when increment visit count: %w", err)
+        }</span>
+
+        <span class="cov8" title="1">txDestination.Commit()
+
+        return nil</span>
+}
+
+func (uc *DestinationUsecase) GetCitiesWithDestinations() (*[]dto.Cities, error) <span class="cov8" title="1">{
+        cities, err := uc.cityRepo.GetCitiesWithDestinations()
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk menemukan data kota"}
+        }</span>
+
+        <span class="cov8" title="1">response := dto.ToCitiesResponse(&amp;cities)
+
+        return response, nil</span>
+}
+
+func (uc *DestinationUsecase) GetDestinationByCityId(id string) (*[]dto.DestinationsByCity, error) <span class="cov8" title="1">{
+        destinations, err := uc.destinationRepo.FindDestinationByCityId(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk menemukan data destinasi"}
+        }</span>
+        <span class="cov8" title="1">if len(destinations) == 0 </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.NotFoundError{Message: "Destinasi tidak ditemukan"}
+        }</span>
+        <span class="cov8" title="1">response := dto.ToDestinationsByCityResponse(&amp;destinations)
+        return response, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package usecases
+
+import (
+        "errors"
+        "fmt"
+        "strings"
+
+        "capstone/dto"
+        "capstone/entities"
+        "capstone/errorHandlers"
+        "capstone/externals/openai"
+        exredis "capstone/externals/redis"
+        "capstone/helpers"
+        "capstone/repositories"
+
+        "github.com/redis/go-redis/v9"
+
+        "github.com/google/uuid"
+        "gorm.io/gorm"
+)
+
+type HomepageUsecase interface {
+        GetNearbyDestinations(req *dto.HomepageRequest) ([]dto.NearbyDestination, error)
+        GetPopularDestinationMeadias() ([]dto.PopularDestination, error)
+        GetRecommendations(uid uuid.UUID) ([]dto.RecommendDestination, error)
+}
+
+type homepageUsecase struct {
+        destinationRepo         repositories.IDestinationRepository
+        routeRepo               repositories.RouteRepository
+        userPersonalizationRepo repositories.UserPersonalizationRepository
+        redisClient             exredis.RedisClient
+        openAIClient            openai.OpenAIClient
+}
+
+func NewHomepageUsecase(
+        destinationRepo repositories.IDestinationRepository,
+        routeRepo repositories.RouteRepository,
+        userPersonalizationRepo repositories.UserPersonalizationRepository,
+        redisClient exredis.RedisClient,
+        openAIClient openai.OpenAIClient,
+) *homepageUsecase <span class="cov8" title="1">{
+        return &amp;homepageUsecase{
+                destinationRepo:         destinationRepo,
+                routeRepo:               routeRepo,
+                userPersonalizationRepo: userPersonalizationRepo,
+                redisClient:             redisClient,
+                openAIClient:            openAIClient,
+        }
+}</span>
+
+func (uc *homepageUsecase) GetNearbyDestinations(req *dto.HomepageRequest) ([]dto.NearbyDestination, error) <span class="cov8" title="1">{
+        const limit = 5
+
+        nearbyDestination, err := uc.destinationRepo.FindByProvinceName(req.CityName, limit)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal mendapatkan destinasi sekitar"}
+        }</span>
+
+        <span class="cov8" title="1">return dto.ToNearbyDestinations(nearbyDestination), nil</span>
+}
+
+func (uc *homepageUsecase) GetPopularDestinationMeadias() ([]dto.PopularDestination, error) <span class="cov8" title="1">{
+        popularDestinations, err := uc.destinationRepo.FindPopularDestinationVideos()
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal mendapatkan destinasi populer"}
+        }</span>
+
+        <span class="cov8" title="1">return dto.ToPopularDestinations(popularDestinations), nil</span>
+}
+
+func (uc *homepageUsecase) GetRecommendations(uid uuid.UUID) ([]dto.RecommendDestination, error) <span class="cov8" title="1">{
+        var recommendDestinations *[]entities.Destination
+
+        encodedKey := helpers.EncodeRedisKey(uid.String())
+
+        ids, err := uc.redisClient.GetRecommendedDestinationsIds(fmt.Sprint("rec_", encodedKey))
+        if err != nil &amp;&amp; !errors.Is(err, redis.Nil) </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal mendapatkan rekomendasi destinasi"}
+        }</span>
+
+        <span class="cov8" title="1">if ids != nil </span><span class="cov8" title="1">{
+                recommendDestinations, err = uc.destinationRepo.FindByManyIds(*ids)
+                if err != nil </span><span class="cov8" title="1">{
+                        return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal mendapatkan rekomendasi destinasi"}
+                }</span>
+
+                <span class="cov8" title="1">return dto.ToRecommendDestinations(recommendDestinations), nil</span>
+        }
+
+        <span class="cov8" title="1">personalization, err := uc.userPersonalizationRepo.FindByUserId(uid)
+        if err != nil </span><span class="cov0" title="0">{
+                switch </span>{
+                case errors.Is(err, gorm.ErrRecordNotFound):<span class="cov0" title="0">
+                        return nil, &amp;errorHandlers.NotFoundError{Message: "Personalisasi belum dibuat"}</span>
+                default:<span class="cov0" title="0">
+                        return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal mendapatkan data personalisasi"}</span>
+                }
+        }
+
+        <span class="cov8" title="1">provinceIds := dto.ToPersonalizationProvinceIds(&amp;personalization.PersonalizationProvinces)
+        categoryIds := dto.ToCategoryIds(&amp;personalization.PersonalizationCategories)
+
+        var visitedDestinations, unVisitedDestinations *[]entities.Destination
+        subquery := uc.routeRepo.FindVisitedByUserSubquery(uid)
+        visitedDestinations, err = uc.destinationRepo.FindBySubqueryRoute(
+                subquery,
+                true,
+                provinceIds,
+                categoryIds,
+        )
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal mendapatkan data personalisasi"}
+        }</span>
+
+        <span class="cov8" title="1">unVisitedDestinations, err = uc.destinationRepo.FindBySubqueryRoute(
+                subquery,
+                false,
+                provinceIds,
+                categoryIds,
+        )
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal mendapatkan data personalisasi"}
+        }</span>
+
+        <span class="cov8" title="1">if len(*unVisitedDestinations) &lt; 5 </span><span class="cov0" title="0">{
+                ids = helpers.SelectRecommendationIds(visitedDestinations, unVisitedDestinations)
+        }</span> else<span class="cov8" title="1"> {
+                var recommendations string
+                prompt := helpers.ToRecommendationPrompt(visitedDestinations, unVisitedDestinations)
+                recommendations, err = uc.openAIClient.GenerateAnswer(
+                        prompt,
+                        helpers.GetRecommendationSystemInstruction(),
+                )
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal mendapatkan rekomendasi destinasi"}
+                }</span>
+
+                <span class="cov8" title="1">splittedIds := strings.Split(recommendations, "\n")
+                ids = &amp;splittedIds</span>
+        }
+
+        <span class="cov8" title="1">err = uc.redisClient.SetRecommendedDestinationsIds(fmt.Sprint("rec_", encodedKey), *ids)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal menyimpan rekomendasi destinasi"}
+        }</span>
+
+        <span class="cov8" title="1">recommendedDestinations, err := uc.destinationRepo.FindByManyIds(*ids)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal mendapatkan rekomendasi destinasi"}
+        }</span>
+
+        <span class="cov8" title="1">return dto.ToRecommendDestinations(recommendedDestinations), nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package usecases
+
+import (
+        "capstone/dto"
+        "capstone/errorHandlers"
+        "capstone/repositories"
+
+        "github.com/devfeel/mapper"
+)
+
+type IMasterDataUsecase interface {
+        GetCategories() (*[]dto.CategoryResponse, error)
+        GetFacilities() (*[]dto.FacilityResponse, error)
+        GetProvinces() (*[]dto.ProvinceResponse, error)
+        GetCities(provinceId string) (*[]dto.CityResponse, error)
+        GetSubdistricts(cityId string) (*[]dto.SubdistrictResponse, error)
+}
+
+type MasterDataUsecase struct {
+        provinceRepo    repositories.IProvinceRepository
+        cityRepo        repositories.ICityRepository
+        subdistrictRepo repositories.ISubdistrictRepository
+        categoryRepo    repositories.ICategoryRepository
+        facilityRepo    repositories.IFacilityRepository
+}
+
+func NewMasterDataUsecase(
+        provinceRepo repositories.IProvinceRepository,
+        cityRepo repositories.ICityRepository,
+        subdistrictRepo repositories.ISubdistrictRepository,
+        categoryRepo repositories.ICategoryRepository,
+        facilityRepo repositories.IFacilityRepository,
+) *MasterDataUsecase <span class="cov8" title="1">{
+        return &amp;MasterDataUsecase{
+                provinceRepo:    provinceRepo,
+                cityRepo:        cityRepo,
+                subdistrictRepo: subdistrictRepo,
+                categoryRepo:    categoryRepo,
+                facilityRepo:    facilityRepo,
+        }
+}</span>
+
+func (r *MasterDataUsecase) GetCategories() (*[]dto.CategoryResponse, error) <span class="cov8" title="1">{
+        categories, err := r.categoryRepo.FindAll()
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk mendapatkan kategori"}
+        }</span>
+
+        <span class="cov8" title="1">res := new([]dto.CategoryResponse)
+
+        err = mapper.MapperSlice(categories, res)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk mendapatkan kategori"}
+        }</span>
+
+        <span class="cov8" title="1">return res, nil</span>
+}
+
+func (r *MasterDataUsecase) GetFacilities() (*[]dto.FacilityResponse, error) <span class="cov8" title="1">{
+        facilities, err := r.facilityRepo.FindAll()
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk mendapatkan fasilitas"}
+        }</span>
+
+        <span class="cov8" title="1">res := new([]dto.FacilityResponse)
+
+        err = mapper.MapperSlice(facilities, res)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk mendapatkan fasilitas"}
+        }</span>
+
+        <span class="cov8" title="1">return res, nil</span>
+}
+
+func (r *MasterDataUsecase) GetProvinces() (*[]dto.ProvinceResponse, error) <span class="cov8" title="1">{
+        provinces, err := r.provinceRepo.FindAll()
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk mendapatkan provinsi"}
+        }</span>
+
+        <span class="cov8" title="1">res := new([]dto.ProvinceResponse)
+
+        err = mapper.MapperSlice(provinces, res)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk mendapatkan provinsi"}
+        }</span>
+
+        <span class="cov8" title="1">return res, nil</span>
+}
+
+func (r *MasterDataUsecase) GetCities(provinceId string) (*[]dto.CityResponse, error) <span class="cov8" title="1">{
+        cities, err := r.cityRepo.FindAll(provinceId)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk mendapatkan kota"}
+        }</span>
+
+        <span class="cov8" title="1">res := new([]dto.CityResponse)
+
+        err = mapper.MapperSlice(cities, res)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk mendapatkan kota"}
+        }</span>
+
+        <span class="cov8" title="1">return res, nil</span>
+}
+
+func (r *MasterDataUsecase) GetSubdistricts(cityId string) (*[]dto.SubdistrictResponse, error) <span class="cov8" title="1">{
+        subdistricts, err := r.subdistrictRepo.FindAll(cityId)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk mendapatkan kecamatan"}
+        }</span>
+
+        <span class="cov8" title="1">res := new([]dto.SubdistrictResponse)
+
+        err = mapper.MapperSlice(subdistricts, res)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk mendapatkan kecamatan"}
+        }</span>
+
+        <span class="cov8" title="1">return res, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package usecases
+
+import (
+        "fmt"
+
+        "capstone/dto"
+        "capstone/entities"
+        "capstone/errorHandlers"
+        "capstone/externals/cloudinary"
+        "capstone/helpers"
+        "capstone/repositories"
+
+        "github.com/google/uuid"
+)
+
+type ProfileUsecase interface {
+        GetDetailUser(id uuid.UUID) (*entities.User, error)
+        InsertUserDetail(request *dto.UserDetailRequest, id uuid.UUID) error
+        ChangePassword(request *dto.ChangePasswordRequest, id uuid.UUID) error
+        HandleProfilePictureUpdate(request *dto.UserDetailRequest, user *entities.User) error
+}
+
+type profileUsecase struct {
+        userRepo         repositories.UserRepository
+        cloudinaryClient cloudinary.ICloudinaryClient
+        passwordHelper   helpers.PasswordHelper
+        iValidation      helpers.IValidationHelper
+}
+
+func NewProfileUsecase(
+        repository repositories.UserRepository,
+        client cloudinary.ICloudinaryClient,
+        passwordHelper helpers.PasswordHelper,
+        iValidation helpers.IValidationHelper,
+) *profileUsecase <span class="cov8" title="1">{
+        return &amp;profileUsecase{userRepo: repository, cloudinaryClient: client, passwordHelper: passwordHelper, iValidation: iValidation}
+}</span>
+
+func (uc *profileUsecase) GetDetailUser(id uuid.UUID) (*entities.User, error) <span class="cov8" title="1">{
+        user, err := uc.userRepo.FindById(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.NotFoundError{Message: "User tidak ditemukan"}
+        }</span>
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+func (uc *profileUsecase) InsertUserDetail(request *dto.UserDetailRequest, id uuid.UUID) error <span class="cov8" title="1">{
+        user, _ := uc.userRepo.FindById(id)
+        if user == nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.ConflictError{Message: "User tidak ditemukan"}
+        }</span>
+        <span class="cov8" title="1">if request.Email != user.Email </span><span class="cov8" title="1">{
+                existEmail, _ := uc.userRepo.FindByEmail(request.Email)
+                if existEmail != nil </span><span class="cov0" title="0">{
+                        return &amp;errorHandlers.ConflictError{Message: "Email sudah digunakan"}
+                }</span>
+        }
+
+        <span class="cov8" title="1">user.Username = request.Username
+        user.Fullname = request.NamaLengkap
+        user.PhoneNumber = request.NoTelepon
+        user.Bio = request.Bio
+        user.Gender = request.JenisKelamin
+        user.City = request.Kota
+        user.Province = request.Provinsi
+        user.Email = request.Email
+
+        if err := uc.HandleProfilePictureUpdate(request, user); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">if err := uc.userRepo.Update(user); err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal untuk memperbarui data user"}
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (uc *profileUsecase) HandleProfilePictureUpdate(request *dto.UserDetailRequest, user *entities.User) error <span class="cov8" title="1">{
+        if request.FotoProfil == nil </span><span class="cov8" title="1">{
+                return nil
+        }</span>
+
+        <span class="cov8" title="1">if !uc.iValidation.IsValidImageType(request.FotoProfil) </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.BadRequestError{Message: "Tipe foto profil tidak valid"}
+        }</span>
+        <span class="cov8" title="1">if !uc.iValidation.IsValidImageSize(request.FotoProfil) </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.BadRequestError{Message: "Ukuran foto profil tidak valid"}
+        }</span>
+
+        <span class="cov8" title="1">file, err := request.FotoProfil.Open()
+        if err != nil </span><span class="cov0" title="0">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal membuka file foto profil"}
+        }</span>
+        <span class="cov8" title="1">defer file.Close()
+
+        fmt.Println(user.ProfileImageUrl)
+
+        if user.ProfileImageUrl != nil &amp;&amp; *user.ProfileImageUrl != "" </span><span class="cov8" title="1">{
+                if err = uc.cloudinaryClient.DeleteImage(*user.ProfileImageUrl); err != nil </span><span class="cov0" title="0">{
+                        return &amp;errorHandlers.InternalServerError{Message: "Gagal menghapus foto profil"}
+                }</span>
+        }
+
+        <span class="cov8" title="1">urlMedia, err := uc.cloudinaryClient.UploadImage(file, "users")
+        if err != nil </span><span class="cov0" title="0">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal upload foto profil"}
+        }</span>
+        <span class="cov8" title="1">user.ProfileImageUrl = &amp;urlMedia
+
+        return nil</span>
+}
+
+func (uc *profileUsecase) ChangePassword(request *dto.ChangePasswordRequest, id uuid.UUID) error <span class="cov8" title="1">{
+        user, _ := uc.userRepo.FindById(id)
+        if user == nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.ConflictError{Message: "User tidak ditemukan"}
+        }</span>
+
+        <span class="cov8" title="1">if err := uc.passwordHelper.VerifyPassword(user.Password, request.PasswordLama); err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.ConflictError{Message: "Password lama tidak valid"}
+        }</span>
+
+        <span class="cov8" title="1">if request.PasswordBaru != request.KonfirmasiPassword </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.BadRequestError{Message: "Password dan konfirmasi password tidak cocok"}
+        }</span>
+
+        <span class="cov8" title="1">hashPassword, err := uc.passwordHelper.HashPassword(request.PasswordBaru)
+        if err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal hashing password"}
+        }</span>
+        <span class="cov8" title="1">user.Password = hashPassword
+
+        if err = uc.userRepo.Update(user); err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal untuk memperbarui password"}
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package usecases
+
+import (
+        "errors"
+        "fmt"
+
+        "capstone/dto"
+        "capstone/entities"
+        "capstone/errorHandlers"
+        "capstone/externals/openai"
+        "capstone/helpers"
+        "capstone/repositories"
+
+        "github.com/google/uuid"
+        "gorm.io/gorm"
+)
+
+type RouteInterface interface {
+        FindAll(page, limit int, searchQuery string) (*[]entities.Route, *int64, error)
+        FindById(id uuid.UUID) (*entities.Route, error)
+        DeleteRoute(id uuid.UUID) error
+        SummarizeRoute(req *dto.RouteSummaryRequest) (*dto.RouteSummaryResponse, error)
+        SaveRoute(req *dto.SaveRouteRequest) error
+        FindAllByCurrentUser(user_id uuid.UUID) (*[]entities.Route, error)
+        FindByIdCurrentUser(user_id, id uuid.UUID) (*entities.Route, error)
+}
+
+type routeUsecase struct {
+        cityRepo        repositories.ICityRepository
+        destinationRepo repositories.IDestinationRepository
+        routeRepo       repositories.RouteRepository
+        routeDetailRepo repositories.RouteDetailRepository
+
+        openAIClient openai.OpenAIClient
+}
+
+func NewRouteUsecase(
+        cityRepo repositories.ICityRepository,
+        destinationRepo repositories.IDestinationRepository,
+        routeRepo repositories.RouteRepository,
+        routeDetail repositories.RouteDetailRepository,
+        openAIClient openai.OpenAIClient,
+) *routeUsecase <span class="cov8" title="1">{
+        return &amp;routeUsecase{
+                cityRepo:        cityRepo,
+                destinationRepo: destinationRepo,
+                routeRepo:       routeRepo,
+                routeDetailRepo: routeDetail,
+                openAIClient:    openAIClient,
+        }
+}</span>
+
+func (uc *routeUsecase) FindAll(page, limit int, searchQuery string) (*[]entities.Route, *int64, error) <span class="cov8" title="1">{
+        routes, total, err := uc.routeRepo.FindAll(page, limit, searchQuery)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, nil, &amp;errorHandlers.InternalServerError{Message: "Gagal mendapatkan data rute"}
+        }</span>
+        <span class="cov8" title="1">return routes, total, nil</span>
+}
+
+func (uc *routeUsecase) FindById(id uuid.UUID) (*entities.Route, error) <span class="cov8" title="1">{
+        route, err := uc.routeRepo.FindById(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.NotFoundError{Message: "Rute tidak ditemukan"}
+        }</span>
+        <span class="cov8" title="1">return route, nil</span>
+}
+
+func (uc *routeUsecase) DeleteRoute(id uuid.UUID) error <span class="cov8" title="1">{
+        route, err := uc.routeRepo.FindById(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.NotFoundError{Message: "Rute tidak ditemukan"}
+        }</span>
+        <span class="cov8" title="1">if err = uc.routeRepo.Delete(route); err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal menghapus rute"}
+        }</span>
+
+        <span class="cov8" title="1">if err = uc.routeDetailRepo.DeleteMany(&amp;route.RouteDetail); err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal menghapus detail rute"}
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (uc *routeUsecase) SummarizeRoute(req *dto.RouteSummaryRequest) (*dto.RouteSummaryResponse, error) <span class="cov8" title="1">{
+        var (
+                destinations []entities.Destination
+                err          error
+        )
+
+        for idx, id := range req.DestinationIds </span><span class="cov8" title="1">{
+                var destination *entities.Destination
+                destination, err = uc.destinationRepo.FindByIdInCityId(id, req.CityId)
+                if err != nil </span><span class="cov8" title="1">{
+                        if errors.Is(err, gorm.ErrRecordNotFound) </span><span class="cov8" title="1">{
+                                return nil, &amp;errorHandlers.NotFoundError{Message: fmt.Sprintf("Destinasi ke-%d tidak ditemukan", idx+1)}
+                        }</span>
+
+                        <span class="cov8" title="1">return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal mendapatkan detail destinasi"}</span>
+                }
+                <span class="cov8" title="1">destinations = append(destinations, *destination)</span>
+        }
+
+        <span class="cov8" title="1">prompt := helpers.ToRoutePrompt(&amp;destinations, req.StartLocation.Lat, req.StartLocation.Long)
+        recommendationRoute, err := uc.openAIClient.GenerateAnswer(
+                prompt,
+                helpers.GetRouteSystemInstruction(),
+        )
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal mendapatkan rekomendasi rute"}
+        }</span>
+
+        <span class="cov8" title="1">routeDetails, estimationCost := helpers.ExtractRouteInformation(
+                recommendationRoute,
+                destinations,
+        )
+
+        res := dto.ToSummaryRouteResponse(
+                dto.ToStartLocation(req.StartLocation.Name, req.StartLocation.Lat, req.StartLocation.Long),
+                routeDetails,
+                estimationCost,
+        )
+
+        return res, nil</span>
+}
+
+func (uc *routeUsecase) SaveRoute(request *dto.SaveRouteRequest) error <span class="cov8" title="1">{
+        route := &amp;entities.Route{
+                Id:             uuid.New(),
+                UserId:         request.UserId,
+                CityId:         request.CityId,
+                Name:           request.Name,
+                StartLocation:  request.StartLocation,
+                StartLongitude: request.StartLongitude,
+                StartLatitude:  request.StartLatitude,
+                Price:          request.Price,
+        }
+
+        if request.RouteDetails == nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.BadRequestError{Message: "data detail rute tidak valid"}
+        }</span>
+
+        <span class="cov8" title="1">if err := uc.routeRepo.Create(route); err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal menyimpan rute"}
+        }</span>
+
+        <span class="cov8" title="1">for _, routeDetail := range request.RouteDetails </span><span class="cov8" title="1">{
+                routeDetail := &amp;entities.RouteDetail{
+                        Id:            uuid.New(),
+                        RouteId:       route.Id,
+                        DestinationId: routeDetail.DestinationId,
+                        Longitude:     routeDetail.Longitude,
+                        Latitude:      routeDetail.Latitude,
+                        Duration:      routeDetail.Duration,
+                        Order:         routeDetail.Order,
+                        VisitStart:    []byte(routeDetail.VisitStart),
+                        VisitEnd:      []byte(routeDetail.VisitEnd),
+                }
+
+                if err := uc.routeDetailRepo.Create(routeDetail); err != nil </span><span class="cov8" title="1">{
+                        return &amp;errorHandlers.InternalServerError{Message: "Gagal menyimpan detail rute"}
+                }</span>
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (uc *routeUsecase) FindAllByCurrentUser(user_id uuid.UUID) (*[]entities.Route, error) <span class="cov8" title="1">{
+        routes, err := uc.routeRepo.FindAllByCurrentUser(user_id)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.NotFoundError{Message: "Gagal mendapatkan data rute"}
+        }</span>
+        <span class="cov8" title="1">return routes, nil</span>
+}
+
+func (uc *routeUsecase) FindByIdCurrentUser(user_id, id uuid.UUID) (*entities.Route, error) <span class="cov8" title="1">{
+        route, err := uc.routeRepo.FindByIdCurrentUser(user_id, id)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.NotFoundError{Message: "Rute tidak ditemukan"}
+        }</span>
+        <span class="cov8" title="1">return route, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package usecases
+
+import (
+        "errors"
+        "fmt"
+
+        "capstone/dto"
+        "capstone/entities"
+        "capstone/errorHandlers"
+        "capstone/repositories"
+
+        "github.com/devfeel/mapper"
+        "github.com/google/uuid"
+        "gorm.io/gorm"
+)
+
+type PersonalizationUsecase interface {
+        GetProvinces() (*[]dto.ProvinceResponse, error)
+        GetCategories() (*[]dto.CategoryResponse, error)
+        CreatePersonalization(request *dto.PersonalizationRequest, userID uuid.UUID) error
+}
+
+type personalizationUsecase struct {
+        provinceRepo            repositories.IProvinceRepository
+        categoryRepo            repositories.ICategoryRepository
+        userPersonalizationRepo repositories.UserPersonalizationRepository
+}
+
+func NewPersonalizationUsecase(
+        provinceRepo repositories.IProvinceRepository,
+        categoryRepo repositories.ICategoryRepository,
+        userPersonalizationRepo repositories.UserPersonalizationRepository,
+) *personalizationUsecase <span class="cov8" title="1">{
+        return &amp;personalizationUsecase{
+                provinceRepo:            provinceRepo,
+                categoryRepo:            categoryRepo,
+                userPersonalizationRepo: userPersonalizationRepo,
+        }
+}</span>
+
+func (r *personalizationUsecase) GetProvinces() (*[]dto.ProvinceResponse, error) <span class="cov8" title="1">{
+        provinces, err := r.provinceRepo.FindAll()
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk mendapatkan provinsi"}
+        }</span>
+
+        <span class="cov8" title="1">res := new([]dto.ProvinceResponse)
+
+        err = mapper.MapperSlice(provinces, res)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk mendapatkan provinsi"}
+        }</span>
+
+        <span class="cov8" title="1">return res, nil</span>
+}
+
+func (r *personalizationUsecase) GetCategories() (*[]dto.CategoryResponse, error) <span class="cov8" title="1">{
+        categories, err := r.categoryRepo.FindAll()
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk mendapatkan kategori destinasi"}
+        }</span>
+
+        <span class="cov8" title="1">res := new([]dto.CategoryResponse)
+
+        err = mapper.MapperSlice(categories, res)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk mendapatkan kategori destinasi"}
+        }</span>
+
+        <span class="cov8" title="1">return res, nil</span>
+}
+
+func (r *personalizationUsecase) CreatePersonalization(request *dto.PersonalizationRequest, userID uuid.UUID) error <span class="cov8" title="1">{
+        id := uuid.New()
+
+        var persCategories []entities.PersonalizationCategory
+        var persProvinces []entities.PersonalizationProvince
+
+        for idx, category := range request.CategoryIds </span><span class="cov8" title="1">{
+                if _, err := r.categoryRepo.FindById(category); err != nil </span><span class="cov8" title="1">{
+                        return &amp;errorHandlers.NotFoundError{Message: fmt.Sprintf("Kategori destinasi pilihan ke-%d tidak ditemukan", idx+1)}
+                }</span>
+
+                <span class="cov8" title="1">persCategories = append(
+                        persCategories,
+                        entities.PersonalizationCategory{
+                                Id:         uuid.New(),
+                                CategoryId: category,
+                        },
+                )</span>
+        }
+
+        <span class="cov8" title="1">for idx, province := range request.ProvinceIds </span><span class="cov8" title="1">{
+                if _, err := r.provinceRepo.FindById(province); err != nil </span><span class="cov8" title="1">{
+                        return &amp;errorHandlers.NotFoundError{Message: fmt.Sprintf("Provinsi pilihan ke-%d tidak ditemukan", idx+1)}
+                }</span>
+
+                <span class="cov8" title="1">persProvinces = append(
+                        persProvinces,
+                        entities.PersonalizationProvince{
+                                Id:         uuid.New(),
+                                ProvinceId: province,
+                        },
+                )</span>
+        }
+
+        <span class="cov8" title="1">userPersonalization := &amp;entities.UserPersonalization{
+                Id:                        id,
+                UserId:                    userID,
+                PersonalizationCategories: persCategories,
+                PersonalizationProvinces:  persProvinces,
+        }
+
+        err := r.userPersonalizationRepo.Create(userPersonalization)
+        if err != nil </span><span class="cov8" title="1">{
+                switch </span>{
+                case errors.Is(err, gorm.ErrDuplicatedKey):<span class="cov8" title="1">
+                        return &amp;errorHandlers.ConflictError{Message: "Personalisasi sudah dibuat"}</span>
+                default:<span class="cov8" title="1">
+                        return &amp;errorHandlers.InternalServerError{Message: "Gagal untuk membuat personalisasi"}</span>
+                }
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package usecases
+
+import (
+        "fmt"
+
+        "capstone/dto"
+        "capstone/entities"
+        "capstone/errorHandlers"
+        "capstone/externals/cloudinary"
+        "capstone/helpers"
+        "capstone/repositories"
+
+        "github.com/google/uuid"
+)
+
+type UserUsecase interface {
+        FindById(id uuid.UUID) (*entities.User, error)
+        FindAll(page, limit int, searchQuery string) (*[]entities.User, *int64, error)
+        Create(request *dto.UserRequest) error
+        Update(id uuid.UUID, request *dto.UserRequest) error
+        Delete(id uuid.UUID) error
+        HandleProfilePictureUpdate(request *dto.UserRequest, user *entities.User) error
+}
+
+type userUsecase struct {
+        repository       repositories.UserRepository
+        cloudinaryClient cloudinary.ICloudinaryClient
+        passwordHelper   helpers.PasswordHelper
+        imageValidation  helpers.IValidationHelper
+}
+
+func NewUserUsecase(
+        repository repositories.UserRepository,
+        client cloudinary.ICloudinaryClient,
+        passwordHelper helpers.PasswordHelper,
+        imageValidation helpers.IValidationHelper,
+) *userUsecase <span class="cov8" title="1">{
+        return &amp;userUsecase{repository: repository, cloudinaryClient: client, passwordHelper: passwordHelper, imageValidation: imageValidation}
+}</span>
+
+func (uc *userUsecase) FindById(id uuid.UUID) (*entities.User, error) <span class="cov8" title="1">{
+        user, err := uc.repository.FindById(id)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, &amp;errorHandlers.NotFoundError{Message: "User tidak ditemukan"}
+        }</span>
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+func (uc *userUsecase) FindAll(page, limit int, searchQuery string) (*[]entities.User, *int64, error) <span class="cov8" title="1">{
+        users, total, err := uc.repository.FindAll(page, limit, searchQuery)
+        if err != nil </span><span class="cov8" title="1">{
+                return nil, nil, &amp;errorHandlers.InternalServerError{Message: "Gagal untuk menampilkan data user"}
+        }</span>
+        <span class="cov8" title="1">return users, total, nil</span>
+}
+
+func (uc *userUsecase) Create(request *dto.UserRequest) error <span class="cov8" title="1">{
+        existUsername, _ := uc.repository.FindByUsername(request.Username)
+        if existUsername != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.ConflictError{Message: "Username sudah digunakan"}
+        }</span>
+
+        <span class="cov8" title="1">existEmail, _ := uc.repository.FindByEmail(request.Email)
+        if existEmail != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.ConflictError{Message: "Email sudah digunakan"}
+        }</span>
+
+        <span class="cov8" title="1">password, err := uc.passwordHelper.HashPassword(request.Password)
+        if err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal hashing password"}
+        }</span>
+        <span class="cov8" title="1">user := &amp;entities.User{
+                Id:              uuid.New(),
+                Email:           request.Email,
+                Password:        password,
+                Username:        request.Username,
+                Fullname:        request.NamaLengkap,
+                Bio:             request.Bio,
+                PhoneNumber:     request.NoTelepon,
+                Gender:          request.JenisKelamin,
+                City:            request.Kota,
+                Province:        request.Provinsi,
+                EmailVerifiedAt: nil,
+        }
+
+        if err = uc.HandleProfilePictureUpdate(request, user); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">if err = uc.repository.Create(user); err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal untuk menambah data user"}
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (uc *userUsecase) Update(id uuid.UUID, request *dto.UserRequest) error <span class="cov8" title="1">{
+        user, _ := uc.repository.FindById(id)
+        if user == nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.NotFoundError{Message: "User tidak ditemukan"}
+        }</span>
+
+        <span class="cov8" title="1">if request.Username != user.Username </span><span class="cov8" title="1">{
+                existUsername, _ := uc.repository.FindByUsername(request.Username)
+                if existUsername != nil </span><span class="cov0" title="0">{
+                        return &amp;errorHandlers.ConflictError{Message: "Username sudah digunakan"}
+                }</span>
+        }
+
+        <span class="cov8" title="1">if request.Email != user.Email </span><span class="cov8" title="1">{
+                existEmail, _ := uc.repository.FindByEmail(request.Email)
+                if existEmail != nil </span><span class="cov0" title="0">{
+                        return &amp;errorHandlers.ConflictError{Message: "Email sudah digunakan"}
+                }</span>
+        }
+
+        <span class="cov8" title="1">password, err := uc.passwordHelper.HashPassword(request.Password)
+        if err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal hashing password"}
+        }</span>
+
+        <span class="cov8" title="1">user.Username = request.Username
+        user.Email = request.Email
+        user.Password = password
+        user.Fullname = request.NamaLengkap
+        user.Bio = request.Bio
+        user.PhoneNumber = request.NoTelepon
+        user.Gender = request.JenisKelamin
+        user.City = request.Kota
+        user.Province = request.Provinsi
+
+        if err = uc.HandleProfilePictureUpdate(request, user); err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">if err = uc.repository.Update(user); err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal untuk memperbarui data user"}
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (uc *userUsecase) Delete(id uuid.UUID) error <span class="cov8" title="1">{
+        user, _ := uc.repository.FindById(id)
+        if user == nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.NotFoundError{Message: "User tidak ditemukan"}
+        }</span>
+
+        <span class="cov8" title="1">if user.ProfileImageUrl != nil &amp;&amp; *user.ProfileImageUrl != "" </span><span class="cov8" title="1">{
+                if err := uc.cloudinaryClient.DeleteImage(*user.ProfileImageUrl); err != nil </span><span class="cov8" title="1">{
+                        return &amp;errorHandlers.InternalServerError{Message: "Gagal menghapus foto profil"}
+                }</span>
+        }
+
+        <span class="cov8" title="1">if err := uc.repository.Delete(user); err != nil </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal untuk menghapus data user"}
+        }</span>
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (uc *userUsecase) HandleProfilePictureUpdate(request *dto.UserRequest, user *entities.User) error <span class="cov8" title="1">{
+        if request.FotoProfil == nil </span><span class="cov8" title="1">{
+                return nil
+        }</span>
+
+        <span class="cov8" title="1">if !uc.imageValidation.IsValidImageType(request.FotoProfil) </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.BadRequestError{Message: "Tipe foto profil tidak valid"}
+        }</span>
+        <span class="cov8" title="1">if !uc.imageValidation.IsValidImageSize(request.FotoProfil) </span><span class="cov8" title="1">{
+                return &amp;errorHandlers.BadRequestError{Message: "Ukuran foto profil tidak valid"}
+        }</span>
+
+        <span class="cov8" title="1">file, err := request.FotoProfil.Open()
+        if err != nil </span><span class="cov0" title="0">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal membuka file foto profil"}
+        }</span>
+        <span class="cov8" title="1">defer file.Close()
+
+        fmt.Println(user.ProfileImageUrl)
+        if user.ProfileImageUrl != nil &amp;&amp; *user.ProfileImageUrl != "" </span><span class="cov8" title="1">{
+                if err = uc.cloudinaryClient.DeleteImage(*user.ProfileImageUrl); err != nil </span><span class="cov0" title="0">{
+                        return &amp;errorHandlers.InternalServerError{Message: "Gagal menghapus foto profil"}
+                }</span>
+        }
+
+        <span class="cov8" title="1">urlMedia, err := uc.cloudinaryClient.UploadImage(file, "users")
+        if err != nil </span><span class="cov0" title="0">{
+                return &amp;errorHandlers.InternalServerError{Message: "Gagal upload foto profil"}
+        }</span>
+        <span class="cov8" title="1">user.ProfileImageUrl = &amp;urlMedia
+
+        return nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

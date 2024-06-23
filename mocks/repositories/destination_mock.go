@@ -25,7 +25,7 @@ func (m *MockDestinationRepository) FindById(id uuid.UUID) (*entities.Destinatio
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
-	return args.Get(0).(*entities.Destination), args.Error(1)
+	return args.Get(0).(*entities.Destination), nil
 }
 
 func (m *MockDestinationRepository) FindByIdInCityId(id uuid.UUID, cityId string) (*entities.Destination, error) {
@@ -54,26 +54,18 @@ func (m *MockDestinationRepository) FindByCategoryId(id uuid.UUID) ([]entities.D
 
 func (m *MockDestinationRepository) Create(destination *entities.Destination, tx *gorm.DB) error {
 	args := m.Called(destination, tx)
-	if args.Get(0) == nil {
-		return args.Error(1)
-	}
-	return args.Error(1)
+	return args.Error(0)
 }
 
 func (m *MockDestinationRepository) Update(destination *entities.Destination, tx *gorm.DB) error {
 	args := m.Called(destination, tx)
-	if args.Get(0) == nil {
-		return args.Error(0)
-	}
 	return args.Error(0)
 }
 
 func (m *MockDestinationRepository) Delete(destination *entities.Destination, tx *gorm.DB) error {
 	args := m.Called(destination, tx)
-	if args.Get(0) == nil {
-		return args.Error(1)
-	}
-	return args.Error(1)
+
+	return args.Error(0)
 }
 
 func (m *MockDestinationRepository) FindDestinationByCityId(id string) ([]entities.Destination, error) {
