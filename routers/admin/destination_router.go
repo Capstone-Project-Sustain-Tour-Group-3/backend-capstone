@@ -4,7 +4,6 @@ import (
 	"capstone/config"
 	"capstone/externals/cloudinary"
 	"capstone/handlers"
-	"capstone/middlewares"
 	"capstone/repositories"
 	"capstone/usecases"
 
@@ -12,8 +11,8 @@ import (
 )
 
 func DestinationRouter(r *echo.Group) {
-	r.Use(middlewares.JWTMiddleware)
-	r.Use(middlewares.RoleMiddleware("admin", "superadmin"))
+	//r.Use(middlewares.JWTMiddleware)
+	//r.Use(middlewares.RoleMiddleware("admin", "superadmin"))
 
 	destinationRepo := repositories.NewDestinationRepository(config.DB)
 	destinationFacilityRepo := repositories.NewDestinationFacilityRepository(config.DB)
