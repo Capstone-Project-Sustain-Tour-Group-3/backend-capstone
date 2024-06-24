@@ -39,12 +39,15 @@ func ToOneDestinationResponse(destination *entities.Destination) GetAllDestinati
 		VisitCount: destination.VisitCount,
 		Category:   *ToCategory(destination),
 		DestinationAddress: &DestinationAddress{
-			Id:          destination.DestinationAddress.Id,
-			Province:    destination.DestinationAddress.Province.Name,
-			City:        destination.DestinationAddress.City.Name,
-			Subdistrict: destination.DestinationAddress.Subdistrict.Name,
-			StreetName:  destination.DestinationAddress.StreetName,
-			PostalCode:  destination.DestinationAddress.PostalCode,
+			Id:            destination.DestinationAddress.Id,
+			ProvinceId:    destination.DestinationAddress.ProvinceId,
+			Province:      destination.DestinationAddress.Province.Name,
+			CityId:        destination.DestinationAddress.CityId,
+			City:          destination.DestinationAddress.City.Name,
+			SubdistrictId: destination.DestinationAddress.SubdistrictId,
+			Subdistrict:   destination.DestinationAddress.Subdistrict.Name,
+			StreetName:    destination.DestinationAddress.StreetName,
+			PostalCode:    destination.DestinationAddress.PostalCode,
 		},
 	}
 }
@@ -86,12 +89,15 @@ func ToGetAllDestinationsResponse(destinations *[]entities.Destination) *[]GetAl
 			EntryPrice: destination.EntryPrice,
 			Category:   *ToCategory(&destination),
 			DestinationAddress: &DestinationAddress{
-				Id:          destination.DestinationAddress.Id,
-				Province:    destination.DestinationAddress.Province.Name,
-				City:        destination.DestinationAddress.City.Name,
-				Subdistrict: destination.DestinationAddress.Subdistrict.Name,
-				StreetName:  destination.DestinationAddress.StreetName,
-				PostalCode:  destination.DestinationAddress.PostalCode,
+				Id:            destination.DestinationAddress.Id,
+				ProvinceId:    destination.DestinationAddress.ProvinceId,
+				Province:      destination.DestinationAddress.Province.Name,
+				CityId:        destination.DestinationAddress.CityId,
+				City:          destination.DestinationAddress.City.Name,
+				SubdistrictId: destination.DestinationAddress.SubdistrictId,
+				Subdistrict:   destination.DestinationAddress.Subdistrict.Name,
+				StreetName:    destination.DestinationAddress.StreetName,
+				PostalCode:    destination.DestinationAddress.PostalCode,
 			},
 		}
 	}
@@ -114,12 +120,15 @@ type UrlVideo struct {
 }
 
 type DestinationAddress struct {
-	Id          uuid.UUID `json:"id_alamat"`
-	Province    string    `json:"provinsi"`
-	City        string    `json:"kota"`
-	Subdistrict string    `json:"kecamatan"`
-	StreetName  string    `json:"nama_jalan"`
-	PostalCode  string    `json:"kode_pos"`
+	Id            uuid.UUID `json:"id_alamat"`
+	ProvinceId    string    `json:"id_provinsi"`
+	Province      string    `json:"provinsi"`
+	CityId        string    `json:"id_kota"`
+	City          string    `json:"kota"`
+	SubdistrictId string    `json:"id_kecamatan"`
+	Subdistrict   string    `json:"kecamatan"`
+	StreetName    string    `json:"nama_jalan"`
+	PostalCode    string    `json:"kode_pos"`
 }
 
 type Category struct {
@@ -282,12 +291,15 @@ func ToDetailDestinationResponse(destination *entities.Destination, similarDesti
 		VisitCount:  destination.VisitCount,
 		Description: destination.Description,
 		DestinationAddress: &DestinationAddress{
-			Id:          destination.DestinationAddress.Id,
-			Province:    destination.DestinationAddress.Province.Name,
-			City:        destination.DestinationAddress.City.Name,
-			Subdistrict: destination.DestinationAddress.Subdistrict.Name,
-			StreetName:  destination.DestinationAddress.StreetName,
-			PostalCode:  destination.DestinationAddress.PostalCode,
+			Id:            destination.DestinationAddress.Id,
+			ProvinceId:    destination.DestinationAddress.ProvinceId,
+			Province:      destination.DestinationAddress.Province.Name,
+			CityId:        destination.DestinationAddress.CityId,
+			City:          destination.DestinationAddress.City.Name,
+			SubdistrictId: destination.DestinationAddress.SubdistrictId,
+			Subdistrict:   destination.DestinationAddress.Subdistrict.Name,
+			StreetName:    destination.DestinationAddress.StreetName,
+			PostalCode:    destination.DestinationAddress.PostalCode,
 		},
 		UrlImages:          ToUrlImages(destination),
 		UrlVideos:          ToUrlVideos(destination),
@@ -307,12 +319,15 @@ func ToGetByIdDestinationResponse(destination *entities.Destination) *GetByIdDes
 		VisitCount:  destination.VisitCount,
 		Description: destination.Description,
 		DestinationAddress: &DestinationAddress{
-			Id:          destination.DestinationAddress.Id,
-			Province:    destination.DestinationAddress.Province.Name,
-			City:        destination.DestinationAddress.City.Name,
-			Subdistrict: destination.DestinationAddress.Subdistrict.Name,
-			StreetName:  destination.DestinationAddress.StreetName,
-			PostalCode:  destination.DestinationAddress.PostalCode,
+			Id:            destination.DestinationAddress.Id,
+			ProvinceId:    destination.DestinationAddress.Province.Id,
+			Province:      destination.DestinationAddress.Province.Name,
+			CityId:        destination.DestinationAddress.City.Id,
+			City:          destination.DestinationAddress.City.Name,
+			SubdistrictId: destination.DestinationAddress.Subdistrict.Id,
+			Subdistrict:   destination.DestinationAddress.Subdistrict.Name,
+			StreetName:    destination.DestinationAddress.StreetName,
+			PostalCode:    destination.DestinationAddress.PostalCode,
 		},
 		UrlImages:  ToUrlImages(destination),
 		Categories: ToCategory(destination),
