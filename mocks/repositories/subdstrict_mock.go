@@ -18,8 +18,8 @@ func (m *MockSubdistrictRepository) Create(subdistrict *entities.Subdistrict) er
 	return args.Error(0)
 }
 
-func (m *MockSubdistrictRepository) FindAll() ([]entities.Subdistrict, error) {
-	args := m.Called()
+func (m *MockSubdistrictRepository) FindAll(cityId string) ([]entities.Subdistrict, error) {
+	args := m.Called(cityId)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}

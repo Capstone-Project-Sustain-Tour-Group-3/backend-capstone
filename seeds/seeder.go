@@ -62,7 +62,7 @@ func RunSeeder() {
 		"SeedSubdistricts",
 		"SeedFacilities",
 		"SeedDestinations",
-		"SeedRoutes",
+		// "SeedRoutes",
 		// "SeedDestinationAddresses",
 		// "SeedDestinationMedias",
 	}

@@ -8,7 +8,7 @@ import (
 
 type ICityRepository interface {
 	Create(city *entities.City) error
-	FindAll() ([]entities.City, error)
+	FindAll(provinceId string) ([]entities.City, error)
 	FindById(id string) (*entities.City, error)
 	Update(city *entities.City) error
 	Delete(city *entities.City) error
@@ -30,9 +30,16 @@ func (r *CityRepository) Create(city *entities.City) error {
 	return nil
 }
 
-func (r *CityRepository) FindAll() ([]entities.City, error) {
+func (r *CityRepository) FindAll(provinceId string) ([]entities.City, error) {
 	var cities []entities.City
-	if err := r.db.Find(&cities).Error; err != nil {
+
+	db := r.db.Model(&entities.City{})
+
+	if provinceId != "" {
+		db = db.Where("province_id = ?", provinceId)
+	}
+
+	if err := db.Find(&cities).Error; err != nil {
 		return nil, err
 	}
 	return cities, nil
@@ -63,10 +70,11 @@ func (r *CityRepository) Delete(city *entities.City) error {
 func (r *CityRepository) GetCitiesWithDestinations() ([]entities.City, error) {
 	var cities []entities.City
 
-	err := r.db.Preload("Province").
+	err := r.db.Debug().
+		Preload("Province").
 		Joins("JOIN destination_addresses da ON da.city_id = cities.id").
 		Joins("JOIN destinations d ON d.id = da.destination_id").
-		Where("d.id IS NOT NULL").
+		Where("d.deleted_at IS NULL").
 		Group("cities.id").
 		Order("cities.name ASC").
 		Find(&cities).Error
