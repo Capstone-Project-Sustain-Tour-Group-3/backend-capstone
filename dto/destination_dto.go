@@ -177,6 +177,8 @@ type DetailDestinationResponse struct {
 type GetByIdDestinationResponse struct {
 	Id                 uuid.UUID           `json:"id_destinasi"`
 	Name               string              `json:"nama_destinasi"`
+	Latitude           float64             `json:"latitude"`
+	Longitude          float64             `json:"longitude"`
 	OpenTime           string              `json:"jam_buka"`
 	CloseTime          string              `json:"jam_tutup"`
 	EntryPrice         float64             `json:"harga_masuk"`
@@ -318,6 +320,8 @@ func ToGetByIdDestinationResponse(destination *entities.Destination) *GetByIdDes
 		EntryPrice:  destination.EntryPrice,
 		VisitCount:  destination.VisitCount,
 		Description: destination.Description,
+		Latitude:    destination.Latitude,
+		Longitude:   destination.Longitude,
 		DestinationAddress: &DestinationAddress{
 			Id:            destination.DestinationAddress.Id,
 			ProvinceId:    destination.DestinationAddress.Province.Id,
