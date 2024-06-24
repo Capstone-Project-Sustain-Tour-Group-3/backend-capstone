@@ -39,6 +39,7 @@ func ToOneDestinationResponse(destination *entities.Destination) GetAllDestinati
 		VisitCount: destination.VisitCount,
 		Category:   *ToCategory(destination),
 		DestinationAddress: &DestinationAddress{
+			Id:          destination.DestinationAddress.Id,
 			Province:    destination.DestinationAddress.Province.Name,
 			City:        destination.DestinationAddress.City.Name,
 			Subdistrict: destination.DestinationAddress.Subdistrict.Name,
@@ -85,6 +86,7 @@ func ToGetAllDestinationsResponse(destinations *[]entities.Destination) *[]GetAl
 			EntryPrice: destination.EntryPrice,
 			Category:   *ToCategory(&destination),
 			DestinationAddress: &DestinationAddress{
+				Id:          destination.DestinationAddress.Id,
 				Province:    destination.DestinationAddress.Province.Name,
 				City:        destination.DestinationAddress.City.Name,
 				Subdistrict: destination.DestinationAddress.Subdistrict.Name,
@@ -98,9 +100,10 @@ func ToGetAllDestinationsResponse(destinations *[]entities.Destination) *[]GetAl
 }
 
 type UrlImage struct {
-	Id   uuid.UUID `json:"id_media"`
-	Url  string    `json:"url_media"`
-	Type string    `json:"tipe"`
+	Id    uuid.UUID `json:"id_media"`
+	Url   string    `json:"url_media"`
+	Type  string    `json:"tipe"`
+	Title string    `json:"judul"`
 }
 
 type UrlVideo struct {
@@ -111,11 +114,12 @@ type UrlVideo struct {
 }
 
 type DestinationAddress struct {
-	Province    string `json:"provinsi"`
-	City        string `json:"kota"`
-	Subdistrict string `json:"kecamatan"`
-	StreetName  string `json:"nama_jalan"`
-	PostalCode  string `json:"kode_pos"`
+	Id          uuid.UUID `json:"id_alamat"`
+	Province    string    `json:"provinsi"`
+	City        string    `json:"kota"`
+	Subdistrict string    `json:"kecamatan"`
+	StreetName  string    `json:"nama_jalan"`
+	PostalCode  string    `json:"kode_pos"`
 }
 
 type Category struct {
@@ -224,9 +228,10 @@ func ToUrlImages(destination *entities.Destination) *[]UrlImage {
 	for _, media := range destination.DestinationMedias {
 		if media.Type == "image" {
 			images = append(images, UrlImage{
-				Id:   media.Id,
-				Url:  media.Url,
-				Type: media.Type,
+				Id:    media.Id,
+				Url:   media.Url,
+				Type:  media.Type,
+				Title: media.Title,
 			})
 		}
 	}
@@ -277,6 +282,7 @@ func ToDetailDestinationResponse(destination *entities.Destination, similarDesti
 		VisitCount:  destination.VisitCount,
 		Description: destination.Description,
 		DestinationAddress: &DestinationAddress{
+			Id:          destination.DestinationAddress.Id,
 			Province:    destination.DestinationAddress.Province.Name,
 			City:        destination.DestinationAddress.City.Name,
 			Subdistrict: destination.DestinationAddress.Subdistrict.Name,
@@ -301,6 +307,7 @@ func ToGetByIdDestinationResponse(destination *entities.Destination) *GetByIdDes
 		VisitCount:  destination.VisitCount,
 		Description: destination.Description,
 		DestinationAddress: &DestinationAddress{
+			Id:          destination.DestinationAddress.Id,
 			Province:    destination.DestinationAddress.Province.Name,
 			City:        destination.DestinationAddress.City.Name,
 			Subdistrict: destination.DestinationAddress.Subdistrict.Name,
