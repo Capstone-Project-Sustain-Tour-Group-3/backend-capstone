@@ -24,6 +24,13 @@ func LoadDb() {
 		log.Fatal(err)
 	}
 
+	sqlDB, err := db.DB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(40)
+
 	if err = db.AutoMigrate(
 		mysql2.User{},
 		mysql2.Destination{},
