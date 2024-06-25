@@ -26,7 +26,8 @@ func main() {
 	}
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(45)
-	sqlDB.SetConnMaxIdleTime(30 * time.Minute)
+	sqlDB.SetConnMaxIdleTime(5 * time.Minute)
+	sqlDB.SetConnMaxLifetime(30 * time.Minute)
 	defer sqlDB.Close()
 
 	mapper.SetEnabledJsonTag(false)
