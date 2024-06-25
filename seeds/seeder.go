@@ -51,9 +51,6 @@ func seed(s Seed, seedMethodName string) {
 }
 
 func RunSeeder() {
-	config.LoadConfig()
-	config.LoadDb()
-
 	methodList := []string{
 		// list of seed method name
 		"SeedCategories",
