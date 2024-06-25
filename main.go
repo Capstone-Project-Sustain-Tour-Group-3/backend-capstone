@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
+	"time"
 
 	"capstone/config"
 	"capstone/middlewares"
@@ -16,7 +18,17 @@ import (
 
 func main() {
 	config.LoadConfig()
+
 	config.LoadDb()
+	sqlDB, err := config.DB.DB()
+	if err != nil {
+		log.Fatal(err)
+	}
+	sqlDB.SetMaxIdleConns(10)
+	sqlDB.SetMaxOpenConns(45)
+	sqlDB.SetConnMaxIdleTime(30 * time.Minute)
+	defer sqlDB.Close()
+
 	mapper.SetEnabledJsonTag(false)
 
 	e := echo.New()

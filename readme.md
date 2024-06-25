@@ -1,5 +1,5 @@
 # NutriPlans
-![API Docs](./assets/API-docs.png)
+![API Docs](./assets/API-Docs.png)
 
 ## About Project
 Tourists often face difficulties in finding accurate and reliable information about tourist destinations in Indonesia. In addition, the lack of personalized recommendations, challenges in planning itineraries, and minimal information on digital facilities at destinations are major pressing problems that require effective solutions.
@@ -52,7 +52,7 @@ Tourists often face difficulties in finding accurate and reliable information ab
 [Tourease API](https://api.tourease.my.id/docs)
 
 ## ERD
-![ERD](./assets/ERD-tourease.png)
+![ERD](./assets/ERD-Tourease.png)
 
 ## Setup 
 ### Prerequisites
