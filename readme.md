@@ -1,4 +1,4 @@
-# NutriPlans
+# Tourease
 ![API Docs](./assets/API-Docs.png)
 
 ## About Project
@@ -53,6 +53,9 @@ Tourists often face difficulties in finding accurate and reliable information ab
 
 ## ERD
 ![ERD](./assets/ERD-Tourease.png)
+
+## HLA
+![HLA](./assets/HLA-Tourease.png)
 
 ## Setup 
 ### Prerequisites
